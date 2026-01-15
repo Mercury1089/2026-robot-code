@@ -124,7 +124,8 @@ public final class Constants {
     public static final int PIGEON_DRIVETRAIN = 9;
     // public static final int WRIST_SPARKMAX = 10;
     public static final int SHOOTER = 11;
-    // public static final int SHOOTER_BACK_SPARKMAX = 12;
+    // Secondary shooter SparkMax (follower)
+    public static final int SHOOTER_BACK_SPARKMAX = 12;
     public static final int ELEVATOR_LEFT = 13;
     public static final int ELEVATOR_RIGHT = 14;
     public static final int CORAL_INTAKE = 15;
