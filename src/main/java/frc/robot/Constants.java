@@ -122,7 +122,6 @@ public final class Constants {
     public static final int TURNING_BACK_RIGHT = 6;
     
     public static final int PIGEON_DRIVETRAIN = 9;
-    // public static final int WRIST_SPARKMAX = 10;
     public static final int SHOOTER = 11;
     // Secondary shooter SparkMax (follower)
     public static final int SHOOTER_BACK_SPARKMAX = 12;
@@ -141,20 +140,15 @@ public final class Constants {
     public static final int FRONT_CORAL_SENSOR = 20;
     public static final int BACK_CORAL_SENSOR = 21;
 
-    public static final int ALGAE_ARTICULATOR = 22;
-    public static final int ALGAE_INTAKE = 23;
-
-    public static final int CLIMBER = 24;
-
     private CAN() {} 
   }
 
-  public static class BREAKBEAM {
-    public static final int INTAKE_BREAKBEAM = 0;
-    public static final int SHOOTER_BREAKBEAM = 1;
+  // public static class BREAKBEAM {
+  //   public static final int INTAKE_BREAKBEAM = 0;
+  //   public static final int SHOOTER_BREAKBEAM = 1;
 
-    private BREAKBEAM() {}
-  }
+  //   private BREAKBEAM() {}
+  // }
 
   public static class CAN_STATUS_FREQ {
     public static final int
