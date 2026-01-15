@@ -55,7 +55,7 @@ public class TargetUtils {
     */
     public static Rotation2d getTargetHeadingToPoint(Pose2d robotPose, Translation2d point) {
         Rotation2d targetRotation = point.minus(robotPose.getTranslation()).getAngle();
-        return  targetRotation.rotateBy(Rotation2d.fromDegrees(180.0));
+        return  targetRotation;
     }
 
     public static double getDistanceToPoint(Pose2d pose, Translation2d point) {
