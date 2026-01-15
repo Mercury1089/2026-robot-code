@@ -127,7 +127,6 @@ public class Autons {
      * - Starting Pose
      * - like all the things we do
      */
-
     public void updateDash() {
 
         boolean rebuildAutonCommand = false;
@@ -147,8 +146,6 @@ public class Autons {
             this.autoType = type;
             rebuildAutonCommand = true;
         }
-
-        // Pose2d startingPose = startingPoseChooser.getSelected();
         
         if (rebuildAutonCommand) {
             this.autonCommand = buildAutonCommand(knownLocations);
@@ -160,12 +157,6 @@ public class Autons {
         autonTypeChooser.setDefaultOption("RIGHT", AutonType.RIGHT);
         autonTypeChooser.addOption("MIDDLE", AutonType.MIDDLE);
         autonTypeChooser.addOption("LEFT", AutonType.LEFT);
-
-        // // select the MANUAL STARTING POSITION of the robot
-        // this.startingPoseChooser = new SendableChooser<Pose2d>();
-        // startingPoseChooser.setDefaultOption("RIGHT", knownLocations.rightStart);
-
-        // SmartDashboard.putData("Starting Pose", startingPoseChooser);
 
         SmartDashboard.putData("Auton Type Chooser", autonTypeChooser);
     }
