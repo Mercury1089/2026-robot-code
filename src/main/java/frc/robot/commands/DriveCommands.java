@@ -1,7 +1,5 @@
 package frc.robot.commands;
 
-import java.sql.Driver;
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -53,42 +51,26 @@ public class DriveCommands {
               fieldRelative)
           , drivetrain);
     } 
-    // /**
-    // * @param : Supplier (xSpeed, ySpeed, heading), Drivetrain
-    // * @return : Returns PID Command (Pose, Rotation, and Heading Degrees)
-    // */
-    // public static Command targetDrive(Supplier<Double> xSpeedSupplier, Supplier<Double> ySpeedSupplier, DoubleSupplier headingSupplier, Drivetrain drivetrain) {
-    //     return new PIDCommand(
-    //         drivetrain.getRotationalController(),
-    //         () -> drivetrain.getPose().getRotation().getDegrees(),
-    //         headingSupplier,
-    //         (angularSpeed) -> drivetrain.drive(
-    //           -MercMath.squareInput(MathUtil.applyDeadband(xSpeedSupplier.get(), SWERVE.JOYSTICK_DEADBAND)),
-    //           -MercMath.squareInput(MathUtil.applyDeadband(ySpeedSupplier.get(), SWERVE.JOYSTICK_DEADBAND)),
-    //         angularSpeed),
-    //         drivetrain);
-    // }
-    //TODO: Refactor with a Pose2d Parameter
+
     /**
     * @param : Supplier (xSpeed, ySpeed), 
     * @return : Returns a RunCommand telling the drivetrain to drive and calculates heading degrees required to target reef
     */
-    // public static Command targetDriveToReef(Supplier<Double> xSpeedSupplier, Supplier<Double> ySpeedSupplier, Drivetrain drivetrain) {
-    //     Supplier<Double> heading = () -> ReefscapeUtils.getTargetHeadingToReef(drivetrain.getPose());
-    //     return new RunCommand(
-    //             () -> drivetrain.drive(
-    //               -MercMath.squareInput(MathUtil.applyDeadband(xSpeedSupplier.get(), SWERVE.JOYSTICK_DEADBAND)),
-    //               -MercMath.squareInput(MathUtil.applyDeadband(ySpeedSupplier.get(), SWERVE.JOYSTICK_DEADBAND)),
-    //               drivetrain.getRotationalController().calculate(drivetrain.getPose().getRotation().getDegrees(), heading.get()),
-    //               true)
-    //           , drivetrain);
-    // }
+    public static Command targetDrive(Supplier<Double> xSpeedSupplier, Supplier<Double> ySpeedSupplier, Supplier<Double> headingSupplier, Drivetrain drivetrain) {
+        return new RunCommand(
+                () -> drivetrain.drive(
+                  -MercMath.squareInput(MathUtil.applyDeadband(xSpeedSupplier.get(), SWERVE.JOYSTICK_DEADBAND)),
+                  -MercMath.squareInput(MathUtil.applyDeadband(ySpeedSupplier.get(), SWERVE.JOYSTICK_DEADBAND)),
+                  drivetrain.getRotationalController().calculate(drivetrain.getPose().getRotation().getDegrees(), headingSupplier.get()),
+                  true)
+              , drivetrain);
+    }
 
     /**
     * @param : Drivetrain, Pose2d Supplier 
     * @return : Outputs a Run Command 
     */
-    public static Command goToPose(Drivetrain drivetrain, Supplier<Pose2d> desiredPose) {
+    public static Command driveToPose(Drivetrain drivetrain, Supplier<Pose2d> desiredPose) {
         return new RunCommand(
             () -> drivetrain.drive(
               drivetrain.getXController().calculate(drivetrain.getPose().getX(), desiredPose.get().getX()),
@@ -96,45 +78,7 @@ public class DriveCommands {
               drivetrain.getRotationalController().calculate(drivetrain.getPose().getRotation().getDegrees(), desiredPose.get().getRotation().getDegrees()),
               true, false,
               () -> drivetrain.getPose().getRotation())
-          , drivetrain);//.until(() -> drivetrain.isAtPose(desiredPose.get()))
-          //this seems like a bad idea to comment this out
-    }
-    
-    /**
-    * @param : Drivetrain
-    * Sensor Input
-    * @return : Outputs a Run Command and calculates if the robot is too far left or right it will adjust itself
-    * SELECT BRANCH AND ZONE BEFORE USING
-    */
-    // public static Command alignwithSensors(Drivetrain drivetrain, Supplier<RobotZone> zone, Supplier<BranchSide> side) {
-
-    //     Supplier<DistanceSensors> proximitySensor = () -> side.get() == BranchSide.LEFT ? drivetrain.getLeftSensors() : drivetrain.getRightSensors();
-
-    //     // proximitySensor = () -> zone.get() == RobotZone.BARGE || zone.get() == RobotZone.BARGE_LEFT || zone.get() == RobotZone.BARGE_RIGHT ?
-    //     //                         side.get() == BranchSide.LEFT ? drivetrain.getRightSensors() : drivetrain.getLeftSensors() :
-    //     //                         side.get() == BranchSide.LEFT ? drivetrain.getLeftSensors() : drivetrain.getRightSensors();
-
-    //     // Positive Y moves right, negative Y moves left
-    //     Supplier<Double> yDirection = () -> proximitySensor.get().isTooFarLeft(zone, side) ? -1.0 : 1.0;
-
-    //     return goCloserToReef(drivetrain, zone, side).andThen(new RunCommand(
-    //         () -> drivetrain.drive(
-    //           0.0, 
-    //           yDirection.get() * 0.05,
-    //           0.0,
-    //           false)
-    //     ).until(() -> proximitySensor.get().isAtReefSide())
-    //         .andThen(new RunCommand(() -> drivetrain.drive(0.0,0.0,0.0))).until(() -> drivetrain.isNotMoving()));
-    // }
-    /**
-    * SELECT SIDE AND CORAL STATION BEFORE USING
-    * @param : Drivetrain 
-    * @return : Returns a Sequential Command Group, and starts goToPose command to go to the prefered Station
-    */
-    public static Command goToCoralStation(Drivetrain drivetrain, Pose2d station) {
-        return new SequentialCommandGroup(
-            PathUtils.getPathToPose(station, () -> 0.5),
-            goToPose(drivetrain, () -> station).until(() -> drivetrain.isAtPose(station)));
+          , drivetrain);
     }
 
     /**
