@@ -91,6 +91,17 @@ public class DriveCommands {
         return drivetrain.defer(() -> AutoBuilder.followPath(pathSupplier.get()));
     }
    
-
+    public static Command driveStraightAtAngle(double xSpeed, double ySpeed, Supplier<Double> headingSupplier, double speed, Drivetrain drivetrain) {
+        double magnitude = Math.hypot(xSpeed, ySpeed);
+        double xSpeedCapped = speed * (xSpeed / magnitude);
+        double ySpeedCapped = speed * (ySpeed / magnitude);
+        return new RunCommand(
+            () -> drivetrain.drive(
+              MercMath.squareInput(MathUtil.applyDeadband(xSpeedCapped, SWERVE.JOYSTICK_DEADBAND)),
+              MercMath.squareInput(MathUtil.applyDeadband(ySpeedCapped, SWERVE.JOYSTICK_DEADBAND)),
+              drivetrain.getRotationalController().calculate(drivetrain.getPose().getRotation().getDegrees(), headingSupplier.get()),
+              true
+            ), drivetrain);
+    }
 
 }

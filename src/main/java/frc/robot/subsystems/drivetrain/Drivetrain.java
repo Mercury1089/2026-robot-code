@@ -76,8 +76,8 @@ public class Drivetrain extends SubsystemBase {
   );
 
   // // distance between wheels
-  private final double WHEEL_WIDTH = 25.68; // distance between front/back wheels (in inches)
-  private final double WHEEL_LENGTH = 25.68; // distance between left/right wheels (in inches)
+  private final double WHEEL_WIDTH = 23.5; // distance between front/back wheels (in inches)
+  private final double WHEEL_LENGTH = 28.5; // distance between left/right wheels (in inches)
 
   private Rotation2d gyroOffset = Rotation2d.fromDegrees(0); // Offset to apply to gyro for field oriented
 
