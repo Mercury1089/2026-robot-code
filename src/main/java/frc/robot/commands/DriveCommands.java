@@ -9,6 +9,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -91,17 +92,40 @@ public class DriveCommands {
         return drivetrain.defer(() -> AutoBuilder.followPath(pathSupplier.get()));
     }
    
-    public static Command driveStraightAtAngle(double xSpeed, double ySpeed, Supplier<Double> headingSupplier, double speed, Drivetrain drivetrain) {
-        double magnitude = Math.hypot(xSpeed, ySpeed);
-        double xSpeedCapped = speed * (xSpeed / magnitude);
-        double ySpeedCapped = speed * (ySpeed / magnitude);
+    public static Command driveStraightAtAngle(Supplier<Double> xSpeed, Supplier<Double> ySpeed, Supplier<Double> headingSupplier, double speed, Drivetrain drivetrain) {
+        double magnitude = Math.hypot(drivetrain.getXSpeeds(), drivetrain.getYSpeeds());
+        double xSpeedCapped = (magnitude > 1e-6) ? speed * (drivetrain.getXSpeeds() / magnitude) : 0.0;
+        double ySpeedCapped = (magnitude > 1e-6) ? speed * (drivetrain.getYSpeeds() / magnitude) : 0.0;
+
+        ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
+            xSpeedCapped,
+            ySpeedCapped,
+            drivetrain.getRotationalController().calculate(drivetrain.getPose().getRotation().getDegrees(), headingSupplier.get())
+        );
         return new RunCommand(
-            () -> drivetrain.drive(
-              MercMath.squareInput(MathUtil.applyDeadband(xSpeedCapped, SWERVE.JOYSTICK_DEADBAND)),
-              MercMath.squareInput(MathUtil.applyDeadband(ySpeedCapped, SWERVE.JOYSTICK_DEADBAND)),
-              drivetrain.getRotationalController().calculate(drivetrain.getPose().getRotation().getDegrees(), headingSupplier.get()),
-              true
-            ), drivetrain);
+            () -> drivetrain.drive(chassisSpeeds),
+            drivetrain
+        );
     }
 
+    public static Command safelyDriveOverBump(Supplier<Double> xSpeedSupplier, Supplier<Double> ySpeedSupplier, Drivetrain drivetrain) {
+        Supplier<Double> currentHeading = () -> drivetrain.getPose().getRotation().getDegrees();
+        // These headings might need to be adjusted based on the ratio of the length and width of the robot
+        // to ensure that the robot's wheel always hit the bump first.
+        Supplier<Double> nearestSafeHeading = () -> {
+            if (currentHeading.get() < 0.0 && currentHeading.get() > 90.0) {
+                return 45.0;
+            } else if (currentHeading.get() > 90.0 && currentHeading.get() < 180.0) {
+                return 135.0;
+            } else if (currentHeading.get() > -90.0 && currentHeading.get() < -180.0) {
+                return -135.0;
+            } else if (currentHeading.get() < 0.0 && currentHeading.get() > -90.0) {
+                return -45.0;
+            } else {
+                return 0.0;
+            }
+        };
+
+        return targetDrive(xSpeedSupplier, ySpeedSupplier, nearestSafeHeading, drivetrain);
+    }
 }
