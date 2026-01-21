@@ -90,6 +90,10 @@ public class RobotContainer {
      */
     left10.onTrue(new InstantCommand(() -> drivetrain.resetGyro(), drivetrain).ignoringDisable(true));
     right2.onTrue(drivetrain.getDefaultCommand());
+
+    left3.whileTrue(DriveCommands.driveStraightAtAngle(leftJoystickY, leftJoystickX, rightJoystickX, 2.0, drivetrain));
+
+    left2.onTrue(DriveCommands.safelyDriveOverBump(leftJoystickY, leftJoystickX, drivetrain));
   }
 
   public Drivetrain getDrivetrain() {

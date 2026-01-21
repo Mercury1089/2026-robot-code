@@ -55,7 +55,7 @@ public class DriveCommands {
 
     /**
     * @param : Supplier (xSpeed, ySpeed), 
-    * @return : Returns a RunCommand telling the drivetrain to drive and calculates heading degrees required to target reef
+    * @return : Returns a RunCommand telling the drivetrain to drive and calculates heading degrees required to target
     */
     public static Command targetDrive(Supplier<Double> xSpeedSupplier, Supplier<Double> ySpeedSupplier, Supplier<Double> headingSupplier, Drivetrain drivetrain) {
         return new RunCommand(
@@ -68,8 +68,8 @@ public class DriveCommands {
     }
 
     /**
-    * @param : Drivetrain, Pose2d Supplier 
-    * @return : Outputs a Run Command 
+    * @param: Drivetrain, Pose2d Supplier 
+    * @return: Outputs a Run Command 
     */
     public static Command driveToPose(Drivetrain drivetrain, Supplier<Pose2d> desiredPose) {
         return new RunCommand(
@@ -100,7 +100,7 @@ public class DriveCommands {
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
             xSpeedCapped,
             ySpeedCapped,
-            drivetrain.getRotationalController().calculate(drivetrain.getPose().getRotation().getDegrees(), headingSupplier.get())
+            0.0 // TODO: Give Radial Velocity
         );
         return new RunCommand(
             () -> drivetrain.drive(chassisSpeeds),
@@ -109,23 +109,16 @@ public class DriveCommands {
     }
 
     public static Command safelyDriveOverBump(Supplier<Double> xSpeedSupplier, Supplier<Double> ySpeedSupplier, Drivetrain drivetrain) {
-        Supplier<Double> currentHeading = () -> drivetrain.getPose().getRotation().getDegrees();
         // These headings might need to be adjusted based on the ratio of the length and width of the robot
         // to ensure that the robot's wheel always hit the bump first.
-        Supplier<Double> nearestSafeHeading = () -> {
-            if (currentHeading.get() < 0.0 && currentHeading.get() > 90.0) {
-                return 45.0;
-            } else if (currentHeading.get() > 90.0 && currentHeading.get() < 180.0) {
-                return 135.0;
-            } else if (currentHeading.get() > -90.0 && currentHeading.get() < -180.0) {
-                return -135.0;
-            } else if (currentHeading.get() < 0.0 && currentHeading.get() > -90.0) {
-                return -45.0;
-            } else {
-                return 0.0;
-            }
-        };
+        Supplier<Double> nearestSafeHeading = () -> drivetrain.getSafeBumpingAngle();
 
-        return targetDrive(xSpeedSupplier, ySpeedSupplier, nearestSafeHeading, drivetrain);
+        return new RunCommand(
+                () -> drivetrain.drive(
+                  -MercMath.squareInput(MathUtil.applyDeadband(xSpeedSupplier.get(), SWERVE.JOYSTICK_DEADBAND)),
+                  -MercMath.squareInput(MathUtil.applyDeadband(ySpeedSupplier.get(), SWERVE.JOYSTICK_DEADBAND)),
+                  drivetrain.getRotationalController().calculate(drivetrain.getPose().getRotation().getDegrees(), nearestSafeHeading.get()),
+                  true)
+              , drivetrain);
     }
 }

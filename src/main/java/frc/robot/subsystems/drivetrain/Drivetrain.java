@@ -409,6 +409,31 @@ public class Drivetrain extends SubsystemBase {
     return min;
   }
 
+  public double getSafeBumpingAngle() {
+    double currentHeading = getPose().getRotation().getDegrees();
+    if (currentHeading >= 0.0 && currentHeading <= 90.0) {
+      return 45.0;
+    } else if (currentHeading >= 90.0 && currentHeading <= 180.0) {
+        return 135.0;
+    } else if (currentHeading <= -90.0 && currentHeading >= -180.0) {
+        return -135.0;
+    } else if (currentHeading <= 0.0 && currentHeading >= -90.0) {
+        return -45.0;
+    } else {
+        return 0.0;
+    }
+  }
+
+  public double getXSpeedCappedStraightDrive(double speed) {
+    double magnitude = Math.hypot(getXSpeeds(), getYSpeeds());
+    return (magnitude > 1e-6) ? speed * (getXSpeeds() / magnitude) : 0.0;
+  }
+
+  public double getYSpeedCappedStraightDrive(double speed) {
+    double magnitude = Math.hypot(getXSpeeds(), getYSpeeds());
+    return (magnitude > 1e-6) ? speed * (getYSpeeds() / magnitude) : 0.0;
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
@@ -453,5 +478,8 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Drivetrain/gyroOffset", gyroOffset.getDegrees()); 
     SmartDashboard.putBoolean("Drivetrain/isLeftCamUpdating", leftResult.isPresent() && !leftCam.rejectUpdate(leftResult.get()));
     SmartDashboard.putBoolean("Drivetrain/isRightCamUpdating", rightResult.isPresent() && !rightCam.rejectUpdate(rightResult.get()));
+    SmartDashboard.putNumber("Drivetrain/safeBumpingAngle", getSafeBumpingAngle());
+    SmartDashboard.putNumber("Drivetrain/xSpeedCappedStraight", getXSpeedCappedStraightDrive(2.0));
+    SmartDashboard.putNumber("Drivetrain/ySpeedCappedStraight", getYSpeedCappedStraightDrive(2.0));
   }
 }

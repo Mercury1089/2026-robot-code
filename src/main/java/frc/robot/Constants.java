@@ -48,8 +48,8 @@ public final class Constants {
     // public static final double WHEEL_LENGTH = 28.5; // distance between left/right wheels (in inches)
 
     // wheel distances
-    public static final double WHEEL_WIDTH = 25.68; // distance between front/back wheels (in inches)
-    public static final double WHEEL_LENGTH = 25.68; // distance between left/right wheels (in inches)
+    public static final double WHEEL_WIDTH = 23.5; // distance between front/back wheels (in inches)
+    public static final double WHEEL_LENGTH = 28.5; // distance between left/right wheels (in inches)
 
     // Distance from center to farthest wheel
     public static final double WHEEL_RADIUS = (new Translation2d(Units.inchesToMeters(WHEEL_WIDTH / 2),Units.inchesToMeters(WHEEL_WIDTH / 2))).getNorm();
