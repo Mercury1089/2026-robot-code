@@ -481,5 +481,6 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Drivetrain/safeBumpingAngle", getSafeBumpingAngle());
     SmartDashboard.putNumber("Drivetrain/xSpeedCappedStraight", getXSpeedCappedStraightDrive(2.0));
     SmartDashboard.putNumber("Drivetrain/ySpeedCappedStraight", getYSpeedCappedStraightDrive(2.0));
+    SmartDashboard.putData(smartdashField);
   }
 }

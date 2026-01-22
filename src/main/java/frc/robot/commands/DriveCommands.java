@@ -92,7 +92,7 @@ public class DriveCommands {
         return drivetrain.defer(() -> AutoBuilder.followPath(pathSupplier.get()));
     }
    
-    public static Command driveStraightAtAngle(Supplier<Double> xSpeed, Supplier<Double> ySpeed, Supplier<Double> headingSupplier, double speed, Drivetrain drivetrain) {
+    public static Command driveStraightAtAngle(Supplier<Double> headingSupplier, double speed, Drivetrain drivetrain) {
         double magnitude = Math.hypot(drivetrain.getXSpeeds(), drivetrain.getYSpeeds());
         double xSpeedCapped = (magnitude > 1e-6) ? speed * (drivetrain.getXSpeeds() / magnitude) : 0.0;
         double ySpeedCapped = (magnitude > 1e-6) ? speed * (drivetrain.getYSpeeds() / magnitude) : 0.0;
@@ -121,4 +121,10 @@ public class DriveCommands {
                   true)
               , drivetrain);
     }
+
+    public static Command lockToHub(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Drivetrain drivetrain) {
+        Supplier<Double> headingSupplier = () -> TargetUtils.getTargetHeadingToPoint(drivetrain.getPose(), KnownLocations.getKnownLocations().HUB.getTranslation()).getDegrees();
+        return targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain);
+    }
+
 }
