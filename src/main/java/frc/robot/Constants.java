@@ -127,7 +127,7 @@ public final class Constants {
     public static final int SHOOTER_BACK_SPARKMAX = 12;
     public static final int ELEVATOR_LEFT = 13;
     public static final int ELEVATOR_RIGHT = 14;
-    public static final int CORAL_INTAKE = 15;
+    public static final int INTAKE = 15;
 
     public static final int LEFT_OUTER_LASER_CAN = 19;
     public static final int LEFT_INNER_LASER_CAN = 18;

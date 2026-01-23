@@ -10,6 +10,8 @@ import frc.robot.commands.Autons;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.RobotModeLEDs;
 import frc.robot.subsystems.drivetrain.Drivetrain;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.Intake.IntakeSpeed;
 import frc.robot.util.KnownLocations;
 import frc.robot.util.TargetUtils;
 
@@ -80,6 +82,9 @@ public class RobotContainer {
     drivetrain = new Drivetrain();
     drivetrain.setDefaultCommand(DriveCommands.joyStickDrive(leftJoystickY, leftJoystickX, rightJoystickX, drivetrain));
     drivetrain.resetGyro();
+
+    Intake intake = new Intake();
+    intake.setDefaultCommand(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
     
     auton = new Autons(drivetrain);
 
@@ -94,6 +99,8 @@ public class RobotContainer {
     left3.whileTrue(DriveCommands.driveStraightAtAngle(leftJoystickY, leftJoystickX, rightJoystickX, 2.0, drivetrain));
 
     left2.onTrue(DriveCommands.safelyDriveOverBump(leftJoystickY, leftJoystickX, drivetrain));
+
+    right3.whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
   }
 
   public Drivetrain getDrivetrain() {
