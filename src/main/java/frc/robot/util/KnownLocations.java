@@ -39,6 +39,8 @@ public class KnownLocations {
     public final Rotation2d
         zeroGyroRotation;
 
+    public final Pose2d HUB;
+
     /**
      * Load the field layout for the current year (currently REEFSCAPE).
      * 
@@ -53,7 +55,7 @@ public class KnownLocations {
             try {//C:/Users/Mercury1089/git/
                 // fieldLayout = new AprilTagFieldLayout(Filesystem.getDeployDirectory() + "/combined_calibration.json");
                 //TODO: use new apriltag layout
-                fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+                fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
             } catch (Exception e) {
                 DriverStation.reportWarning("Failed to load AprilTagFieldLayout: " + e.getMessage(), true);
                 fieldLayout = null;
@@ -84,15 +86,25 @@ public class KnownLocations {
 
     private KnownLocations(Alliance alliance) {
         this.alliance = alliance;
-
+         
         if (alliance == Alliance.Blue) {
             // Assumes we start with the robot facing away
             zeroGyroRotation = Rotation2d.fromDegrees(0);
+
+            Pose2d middleAprilTagPos = getFieldLayout().getTagPose(26).get().toPose2d();
+            HUB = new Pose2d(middleAprilTagPos.getX() + Units.inchesToMeters(23.5), 
+                              middleAprilTagPos.getY(),
+                              middleAprilTagPos.getRotation());
+            
 
         } else {
             // Assumes we start with the robot facing away
             zeroGyroRotation = Rotation2d.fromDegrees(180);
 
+            Pose2d middleAprilTagPos = getFieldLayout().getTagPose(10).get().toPose2d();
+            HUB = new Pose2d(middleAprilTagPos.getX() - Units.inchesToMeters(23.5), 
+                              middleAprilTagPos.getY(),
+                              middleAprilTagPos.getRotation());
         }
 
     }
