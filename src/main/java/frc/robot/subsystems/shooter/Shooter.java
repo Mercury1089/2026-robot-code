@@ -82,4 +82,10 @@ public class Shooter extends SubsystemBase {
     public double getVelocityRPM() {
         return encoder.getVelocity();
     }
+    /**
+     * @return target shooting speed in m/s
+     */
+    public double getShootingRPM() {
+        return 1.0;
+    }
 }

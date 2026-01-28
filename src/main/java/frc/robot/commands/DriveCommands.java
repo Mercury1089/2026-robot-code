@@ -9,6 +9,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -21,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.SWERVE;
 import frc.robot.subsystems.drivetrain.Drivetrain;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.util.KnownLocations;
 import frc.robot.util.MercMath;
 import frc.robot.util.PathUtils;
@@ -93,17 +95,23 @@ public class DriveCommands {
     }
    
     public static Command driveStraightAtAngle(Supplier<Double> headingSupplier, double speed, Drivetrain drivetrain) {
-        double magnitude = Math.hypot(drivetrain.getXSpeeds(), drivetrain.getYSpeeds());
-        double xSpeedCapped = (magnitude > 1e-6) ? speed * (drivetrain.getXSpeeds() / magnitude) : 0.0;
-        double ySpeedCapped = (magnitude > 1e-6) ? speed * (drivetrain.getYSpeeds() / magnitude) : 0.0;
+        Supplier<Double> magnitude = () -> Math.hypot(drivetrain.getXSpeeds(), drivetrain.getYSpeeds());
+        Supplier<Double> xSpeedCapped = () -> (magnitude.get() > 1e-6) ? speed * (drivetrain.getXSpeeds() / magnitude.get()) : 0.0;
+        Supplier<Double> ySpeedCapped = () -> (magnitude.get() > 1e-6) ? speed * (drivetrain.getYSpeeds() / magnitude.get()) : 0.0;
 
-        ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
-            xSpeedCapped,
-            ySpeedCapped,
-            0.0 // TODO: Give Radial Velocity
-        );
+        // ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
+        //     xSpeedCapped,
+        //     ySpeedCapped,
+        //     0.0 // TODO: Give Radial Velocity
+        // );
+
         return new RunCommand(
-            () -> drivetrain.drive(chassisSpeeds),
+            () -> drivetrain.drive(
+                xSpeedCapped.get(),
+                ySpeedCapped.get(),
+                drivetrain.getRotationalController().calculate(drivetrain.getPose().getRotation().getDegrees(), headingSupplier.get()),
+                true
+            ),
             drivetrain
         );
     }
@@ -125,6 +133,12 @@ public class DriveCommands {
     public static Command lockToHub(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Drivetrain drivetrain) {
         Supplier<Double> headingSupplier = () -> TargetUtils.getTargetHeadingToPoint(drivetrain.getPose(), KnownLocations.getKnownLocations().HUB.getTranslation()).getDegrees();
         return targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain);
+    }
+
+    public static Command shootOnTheMove(Shooter shooter, Drivetrain drivetrain){
+        return new ParallelCommandGroup(
+            driveStraightAtAngle(drivetrain.getShootingAngleSupplier(), 1, drivetrain)
+        );
     }
 
 }
