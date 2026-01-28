@@ -102,7 +102,7 @@ public class RobotContainer {
 
     right8.onTrue(DriveCommands.lockToHub(leftJoystickY, leftJoystickX, drivetrain));
 
-    right3.whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
+    right1.whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
   }
 
   public Drivetrain getDrivetrain() {
