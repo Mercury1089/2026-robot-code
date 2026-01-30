@@ -72,6 +72,10 @@ public class Drivetrain extends SubsystemBase {
   private Translation2d targetHubVelocityVector;
   private Translation2d shootHereVector;
 
+  private double headingToHub = 0.0;
+
+  private double xDirStraight = 0.0, yDirStraight = 0.0;
+
   private Transform3d leftCamTransform3d = new Transform3d(
     new Translation3d(Units.inchesToMeters(9.0), Units.inchesToMeters(12.375), Units.inchesToMeters(9.0)), 
     new Rotation3d(0.0, Rotation2d.fromDegrees(13).getRadians(), Rotation2d.fromDegrees(0).getRadians())
@@ -99,7 +103,7 @@ public class Drivetrain extends SubsystemBase {
   
   
     /** Creates a new Drivetrain. */
-    public Drivetrain() {
+    public Drivetrain(Shooter shooter) {
       // configure swerve modules
       /**
       * Configuring Driving and Turning motors for each Swerve Module
@@ -108,6 +112,7 @@ public class Drivetrain extends SubsystemBase {
       frontRightModule = new MAXSwerveModule(CAN.DRIVING_FRONT_RIGHT, CAN.TURNING_FRONT_RIGHT, 0);
       backLeftModule = new MAXSwerveModule(CAN.DRIVING_BACK_LEFT, CAN.TURNING_BACK_LEFT, Math.PI);
       backRightModule = new MAXSwerveModule(CAN.DRIVING_BACK_RIGHT, CAN.TURNING_BACK_RIGHT, Math.PI / 2);
+      this.shooter = shooter;
   
       // leftSensors = new DistanceSensors(CAN.LEFT_INNER_LASER_CAN, CAN.LEFT_OUTER_LASER_CAN, 430, 445, 400);
       // rightSensors = new DistanceSensors(CAN.RIGHT_INNER_LASER_CAN, CAN.RIGHT_OUTER_LASER_CAN, 270, 220, 280);
@@ -436,69 +441,105 @@ public class Drivetrain extends SubsystemBase {
       }
     }
   
-    public double getXSpeedCappedStraightDrive(double speed) {
-      double magnitude = Math.hypot(getXSpeeds(), getYSpeeds());
-      return (magnitude > 1e-6) ? speed * (getXSpeeds() / magnitude) : 0.0;
+    public double getXSpeedCappedStraightDrive() {
+      return xDirStraight;
     }
   
-    public double getYSpeedCappedStraightDrive(double speed) {
-      double magnitude = Math.hypot(getXSpeeds(), getYSpeeds());
-      return (magnitude > 1e-6) ? speed * (getYSpeeds() / magnitude) : 0.0;
+    public double getYSpeedCappedStraightDrive() {
+      return yDirStraight;
+    }
+
+    public void setXDirStraight(double speed) {
+      Translation2d current = new Translation2d(getXSpeeds(), getYSpeeds());
+      double magnitude = current.getNorm();
+      if (magnitude > 1e-6) {
+        Translation2d scaled = current.div(magnitude).times(.1);
+        xDirStraight = scaled.getX();
+      } else {
+        xDirStraight = 0.0;
+      }
+    }
+
+    public void setYDirStraight(double speed) {
+      Translation2d current = new Translation2d(getXSpeeds(), getYSpeeds());
+      double magnitude = current.getNorm();
+      if (magnitude > 1e-6) {
+        Translation2d scaled = current.div(magnitude).times(.1);
+        yDirStraight = scaled.getY();
+      } else {
+        yDirStraight = 0.0;
+      }
+    }
+
+    public double getHeadingToHub() {
+      return headingToHub;
+    }
+
+    public Translation2d getCompensatedVector() {
+      return shootHereVector;
     }
   
     @Override
     public void periodic() {
       // This method will be called once per scheduler run
+
+      headingToHub = TargetUtils.getTargetHeadingToPoint(getPose(), KnownLocations.getKnownLocations().HUB.getTranslation()).getDegrees();
   
       robotVelocityVector = new Translation2d(getXSpeeds(), getYSpeeds());
-      targetHubVector = KnownLocations.getKnownLocations().HUB.getTranslation().minus(getPose().getTranslation());
-      targetHubVelocityVector = targetHubVector.div(targetHubVector.getNorm()).times(shooter.getShootingRPM());
-      shootHereVector = targetHubVector.minus(robotVelocityVector);
+      // targetHubVector = KnownLocations.getKnownLocations().HUB.getTranslation().minus(getPose().getTranslation());
+      // targetHubVelocityVector = targetHubVector.div(targetHubVector.getNorm()).times(shooter.getShootingRPM());
+      //TODO: might want to use current velocity of the shooter instead of theoretical
+      Translation2d exitVelocityVector = new Translation2d(shooter.getShootingRPM(), Rotation2d.fromDegrees(headingToHub));
+      shootHereVector = exitVelocityVector.minus(robotVelocityVector);
 
-    odometry.update(
-      getRotation(),
-      new SwerveModulePosition[] {
-        frontLeftModule.getPosition(),
-        frontRightModule.getPosition(),
-        backLeftModule.getPosition(),
-        backRightModule.getPosition()
-    });
-    
-    Optional<EstimatedRobotPose> leftResult = leftCam.getGlobalPose();
-    if (leftResult.isPresent() && !leftCam.rejectUpdate(leftResult.get())) {
-      // Uncomment the following to check camera position on robot
-      // Pose3d estimatedPose = result.get().estimatedPose;
-      // SmartDashboard.putNumber("Cam/Yaw", estimatedPose.getRotation().getZ());
-      // SmartDashboard.putNumber("Cam/Pitch", estimatedPose.getRotation().getY());
-      // SmartDashboard.putNumber("Cam/Roll", estimatedPose.getRotation().getX());
-      odometry.addVisionMeasurement(leftResult.get().estimatedPose.toPose2d(), leftResult.get().timestampSeconds);
-    }
+      odometry.update(
+        getRotation(),
+        new SwerveModulePosition[] {
+          frontLeftModule.getPosition(),
+          frontRightModule.getPosition(),
+          backLeftModule.getPosition(),
+          backRightModule.getPosition()
+      });
+      
+      Optional<EstimatedRobotPose> leftResult = leftCam.getGlobalPose();
+      if (leftResult.isPresent() && !leftCam.rejectUpdate(leftResult.get())) {
+        // Uncomment the following to check camera position on robot
+        // Pose3d estimatedPose = result.get().estimatedPose;
+        // SmartDashboard.putNumber("Cam/Yaw", estimatedPose.getRotation().getZ());
+        // SmartDashboard.putNumber("Cam/Pitch", estimatedPose.getRotation().getY());
+        // SmartDashboard.putNumber("Cam/Roll", estimatedPose.getRotation().getX());
+        odometry.addVisionMeasurement(leftResult.get().estimatedPose.toPose2d(), leftResult.get().timestampSeconds);
+      }
 
-    Optional<EstimatedRobotPose> rightResult = rightCam.getGlobalPose();
-    if (rightResult.isPresent() && !rightCam.rejectUpdate(rightResult.get())) {
-      // Uncomment the following to check camera position on robot
-      // Pose3d estimatedPose = result.get().estimatedPose;
-      // SmartDashboard.putNumber("Cam/Yaw", estimatedPose.getRotation().getZ());
-      // SmartDashboard.putNumber("Cam/Pitch", estimatedPose.getRotation().getY());
-      // SmartDashboard.putNumber("Cam/Roll", estimatedPose.getRotation().getX());
-      odometry.addVisionMeasurement(rightResult.get().estimatedPose.toPose2d(), rightResult.get().timestampSeconds);
-    }
+      Optional<EstimatedRobotPose> rightResult = rightCam.getGlobalPose();
+      if (rightResult.isPresent() && !rightCam.rejectUpdate(rightResult.get())) {
+        // Uncomment the following to check camera position on robot
+        // Pose3d estimatedPose = result.get().estimatedPose;
+        // SmartDashboard.putNumber("Cam/Yaw", estimatedPose.getRotation().getZ());
+        // SmartDashboard.putNumber("Cam/Pitch", estimatedPose.getRotation().getY());
+        // SmartDashboard.putNumber("Cam/Roll", estimatedPose.getRotation().getX());
+        odometry.addVisionMeasurement(rightResult.get().estimatedPose.toPose2d(), rightResult.get().timestampSeconds);
+      }
 
 
-    smartdashField.setRobotPose(getPose());
+      smartdashField.setRobotPose(getPose());
 
-    SmartDashboard.putNumber("Drivetrain/CurrentPose X", getPose().getX());
-    SmartDashboard.putNumber("Drivetrain/CurrentPose Y", getPose().getY());
-    SmartDashboard.putNumber("Drivetrain/getRotation", getRotation().getDegrees());
-    SmartDashboard.putBoolean("Drivetrain/isNotMoving", isNotMoving());
-    SmartDashboard.putNumber("Drivetrain/CurrentPose Rotation", getPose().getRotation().getDegrees());
-    SmartDashboard.putNumber("Drivetrain/Drive Angle", getRotation().getDegrees());
-    SmartDashboard.putNumber("Drivetrain/gyroOffset", gyroOffset.getDegrees()); 
-    SmartDashboard.putBoolean("Drivetrain/isLeftCamUpdating", leftResult.isPresent() && !leftCam.rejectUpdate(leftResult.get()));
-    SmartDashboard.putBoolean("Drivetrain/isRightCamUpdating", rightResult.isPresent() && !rightCam.rejectUpdate(rightResult.get()));
-    SmartDashboard.putNumber("Drivetrain/safeBumpingAngle", getSafeBumpingAngle());
-    SmartDashboard.putNumber("Drivetrain/xSpeedCappedStraight", getXSpeedCappedStraightDrive(2.0));
-    SmartDashboard.putNumber("Drivetrain/ySpeedCappedStraight", getYSpeedCappedStraightDrive(2.0));
-    SmartDashboard.putData(smartdashField);
+      SmartDashboard.putNumber("Drivetrain/CurrentPose X", getPose().getX());
+      SmartDashboard.putNumber("Drivetrain/CurrentPose Y", getPose().getY());
+      SmartDashboard.putNumber("Drivetrain/getRotation", getRotation().getDegrees());
+      SmartDashboard.putBoolean("Drivetrain/isNotMoving", isNotMoving());
+      SmartDashboard.putNumber("Drivetrain/CurrentPose Rotation", getPose().getRotation().getDegrees());
+      SmartDashboard.putNumber("Drivetrain/Drive Angle", getRotation().getDegrees());
+      SmartDashboard.putNumber("Drivetrain/gyroOffset", gyroOffset.getDegrees()); 
+      SmartDashboard.putBoolean("Drivetrain/isLeftCamUpdating", leftResult.isPresent() && !leftCam.rejectUpdate(leftResult.get()));
+      SmartDashboard.putBoolean("Drivetrain/isRightCamUpdating", rightResult.isPresent() && !rightCam.rejectUpdate(rightResult.get()));
+      SmartDashboard.putNumber("Drivetrain/safeBumpingAngle", getSafeBumpingAngle());
+      SmartDashboard.putNumber("Drivetrain/xSpeeds", getXSpeeds());
+      SmartDashboard.putNumber("Drivetrain/ySpeeds", getYSpeeds());
+      SmartDashboard.putNumber("Drivetrain/xSpeedCappedStraight", getXSpeedCappedStraightDrive());
+      SmartDashboard.putNumber("Drivetrain/ySpeedCappedStraight", getYSpeedCappedStraightDrive());
+      SmartDashboard.putData(smartdashField);
+      SmartDashboard.putNumber("Drivetrain/shootHereAngle", shootHereVector.getAngle().getDegrees());
+      SmartDashboard.putNumber("Drivetrain/headingToHub", headingToHub);
   }
 }

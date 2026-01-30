@@ -12,6 +12,7 @@ import frc.robot.subsystems.RobotModeLEDs;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakeSpeed;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.util.KnownLocations;
 import frc.robot.util.TargetUtils;
 
@@ -29,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController; 
@@ -61,6 +63,7 @@ public class RobotContainer {
 
   private Autons auton;
   private Drivetrain drivetrain;
+  private Shooter shooter;
   private RobotModeLEDs leds;
 
   private double manualThreshold = 0.2;
@@ -79,7 +82,8 @@ public class RobotContainer {
     gamepadHID = new GenericHID(DS_USB.GAMEPAD);
     configureBindings();
 
-    drivetrain = new Drivetrain();
+    shooter = new Shooter();
+    drivetrain = new Drivetrain(shooter);
     drivetrain.setDefaultCommand(DriveCommands.joyStickDrive(leftJoystickY, leftJoystickX, rightJoystickX, drivetrain));
     drivetrain.resetGyro();
 
@@ -96,7 +100,13 @@ public class RobotContainer {
     left10.onTrue(new InstantCommand(() -> drivetrain.resetGyro(), drivetrain).ignoringDisable(true));
     right2.onTrue(drivetrain.getDefaultCommand());
 
-    left3.whileTrue(DriveCommands.driveStraightAtAngle(rightJoystickX, 2.0, drivetrain));
+    // left3.whileTrue(new SequentialCommandGroup(
+    //   new InstantCommand(() -> drivetrain.setXDirStraight(0.1), drivetrain),
+    //   new InstantCommand(() -> drivetrain.setYDirStraight(0.1), drivetrain),
+    //   DriveCommands.driveStraightAtAngle(() -> drivetrain.getHeadingToHub(), drivetrain)
+    // ));
+
+    left3.whileTrue(DriveCommands.shootOnTheMove(leftJoystickY, leftJoystickX, drivetrain));
 
     left2.onTrue(DriveCommands.safelyDriveOverBump(leftJoystickY, leftJoystickX, drivetrain));
 

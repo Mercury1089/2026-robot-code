@@ -10,7 +10,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -94,24 +93,26 @@ public class DriveCommands {
         return drivetrain.defer(() -> AutoBuilder.followPath(pathSupplier.get()));
     }
    
-    public static Command driveStraightAtAngle(Supplier<Double> headingSupplier, double speed, Drivetrain drivetrain) {
-        Supplier<Double> magnitude = () -> Math.hypot(drivetrain.getXSpeeds(), drivetrain.getYSpeeds());
-        Supplier<Double> xSpeedCapped = () -> (magnitude.get() > 1e-6) ? speed * (drivetrain.getXSpeeds() / magnitude.get()) : 0.0;
-        Supplier<Double> ySpeedCapped = () -> (magnitude.get() > 1e-6) ? speed * (drivetrain.getYSpeeds() / magnitude.get()) : 0.0;
-
-        // ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
-        //     xSpeedCapped,
-        //     ySpeedCapped,
-        //     0.0 // TODO: Give Radial Velocity
-        // );
-
+    public static Command driveStraightAtAngle(Supplier<Double> headingSupplier, Drivetrain drivetrain) {
+        // speed parameter is treated as a fraction [0..1] of the max direction speed
         return new RunCommand(
-            () -> drivetrain.drive(
-                xSpeedCapped.get(),
-                ySpeedCapped.get(),
-                drivetrain.getRotationalController().calculate(drivetrain.getPose().getRotation().getDegrees(), headingSupplier.get()),
-                true
-            ),
+            () -> {
+                // Build a translation (x,y) using the normalized straight-drive components
+                Translation2d linear = new Translation2d(
+                    drivetrain.getXSpeedCappedStraightDrive(),
+                    drivetrain.getYSpeedCappedStraightDrive()
+                );
+
+                // rotation PID produces a normalized output (roughly -1..1).
+                double rotationNormalized = drivetrain.getRotationalController().calculate(
+                    drivetrain.getPose().getRotation().getDegrees(), headingSupplier.get());
+
+                // Send normalized x/y and normalized rotation into drivetrain.drive so
+                // the subsystem can apply its slew-rate limiting and internal scaling.
+                // Pass fieldRelative=false because getX/YSpeedCappedStraightDrive() are
+                // based on the robot's current chassis speeds (robot-relative).
+                drivetrain.drive(linear.getX(), linear.getY(), rotationNormalized, false);
+            },
             drivetrain
         );
     }
@@ -135,10 +136,9 @@ public class DriveCommands {
         return targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain);
     }
 
-    public static Command shootOnTheMove(Shooter shooter, Drivetrain drivetrain){
+    public static Command shootOnTheMove(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Drivetrain drivetrain){
         return new ParallelCommandGroup(
-            driveStraightAtAngle(drivetrain.getShootingAngleSupplier(), 1, drivetrain)
+            targetDrive(xSupplier, ySupplier, () -> drivetrain.getCompensatedVector().getAngle().getDegrees(), drivetrain)
         );
     }
-
 }
