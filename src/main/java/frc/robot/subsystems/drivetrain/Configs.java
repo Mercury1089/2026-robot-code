@@ -2,6 +2,7 @@ package frc.robot.subsystems.drivetrain;
 
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.config.AbsoluteEncoderConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import frc.robot.Constants;
@@ -16,7 +17,8 @@ public final class Configs {
             double drivingFactor = Constants.SWERVE.WHEEL_DIAMETER * Math.PI
                     / Constants.SWERVE.MOTOR_REDUCTION;
             double turningFactor = 2 * Math.PI;
-            double drivingVelocityFeedForward = 12 / Constants.SWERVE.DRIVE_WHEEL_FREE_SPEED;
+            double nominalVoltage = 12.0;
+            double drivingVelocityFeedForward = nominalVoltage / Constants.SWERVE.DRIVE_WHEEL_FREE_SPEED;
 
             drivingConfig
                     .idleMode(IdleMode.kBrake)
@@ -28,8 +30,8 @@ public final class Configs {
                     .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                     // These are example gains you may need to them for your own robot!
                     .pid(0.04, 0, 0)
-                    .velocityFF(drivingVelocityFeedForward)
-                    .outputRange(-1, 1);
+                    .outputRange(-1, 1)
+                    .feedForward.kV(drivingVelocityFeedForward);
 
             turningConfig
                     .idleMode(IdleMode.kBrake)
