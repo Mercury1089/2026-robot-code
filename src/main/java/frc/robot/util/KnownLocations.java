@@ -54,7 +54,7 @@ public class KnownLocations {
         if (fieldLayout == null) {
             try {//C:/Users/Mercury1089/git/
                 // fieldLayout = new AprilTagFieldLayout(Filesystem.getDeployDirectory() + "/combined_calibration.json");
-                //TODO: use new apriltag layout
+                // per 5.2 in the 2026 manual, FMA uses the Welded field
                 fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
             } catch (Exception e) {
                 DriverStation.reportWarning("Failed to load AprilTagFieldLayout: " + e.getMessage(), true);
