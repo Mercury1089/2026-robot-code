@@ -41,7 +41,8 @@ public final class Configs {
                     // direction of the steering motor in the MAXSwerve Module.
                     .inverted(true)
                     .positionConversionFactor(turningFactor) // radians
-                    .velocityConversionFactor(turningFactor / 60.0); // radians per second
+                    .velocityConversionFactor(turningFactor / 60.0) // radians per second
+                    .apply(AbsoluteEncoderConfig.Presets.REV_ThroughBoreEncoder); //TODO: Confirm encoder in 2026 Swerve Modules
             turningConfig.closedLoop
                     .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
                     // These are example gains you may need to them for your own robot!
