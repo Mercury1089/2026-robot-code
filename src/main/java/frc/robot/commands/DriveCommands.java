@@ -2,6 +2,8 @@ package frc.robot.commands;
 
 import java.util.function.Supplier;
 
+import javax.xml.crypto.dsig.spec.HMACParameterSpec;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 
@@ -10,6 +12,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -97,21 +100,20 @@ public class DriveCommands {
         // speed parameter is treated as a fraction [0..1] of the max direction speed
         return new RunCommand(
             () -> {
-                // Build a translation (x,y) using the normalized straight-drive components
                 Translation2d linear = new Translation2d(
                     drivetrain.getXSpeedCappedStraightDrive(),
                     drivetrain.getYSpeedCappedStraightDrive()
                 );
+                // linear.div(4.0);
 
-                // rotation PID produces a normalized output (roughly -1..1).
-                double rotationNormalized = drivetrain.getRotationalController().calculate(
+                double rotation = SWERVE.MAX_ROTATIONAL_SPEED * drivetrain.getRotationalController().calculate(
                     drivetrain.getPose().getRotation().getDegrees(), headingSupplier.get());
 
-                // Send normalized x/y and normalized rotation into drivetrain.drive so
-                // the subsystem can apply its slew-rate limiting and internal scaling.
-                // Pass fieldRelative=false because getX/YSpeedCappedStraightDrive() are
-                // based on the robot's current chassis speeds (robot-relative).
-                drivetrain.drive(linear.getX(), linear.getY(), rotationNormalized, false);
+                ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(linear.getX(), linear.getY(), rotation), 
+                            drivetrain.getPose().getRotation().plus(KnownLocations.getKnownLocations().zeroGyroRotation));
+                // ChassisSpeeds chassisSpeeds = new ChassisSpeeds(linear.getX(), linear.getY(), 0.2);
+
+                drivetrain.drive(chassisSpeeds);
             },
             drivetrain
         );
@@ -138,7 +140,12 @@ public class DriveCommands {
 
     public static Command shootOnTheMove(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Drivetrain drivetrain){
         return new ParallelCommandGroup(
-            targetDrive(xSupplier, ySupplier, () -> drivetrain.getCompensatedVector().getAngle().getDegrees(), drivetrain)
+            // targetDrive(xSupplier, ySupplier, () -> drivetrain.getCompensatedVector().getAngle().getDegrees(), drivetrain)
+            new SequentialCommandGroup(
+                new InstantCommand(() -> drivetrain.setXDirStraight(0.1), drivetrain),
+                new InstantCommand(() -> drivetrain.setYDirStraight(0.1), drivetrain),
+                DriveCommands.driveStraightAtAngle(() -> drivetrain.getCompensatedVector().getAngle().getDegrees(), drivetrain)
+                )
         );
     }
 }

@@ -103,6 +103,7 @@ public class RobotContainer {
     // left3.whileTrue(new SequentialCommandGroup(
     //   new InstantCommand(() -> drivetrain.setXDirStraight(0.1), drivetrain),
     //   new InstantCommand(() -> drivetrain.setYDirStraight(0.1), drivetrain),
+    //   new InstantCommand(() -> drivetrain.setRotationBeforeStraightDrive(drivetrain.getRotation()), drivetrain),
     //   DriveCommands.driveStraightAtAngle(() -> drivetrain.getHeadingToHub(), drivetrain)
     // ));
 

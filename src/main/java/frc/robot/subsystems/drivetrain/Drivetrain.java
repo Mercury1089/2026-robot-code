@@ -75,6 +75,7 @@ public class Drivetrain extends SubsystemBase {
   private double headingToHub = 0.0;
 
   private double xDirStraight = 0.0, yDirStraight = 0.0;
+  private Rotation2d rotationDirStraight = new Rotation2d();
 
   private Transform3d leftCamTransform3d = new Transform3d(
     new Translation3d(Units.inchesToMeters(9.0), Units.inchesToMeters(12.375), Units.inchesToMeters(9.0)), 
@@ -357,16 +358,20 @@ public class Drivetrain extends SubsystemBase {
           backRightModule.getState()
       });
     }
-  
+    
     // meters/second
     //up is pos
     public double getXSpeeds() {
-      return getFieldRelativSpeeds().vxMetersPerSecond;
+      return getFieldRelativSpeeds().vxMetersPerSecond;//NOT FIELD RELATIVE??????
     }
   
     // left is pos
     public double getYSpeeds() {
-      return getFieldRelativSpeeds().vyMetersPerSecond;
+      return getFieldRelativSpeeds().vyMetersPerSecond;//has presumably the same issue as above
+    }
+
+    public Translation2d getVelocityVector() {
+      return new Translation2d(getXSpeeds(),getYSpeeds()).rotateBy(getRotation().plus(KnownLocations.getKnownLocations().zeroGyroRotation));
     }
   
     /**
@@ -449,26 +454,46 @@ public class Drivetrain extends SubsystemBase {
       return yDirStraight;
     }
 
+    public Rotation2d getRotationBeforeStraightDrive() {
+      return rotationDirStraight;
+    }
+
     public void setXDirStraight(double speed) {
-      Translation2d current = new Translation2d(getXSpeeds(), getYSpeeds());
-      double magnitude = current.getNorm();
-      if (magnitude > 1e-6) {
-        Translation2d scaled = current.div(magnitude).times(.1);
-        xDirStraight = scaled.getX();
+      // Translation2d current = new Translation2d(getXSpeeds(), getYSpeeds());
+      // double magnitude = current.getNorm();
+      // if (magnitude > 1e-6) {
+      //   Translation2d scaled = current.div(magnitude).times(.1);
+      //   xDirStraight = scaled.getX();
+      // } else {
+      //   xDirStraight = 0.0;
+      // }
+      double xSpeeds = getVelocityVector().getX();
+      if (Math.abs(xSpeeds) > 1e-6) {
+        xDirStraight = xSpeeds;
       } else {
         xDirStraight = 0.0;
       }
     }
 
     public void setYDirStraight(double speed) {
-      Translation2d current = new Translation2d(getXSpeeds(), getYSpeeds());
-      double magnitude = current.getNorm();
-      if (magnitude > 1e-6) {
-        Translation2d scaled = current.div(magnitude).times(.1);
-        yDirStraight = scaled.getY();
+      // Translation2d current = new Translation2d(getXSpeeds(), getYSpeeds());
+      // double magnitude = current.getNorm();
+      // if (magnitude > 1e-6) {
+      //   Translation2d scaled = current.div(magnitude).times(.1);
+      //   yDirStraight = scaled.getY();
+      // } else {
+      //   yDirStraight = 0.0;
+      // }
+      double ySpeeds = getVelocityVector().getY();
+      if (Math.abs(ySpeeds) > 1e-6) {
+        yDirStraight = ySpeeds;
       } else {
         yDirStraight = 0.0;
       }
+    }
+
+    public void setRotationBeforeStraightDrive(Rotation2d rotation) {
+      rotationDirStraight = rotation;
     }
 
     public double getHeadingToHub() {
@@ -534,12 +559,13 @@ public class Drivetrain extends SubsystemBase {
       SmartDashboard.putBoolean("Drivetrain/isLeftCamUpdating", leftResult.isPresent() && !leftCam.rejectUpdate(leftResult.get()));
       SmartDashboard.putBoolean("Drivetrain/isRightCamUpdating", rightResult.isPresent() && !rightCam.rejectUpdate(rightResult.get()));
       SmartDashboard.putNumber("Drivetrain/safeBumpingAngle", getSafeBumpingAngle());
-      SmartDashboard.putNumber("Drivetrain/xSpeeds", getXSpeeds());
-      SmartDashboard.putNumber("Drivetrain/ySpeeds", getYSpeeds());
+      SmartDashboard.putNumber("Drivetrain/xVelocity", getVelocityVector().getX());
+      SmartDashboard.putNumber("Drivetrain/yVelocity", getVelocityVector().getY());
       SmartDashboard.putNumber("Drivetrain/xSpeedCappedStraight", getXSpeedCappedStraightDrive());
       SmartDashboard.putNumber("Drivetrain/ySpeedCappedStraight", getYSpeedCappedStraightDrive());
       SmartDashboard.putData(smartdashField);
       SmartDashboard.putNumber("Drivetrain/shootHereAngle", shootHereVector.getAngle().getDegrees());
       SmartDashboard.putNumber("Drivetrain/headingToHub", headingToHub);
+      SmartDashboard.putNumber("Drivetrain/headingThingIDK", this.getPose().getRotation().plus(KnownLocations.getKnownLocations().zeroGyroRotation).getDegrees());
   }
 }
