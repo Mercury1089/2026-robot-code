@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.SWERVE;
 import frc.robot.subsystems.drivetrain.Drivetrain;
-import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.outtake.Shooter;
 import frc.robot.util.KnownLocations;
 import frc.robot.util.MercMath;
 import frc.robot.util.PathUtils;

@@ -12,7 +12,7 @@ import frc.robot.subsystems.RobotModeLEDs;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakeSpeed;
-import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.outtake.Shooter;
 import frc.robot.util.KnownLocations;
 import frc.robot.util.TargetUtils;
 

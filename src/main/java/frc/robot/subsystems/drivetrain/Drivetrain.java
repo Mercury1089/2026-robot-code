@@ -45,7 +45,7 @@ import frc.robot.Constants.CAN;
 import frc.robot.Constants.SWERVE;
 import frc.robot.sensors.AprilTagCamera;
 import frc.robot.sensors.ProximitySensor;
-import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.outtake.Shooter;
 import frc.robot.util.KnownLocations;
 import frc.robot.util.PathUtils;
 import frc.robot.util.SwerveUtils;
