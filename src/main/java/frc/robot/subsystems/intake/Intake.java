@@ -12,29 +12,31 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {
-    private SparkMax intake;
-        
-    public Intake() {
+  private SparkMax intake;
 
-        intake = new SparkMax(Constants.CAN.INTAKE, MotorType.kBrushless);
-        SparkMaxConfig intakeConfig = new SparkMaxConfig();
+  public Intake() {
 
-        intakeConfig.idleMode(IdleMode.kBrake)
+    intake = new SparkMax(Constants.CAN.INTAKE, MotorType.kBrushless);
+    SparkMaxConfig intakeConfig = new SparkMaxConfig();
+
+    intakeConfig.idleMode(IdleMode.kBrake)
         .inverted(true);
 
+    intake.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+  }
 
-        intake.configure(intakeConfig, ResetMode.kResetSafeParameters,  PersistMode.kPersistParameters);
-    }
   public enum IntakeSpeed {
     INTAKE(1.0),
     STOP(0.0);
 
- public final double speed;
-      IntakeSpeed(double speed) {
-        this.speed = speed;
-      }
+    public final double speed;
+
+    IntakeSpeed(double speed) {
+      this.speed = speed;
+    }
   }
+
   public void setSpeed(IntakeSpeed intakeSpeed) {
     intake.set(intakeSpeed.speed);
   }
-}   
+}
