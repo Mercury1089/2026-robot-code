@@ -5,8 +5,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -37,14 +37,14 @@ public class Shooter extends SubsystemBase {
         double kP = 0.0006;
         double kI = 0.0;
         double kD = 0.0;
-        // TODO: The velocityFF needs to be fixed
-        double velocityFF = 1.0 / Constants.NEO_MOTOR_CONSTANTS.FREE_SPEED_RPMS;
+        double nominalVoltage = 12.0;
+        double velocityFF = nominalVoltage / Constants.NEO_MOTOR_CONSTANTS.FREE_SPEED_RPMS;
 
         leader_config.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .pid(kP, kI, kD)
-            .velocityFF(velocityFF)
-            .outputRange(-1.0, 1.0);
+            .outputRange(-1.0, 1.0)
+            .feedForward.kV(velocityFF);
 
         // Build the shooter SparkMaxConfig inline (previously in ShooterConfigs)
         SparkMaxConfig follower_config = new SparkMaxConfig();

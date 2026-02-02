@@ -1,19 +1,16 @@
 package frc.robot.sensors;
 
-import com.reduxrobotics.sensors.canandcolor.Canandcolor;
-
-public class ProximitySensor extends Canandcolor {
+public class ProximitySensor {
 
     private double triggerValue;
 
     public ProximitySensor(int canID, double trigVal) {
-        super(canID);
-        resetFactoryDefaults();
+        // TODO: Re-implement with LaserCAN
 
         this.triggerValue = trigVal;
     }
 
     public boolean isTriggered() { // if the reported value is less than your trigger value, it returns true
-        return isConnected() && getProximity() < triggerValue; // works because of shortcircuit eval
+        throw new UnsupportedOperationException("Unimplemented method 'isTriggered'");
     }
 }

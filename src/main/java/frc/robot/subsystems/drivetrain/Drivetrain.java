@@ -16,7 +16,6 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.reduxrobotics.sensors.canandcolor.Canandcolor;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -409,7 +408,7 @@ public class Drivetrain extends SubsystemBase {
     }
   
     public boolean isAtPose(Pose2d target) {
-      return isAtPose(target, getXController().getPositionTolerance(), getYController().getPositionTolerance());
+      return isAtPose(target, getXController().getErrorTolerance(), getYController().getErrorTolerance());
     }
     
     public boolean isAtPose(Pose2d target, double xTolerance, double yTolerance) {

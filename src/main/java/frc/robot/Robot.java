@@ -4,8 +4,8 @@
 
 package frc.robot;
 
+
 import com.pathplanner.lib.commands.PathfindingCommand;
-import com.reduxrobotics.canand.CanandEventLoop;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -38,8 +38,7 @@ public class Robot extends TimedRobot {
     // CanandEventLoop.getInstance();
     m_robotContainer = new RobotContainer();
     m_alliance = KnownLocations.getKnownLocations().alliance;
-
-    PathfindingCommand.warmupCommand().schedule();
+    CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
   }
 
   /**
@@ -80,7 +79,7 @@ public class Robot extends TimedRobot {
     Command autonCommand = m_robotContainer.getAutonomous().getAutonCommand();
     m_robotContainer.getDrivetrain().resetPose(m_robotContainer.getDrivetrain().getPose()); // check this and if we want it
     if (autonCommand != null){
-      autonCommand.schedule();
+      CommandScheduler.getInstance().schedule(autonCommand);
       DriverStation.reportError("Auton is Scheduled", false);
     }
     DriverStation.reportError("Auton is initialized", false);
