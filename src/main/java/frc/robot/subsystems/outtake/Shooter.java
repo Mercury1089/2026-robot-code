@@ -3,7 +3,7 @@ package frc.robot.subsystems.outtake;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
@@ -17,16 +17,16 @@ import frc.robot.Constants;
 
 /** Shooter subsystem with two NEO motors controlled by SPARK MAX closed-loop velocity control. */
 public class Shooter extends SubsystemBase {
-    private final SparkMax leader;
-    private final SparkMax follower;
+    private final SparkFlex leader;
+    private final SparkFlex follower;
 
     private final RelativeEncoder encoder;
     private final SparkClosedLoopController leaderClosedLoop;
     private final SparkClosedLoopController followerClosedLoop;
 
     public Shooter() {
-        leader = new SparkMax(Constants.CAN.SHOOTER, MotorType.kBrushless);
-        follower = new SparkMax(Constants.CAN.SHOOTER_BACK_SPARKMAX, MotorType.kBrushless);
+        leader = new SparkFlex(Constants.CAN.SHOOTER, MotorType.kBrushless);
+        follower = new SparkFlex(Constants.CAN.SHOOTER_BACK_SPARKMAX, MotorType.kBrushless);
 
         // Build the shooter SparkMaxConfig inline (previously in ShooterConfigs)
         SparkMaxConfig leader_config = new SparkMaxConfig();
