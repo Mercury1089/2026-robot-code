@@ -40,6 +40,8 @@ public class KnownLocations {
         zeroGyroRotation;
 
     public final Pose2d HUB;
+    public final Pose2d STARTING_LINE;
+    public final Pose2d NEUTRAL_EDGE;
 
     /**
      * Load the field layout for the current year (currently REEFSCAPE).
@@ -95,6 +97,10 @@ public class KnownLocations {
             HUB = new Pose2d(middleAprilTagPos.getX() + Units.inchesToMeters(23.5), 
                               middleAprilTagPos.getY(),
                               middleAprilTagPos.getRotation());
+            STARTING_LINE = middleAprilTagPos;
+            NEUTRAL_EDGE = new Pose2d(middleAprilTagPos.getX() + Units.inchesToMeters(47), 
+                              middleAprilTagPos.getY(),
+                              middleAprilTagPos.getRotation()); 
             
 
         } else {
@@ -105,6 +111,11 @@ public class KnownLocations {
             HUB = new Pose2d(middleAprilTagPos.getX() - Units.inchesToMeters(23.5), 
                               middleAprilTagPos.getY(),
                               middleAprilTagPos.getRotation());
+            STARTING_LINE = middleAprilTagPos;
+            NEUTRAL_EDGE = new Pose2d(middleAprilTagPos.getX() - Units.inchesToMeters(47), 
+                              middleAprilTagPos.getY(),
+                              middleAprilTagPos.getRotation()); 
+            
         }
 
     }
