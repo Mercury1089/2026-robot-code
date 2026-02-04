@@ -10,6 +10,8 @@ import frc.robot.commands.Autons;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.RobotModeLEDs;
 import frc.robot.subsystems.drivetrain.Drivetrain;
+import frc.robot.subsystems.intake.Articulator.ArticulatorPosition;
+import frc.robot.subsystems.intake.Articulator;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakeSpeed;
 import frc.robot.subsystems.outtake.Shooter;
@@ -99,6 +101,15 @@ public class RobotContainer {
      */
     left10.onTrue(new InstantCommand(() -> drivetrain.resetGyro(), drivetrain).ignoringDisable(true));
     right2.onTrue(drivetrain.getDefaultCommand());
+
+    
+    Articulator articulator = new Articulator();
+    articulator.setDefaultCommand(new RunCommand(() -> articulator.setSpeed(gamepadLeftY), articulator));
+    gamepadPOVLeft.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
+    gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.MIDDLE), articulator));
+    gamepadPOVRight.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
+    
+
 
     // left3.whileTrue(new SequentialCommandGroup(
     //   new InstantCommand(() -> drivetrain.setXDirStraight(0.1), drivetrain),
