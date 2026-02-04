@@ -9,8 +9,8 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.FeedbackSensor;
 
 import frc.robot.Constants;
@@ -26,15 +26,15 @@ public class Shooter extends SubsystemBase {
 
     public Shooter() {
         leader = new SparkFlex(Constants.CAN.SHOOTER, MotorType.kBrushless);
-        follower = new SparkFlex(Constants.CAN.SHOOTER_BACK_SPARKMAX, MotorType.kBrushless);
+        follower = new SparkFlex(Constants.CAN.SHOOTER_BACK, MotorType.kBrushless);
 
         // Build the shooter SparkMaxConfig inline (previously in ShooterConfigs)
-        SparkMaxConfig leader_config = new SparkMaxConfig();
+        SparkFlexConfig leader_config = new SparkFlexConfig();
         leader_config.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
         // use RPM units for encoder velocity here (1.0 = pass-through)
         leader_config.encoder.velocityConversionFactor(1.0);
 
-        double kP = 0.0006;
+        double kP = 0.0001;
         double kI = 0.0;
         double kD = 0.0;
         double nominalVoltage = 12.0;
@@ -47,11 +47,11 @@ public class Shooter extends SubsystemBase {
             .feedForward.kV(velocityFF);
 
         // Build the shooter SparkMaxConfig inline (previously in ShooterConfigs)
-        SparkMaxConfig follower_config = new SparkMaxConfig();
+        SparkFlexConfig follower_config = new SparkFlexConfig();
         follower_config.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
         // use RPM units for encoder velocity here (1.0 = pass-through)
         follower_config.encoder.velocityConversionFactor(1.0);
-        follower_config.follow(Constants.CAN.SHOOTER_BACK_SPARKMAX);
+        follower_config.follow(Constants.CAN.SHOOTER);
 
         // Apply configuration and persist parameters (consistent with existing project style)
         leader.configure(leader_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -68,7 +68,6 @@ public class Shooter extends SubsystemBase {
      */
     public void setVelocityRPM(double rpm) {
         leaderClosedLoop.setSetpoint(rpm, ControlType.kVelocity);
-        followerClosedLoop.setSetpoint(rpm, ControlType.kVelocity);
     }
 
     /** Stop the shooter (velocity -> 0 RPM). */

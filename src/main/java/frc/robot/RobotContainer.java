@@ -66,6 +66,7 @@ public class RobotContainer {
   private Autons auton;
   private Drivetrain drivetrain;
   private Shooter shooter;
+  private Articulator articulator;
   private RobotModeLEDs leds;
 
   private double manualThreshold = 0.2;
@@ -101,13 +102,18 @@ public class RobotContainer {
      */
     left10.onTrue(new InstantCommand(() -> drivetrain.resetGyro(), drivetrain).ignoringDisable(true));
     right2.onTrue(drivetrain.getDefaultCommand());
-
     
-    Articulator articulator = new Articulator();
+    articulator = new Articulator();
     articulator.setDefaultCommand(new RunCommand(() -> articulator.setSpeed(gamepadLeftY), articulator));
     gamepadPOVLeft.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
     gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.MIDDLE), articulator));
     gamepadPOVRight.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
+
+    shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
+    gamepadA.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(500.0), shooter));
+    gamepadB.onTrue(new RunCommand(() -> shooter.stop(), shooter));
+    gamepadY.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(5000), shooter));
+    gamepadX.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(3000), shooter));
     
 
 
