@@ -110,10 +110,11 @@ public class RobotContainer {
     gamepadPOVRight.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
 
     shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
-    gamepadA.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(500.0), shooter));
+    gamepadA.onTrue(new RunCommand(() -> shooter.setVelocityRPM(1500.0), shooter));
+    // gamepadA.onTrue(new RunCommand(() -> shooter.setSpeed(1.0), shooter));
     gamepadB.onTrue(new RunCommand(() -> shooter.stop(), shooter));
-    gamepadY.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(5000), shooter));
-    gamepadX.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(3000), shooter));
+    gamepadY.onTrue(new RunCommand(() -> shooter.setVelocityRPM(5000.0), shooter));
+    gamepadX.onTrue(new RunCommand(() -> shooter.setVelocityRPM(3000.0), shooter));
     
 
 
