@@ -51,6 +51,7 @@ import frc.robot.util.KnownLocations;
 import frc.robot.util.PathUtils;
 import frc.robot.util.SwerveUtils;
 import frc.robot.util.TargetUtils;
+import frc.robot.util.Shift;
 
 public class Drivetrain extends SubsystemBase {
 
@@ -63,6 +64,8 @@ public class Drivetrain extends SubsystemBase {
   private PIDController rotationPIDController, xPIDController, yPIDController;
   private Pose2d startingPosition;
   private Shooter shooter;
+  private Shift shift;
+
 
   private static final double ROTATION_P = 1.0 / 90.0, DIRECTION_P = 1 / 1.25, I = 0.0, D = 0.0;
   private final double THRESHOLD_DEGREES = 3.0;
@@ -169,6 +172,8 @@ public class Drivetrain extends SubsystemBase {
             backRightModule.getPosition()
         },
         new Pose2d(0, 0, getRotation()));
+
+    shift = new Shift();
   }
 
   public PIDController getRotationalController() {
@@ -508,6 +513,10 @@ public class Drivetrain extends SubsystemBase {
     return headingToHub;
   }
 
+  public Shift getShift() {
+    return shift;
+  }
+
   public Translation2d getCompensatedVector() {
     return shootHereVector;
   }
@@ -553,6 +562,7 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    shift.updateStatesForTeleop();
 
     headingToHub = TargetUtils
         .getTargetHeadingToPoint(getPose(), KnownLocations.getKnownLocations().HUB.getTranslation()).getDegrees();
@@ -621,6 +631,8 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Drivetrain/headingThingIDK",
         this.getPose().getRotation().plus(KnownLocations.getKnownLocations().zeroGyroRotation).getDegrees());
     SmartDashboard.putString("Drivetrain/currentZone", getCurrentZone().getString());
+    SmartDashboard.putBoolean("Shift/isOurHubActive", shift.isOurHubActive());
+    SmartDashboard.putString("Drivetrain/gameMessage", DriverStation.getGameSpecificMessage());
   }
 
   public enum Zone {

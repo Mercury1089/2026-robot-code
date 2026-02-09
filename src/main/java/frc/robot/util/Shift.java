@@ -1,68 +1,125 @@
 package frc.robot.util;
 
+import javax.xml.crypto.dsig.keyinfo.RetrievalMethod;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim.KitbotGearing;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Shift extends SubsystemBase{
-    private static Alliance shift;
-    private static Timer matchTimer = new Timer();
+public class Shift {
+    private Alliance shift;
 
-    public static void startMatchTime() {
-        matchTimer.start();
-    }
+    private boolean isHubActive = true;
+    private double timeUntilTransition = 0;
 
-    public static void setShift(char gameData) {
-        double timeSec = matchTimer.getTimestamp();
-        Alliance currentAlliance = KnownLocations.getKnownLocations().alliance;
-        Alliance otherAlliance = currentAlliance == Alliance.Blue ? Alliance.Red : Alliance.Blue;
+    private String manualAutonWinner = "";
 
-        if(timeSec < 20.0) {
-            // AUTO
-            shift = currentAlliance;
-        } else if(timeSec < 30.0) {
-            // TRANSITION
-            shift = currentAlliance;
-        } else if(timeSec < 55.0) {
-            shift = gameData == 'B' ? otherAlliance : currentAlliance; 
-        } else if(timeSec < 80.0) {
-            shift = gameData == 'B' ? currentAlliance : otherAlliance; 
-        } else if(timeSec < 105.0) {
-            shift = gameData == 'B' ? otherAlliance : currentAlliance;
-        } else if(timeSec < 130.0) {
-            shift = gameData == 'B' ? currentAlliance : otherAlliance; 
-        } else if(timeSec < 160.0) {
-            shift = currentAlliance;
+    private class TimeSegment {
+        public double start;
+        public double end;
+
+        public TimeSegment(double start, double end) {
+            this.start = start;
+            this.end = end;
+        }
+
+        public boolean isTimeWithin(double time) {
+            return time >= start && time <= end;
         }
     }
 
-    public static boolean canShoot() {
-        return shift == KnownLocations.getKnownLocations().alliance;
+    private final TimeSegment[] TeleopHubActiveTimesForAutoWinner = new TimeSegment[] {
+            new TimeSegment(0, 55), // Shift 4 combines with End game
+            new TimeSegment((1 * 60) + 20, (1 * 60) + 45), // Shift 2
+            new TimeSegment((2 * 60) + 10, (2 * 60) + 20) // Transition Shift
+    };
+    private final TimeSegment[] TeleopHubActiveTimesForAutoLoser = new TimeSegment[] {
+            new TimeSegment(0, 30), // End game
+            new TimeSegment(55, (1 * 60) + 20), // Shift 3
+            new TimeSegment((1 * 60) + 45, (2 * 60) + 20) // Shift 1 combines with transition shift
+    };
+
+    public boolean isOurHubActive() {
+        return isHubActive;
     }
 
-    public static void setShiftWithButtons() {
-
+    public void setManualAutonWinner(String manualAutonWinner) {
+        this.manualAutonWinner = manualAutonWinner;
     }
 
-    public void periodic() {
-        String gameData;
-        gameData = DriverStation.getGameSpecificMessage();
-        if (gameData.length() > 0) {
-            switch (gameData.charAt(0)) {
-                case 'B':
-                    // Blue case code
+    public void updateStatesForTeleop() {
+        if (!DriverStation.isTeleopEnabled())
+            return;
+
+        String whoWonAuto = DriverStation.getGameSpecificMessage();
+        boolean redIsWinner;
+        switch (whoWonAuto) {
+            case "R":
+                redIsWinner = true;
+                break;
+            case "B":
+                redIsWinner = false;
+                break;
+            default:
+                if (manualAutonWinner.equals("R")) {
+                    redIsWinner = true;
                     break;
-                case 'R':
-                    // Red case code
+                } else if (manualAutonWinner.equals("B")) {
+                    redIsWinner = false;
                     break;
-                default:
-                    // This is corrupt data
-                    break;
+                } 
+                return;// We don't have the message yet, we can't determine
+        }
+
+        /*
+         * Check to see if our current time is within a time that it doesn't matter what
+         * alliance we're on
+         */
+        double timeLeftInTeleop = DriverStation.getMatchTime();
+        double timeUntilSwap = 150; // Start at 2:30 so it definitely gets cleared
+
+        /*
+         * When we're in teleop we should definitely have the alliance color, so we can
+         * confidently use the DS alliance API
+         */
+        boolean isRedAlliance = DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red;
+
+        /*
+         * This boils down to an XOR but we explicitly call out both cases so it's clear
+         */
+        boolean useWinnerTimes = (redIsWinner && isRedAlliance) || (!redIsWinner && !isRedAlliance);
+
+        /* If we're the winner, use the winner times */
+        if (useWinnerTimes) {
+            for (TimeSegment seg : TeleopHubActiveTimesForAutoWinner) {
+                if (seg.isTimeWithin(timeLeftInTeleop)) {
+                    timeUntilTransition = timeLeftInTeleop - seg.start;
+                    isHubActive = true;
+                    return;
+                }
+                double timeToStart = timeLeftInTeleop - seg.end;
+                if (timeToStart > 0 && timeToStart < timeUntilSwap) {
+                    /* Update our time until swap with this, since it's sooner */
+                    timeUntilSwap = timeToStart;
+                }
             }
         } else {
-            // Code for no data received yet
+            for (TimeSegment seg : TeleopHubActiveTimesForAutoLoser) {
+                if (seg.isTimeWithin(timeLeftInTeleop)) {
+                    timeUntilTransition = timeLeftInTeleop - seg.start;
+                    isHubActive = true;
+                    return;
+                }
+                double timeToStart = timeLeftInTeleop - seg.end;
+                if (timeToStart > 0 && timeToStart < timeUntilSwap) {
+                    /* Update our time until swap with this, since it's sooner */
+                    timeUntilSwap = timeToStart;
+                }
+            }
         }
+        timeUntilTransition = timeUntilSwap;
+        isHubActive = false;
     }
 }
