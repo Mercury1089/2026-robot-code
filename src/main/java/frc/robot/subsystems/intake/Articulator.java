@@ -59,7 +59,7 @@ public class Articulator extends SubsystemBase {
       .inverted(true);
     articulatorConfig.closedLoop
       .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-      .pid(0.05,0,0)
+      .pid(0.1,0,0)
       // .positionWrappingEnabled(true) we don't actually want this 
       // .positionWrappingInputRange(0.0, 360.0)
       .positionWrappingEnabled(false)

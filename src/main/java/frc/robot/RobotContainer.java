@@ -17,6 +17,7 @@ import frc.robot.subsystems.intake.Intake.IntakeSpeed;
 import frc.robot.subsystems.outtake.Shooter;
 import frc.robot.util.KnownLocations;
 import frc.robot.util.TargetUtils;
+import frc.robot.util.Shift;
 
 import java.util.function.Supplier;
 
@@ -68,6 +69,7 @@ public class RobotContainer {
   private Shooter shooter;
   private Articulator articulator;
   private RobotModeLEDs leds;
+  private Shift shift;
 
   private double manualThreshold = 0.2;
   
@@ -110,11 +112,19 @@ public class RobotContainer {
     gamepadPOVRight.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
 
     shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
-    gamepadA.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(500.0), shooter));
-    gamepadB.onTrue(new RunCommand(() -> shooter.stop(), shooter));
-    gamepadY.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(5000), shooter));
-    gamepadX.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(3000), shooter));
+    // gamepadA.onTrue(new RunCommand(() -> shooter.setVelocityRPM(1500.0), shooter));
+    // // gamepadA.onTrue(new RunCommand(() -> shooter.setSpeed(1.0), shooter));
+    // gamepadB.onTrue(new RunCommand(() -> shooter.stop(), shooter));
+    // gamepadY.onTrue(new RunCommand(() -> shooter.setVelocityRPM(5000.0), shooter));
+    // gamepadX.onTrue(new RunCommand(() -> shooter.setVelocityRPM(3000.0), shooter));
     
+    gamepadA.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
+      new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")) 
+    );
+
+    gamepadB.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
+      new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")) 
+    );
 
 
     // left3.whileTrue(new SequentialCommandGroup(

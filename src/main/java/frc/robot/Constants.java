@@ -80,7 +80,7 @@ public final class Constants {
     public static final double RADIANS_CONVERSION = 2 * Math.PI;
     public static final double RADIANS_VELOCITY_CONVERSION = RADIANS_CONVERSION / 60;
 
-    public static final double DRIVING_MOTOR_FREE_SPEED = NEO_MOTOR_CONSTANTS.FREE_SPEED_RPMS / 60; // rps
+    public static final double DRIVING_MOTOR_FREE_SPEED = NEO_MOTOR_CONSTANTS.NEO_FREE_SPEED_RPMS / 60; // rps
     public static final double DRIVE_WHEEL_FREE_SPEED = 
     (DRIVING_MOTOR_FREE_SPEED * (WHEEL_DIAMETER * Math.PI)) / MOTOR_REDUCTION;
 
@@ -95,7 +95,8 @@ public final class Constants {
   }
 
   public static final class NEO_MOTOR_CONSTANTS {
-    public static final double FREE_SPEED_RPMS = 5676;
+    public static final double NEO_FREE_SPEED_RPMS = 5676.0;
+    public static final double VORTEX_FREE_SPEED_RPMS = 5767.0;
   }
 
   public static class UNITS {
@@ -124,7 +125,7 @@ public final class Constants {
     public static final int PIGEON_DRIVETRAIN = 9;
     public static final int SHOOTER = 11;
     // Secondary shooter SparkMax (follower)
-    public static final int SHOOTER_BACK = 12;
+    public static final int SHOOTER_FOLLOWER = 12;
     public static final int HOPPER = 13;
     public static final int KICKER = 14;
     public static final int INTAKE = 15;
