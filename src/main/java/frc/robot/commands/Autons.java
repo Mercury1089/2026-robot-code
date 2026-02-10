@@ -56,7 +56,7 @@ public class Autons {
     private RobotConfig config;
 
     public Autons(Drivetrain drivetrain) {
-
+        // TODO: Put correct settings into PathPlanner GUI for the new robot
         this.drivetrain = drivetrain;
 
         KnownLocations knownLocations = KnownLocations.getKnownLocations();
@@ -102,11 +102,39 @@ public class Autons {
         return this.autonCommand;
     }
 
+    public void displayPaths(PathPlannerPath[] paths) {
+        boolean isRedAlliance = (KnownLocations.getKnownLocations().alliance == Alliance.Red);
+        boolean isMiddleAuton = (autoType == AutonType.MIDDLE);
+        int trajIndex = 0;
+
+        for (int i = 0; i < paths.length; i++) {
+            if (isMiddleAuton && i > 0) {
+                drivetrain.setTrajectorySmartdash(new Trajectory(), trajIndex + "");
+            } else {
+                PathPlannerPath path = isRedAlliance ? paths[i].flipPath() : paths[i];
+                drivetrain.setTrajectorySmartdash(PathUtils.TrajectoryFromPath(path, config), trajIndex + "");
+            }
+
+            trajIndex++;
+        }
+    }
+
 
     public Command buildAutonCommand(KnownLocations knownLocations) {
-        return new SequentialCommandGroup(
-            
-        );
+        SequentialCommandGroup autonCommand = new SequentialCommandGroup();
+
+        switch (autoType) {
+            case LEFT:
+                break;
+            case MIDDLE:
+                break;
+            case RIGHT:
+                break;
+            default:
+                break;
+        }
+
+        return autonCommand;
     }
 
     public PathPlannerPath getBasePath() {

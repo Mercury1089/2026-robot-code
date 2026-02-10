@@ -70,7 +70,7 @@ public class Drivetrain extends SubsystemBase {
   private Translation2d robotVelocityVector;
   private Translation2d targetHubVector;
   private Translation2d targetHubVelocityVector;
-  private Translation2d shootHereVector;
+  private Translation2d compensatedShotVector;
 
   private double headingToHub = 0.0;
 
@@ -400,7 +400,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Supplier<Double> getShootingAngleSupplier() {
-    return () -> shootHereVector.getAngle().getDegrees();
+    return () -> compensatedShotVector.getAngle().getDegrees();
   }
 
   public AprilTagCamera getAprilTagCamera() {
@@ -509,7 +509,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Translation2d getCompensatedVector() {
-    return shootHereVector;
+    return compensatedShotVector;
   }
 
   public Zone getCurrentZone() {
@@ -558,15 +558,11 @@ public class Drivetrain extends SubsystemBase {
         .getTargetHeadingToPoint(getPose(), KnownLocations.getKnownLocations().HUB.getTranslation()).getDegrees();
 
     robotVelocityVector = new Translation2d(getXSpeeds(), getYSpeeds());
-    // targetHubVector =
-    // KnownLocations.getKnownLocations().HUB.getTranslation().minus(getPose().getTranslation());
-    // targetHubVelocityVector =
-    // targetHubVector.div(targetHubVector.getNorm()).times(shooter.getShootingRPM());
-    // TODO: might want to use current velocity of the shooter instead of
-    // theoretical
+    
+    // TODO: might want to use current velocity of the shooter instead of theoretical
     Translation2d exitVelocityVector = new Translation2d(shooter.getShootingRPM(),
         Rotation2d.fromDegrees(headingToHub));
-    shootHereVector = exitVelocityVector.minus(robotVelocityVector);
+    compensatedShotVector = exitVelocityVector.minus(robotVelocityVector);
 
     odometry.update(
         getRotation(),
@@ -616,7 +612,7 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Drivetrain/xSpeedCappedStraight", getXSpeedCappedStraightDrive());
     SmartDashboard.putNumber("Drivetrain/ySpeedCappedStraight", getYSpeedCappedStraightDrive());
     SmartDashboard.putData(smartdashField);
-    SmartDashboard.putNumber("Drivetrain/shootHereAngle", shootHereVector.getAngle().getDegrees());
+    SmartDashboard.putNumber("Drivetrain/shootHereAngle", compensatedShotVector.getAngle().getDegrees());
     SmartDashboard.putNumber("Drivetrain/headingToHub", headingToHub);
     SmartDashboard.putNumber("Drivetrain/headingThingIDK",
         this.getPose().getRotation().plus(KnownLocations.getKnownLocations().zeroGyroRotation).getDegrees());
