@@ -131,6 +131,9 @@ public final class Constants {
     public static final int INTAKE = 15;
     public static final int ARTICULATOR = 16;
 
+    public static final int LASER_CAN = 21;
+    public static final int PROX_SENSOR = 22;
+
     private CAN() {} 
   }
 
