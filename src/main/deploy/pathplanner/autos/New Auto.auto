@@ -1,0 +1,31 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightStartToFarRightNeutralZone"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "FarRightNeutralZoneToRightShoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightShootToMiddleRightNeutralZone"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
