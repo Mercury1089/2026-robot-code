@@ -12,6 +12,9 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
+
+import au.grapplerobotics.LaserCan;
+
 import com.revrobotics.spark.FeedbackSensor;
 
 import frc.robot.Constants;
@@ -24,6 +27,7 @@ public class Shooter extends SubsystemBase {
     private final RelativeEncoder encoder;
     private final SparkClosedLoopController leaderClosedLoop;
     private final SparkClosedLoopController followerClosedLoop;
+    private LaserCan lc;
 
     public Shooter() {
         leader = new SparkFlex(Constants.CAN.SHOOTER, MotorType.kBrushless);
@@ -94,7 +98,19 @@ public class Shooter extends SubsystemBase {
     public double getShootingRPM() {
         return 1.0;
     }
+    // public boolean fuelInShooter(){
+    //     LaserCan.Measurement measurement;
+    //     measurement = lc.getMeasurement();
+    //     if (measurement != null){
+    //         return  (measurement.distance_mm < 450);
+    //     }
+    //     else{
+    //         return false;
+    //     }
+    // }
+
     public void periodic() {
         SmartDashboard.putNumber("ShooterRPM", getVelocityRPM());
+        // SmartDashboard.putBoolean("Shooter/isFuelInShooter", fuelInShooter());
     }
 }
