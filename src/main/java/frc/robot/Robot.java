@@ -38,8 +38,9 @@ public class Robot extends TimedRobot {
     CanBridge.runTCP();
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    CanandEventLoop.getInstance();
+    
     m_robotContainer = new RobotContainer();
+    CanandEventLoop.getInstance();
     m_alliance = KnownLocations.getKnownLocations().alliance;
     CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
   }

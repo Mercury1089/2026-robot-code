@@ -10,6 +10,7 @@ import frc.robot.commands.Autons;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.RobotModeLEDs;
 import frc.robot.subsystems.drivetrain.Drivetrain;
+import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intake.Articulator.ArticulatorPosition;
 import frc.robot.subsystems.intake.Articulator;
 import frc.robot.subsystems.intake.Intake;
@@ -94,6 +95,7 @@ public class RobotContainer {
 
     Intake intake = new Intake();
     intake.setDefaultCommand(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
+    Hopper hopper = new Hopper();
     
     auton = new Autons(drivetrain);
 
