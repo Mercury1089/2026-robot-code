@@ -16,10 +16,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.sensors.ProximitySensor;
 import frc.robot.Constants;
 
+
 public class Hopper extends SubsystemBase {
     private SparkMax hopper;
     private LaserCan lc;
     private ProximitySensor proxSensor;
+    private double setPosition;
     // Changed to 1 and 2 to FRONT and BACK for clarity
     // private DigitalInput hopperBreakBeamFront;
     //private DigitalInput hopperBreakBeamBack;
@@ -53,21 +55,26 @@ public class Hopper extends SubsystemBase {
             this.speed = speed;
         }
     }
+    
 
     public void setSpeed(HopperSpeed intakeSpeed) {
         hopper.set(intakeSpeed.speed);
     }
 
+    public void setPosition(double pos) {
+        setPosition = pos;
+        hopperClosedLoopController.setSetpoint(pos, SparkMax.ControlType.kPosition);
+    }
 
     //!hopperBreakBeam1.get() is true if it is blocked (has fuel)
     public boolean hopperIsFull(){
         LaserCan.Measurement measurement = lc.getMeasurement();
-        return  (measurement != null && measurement.distance_mm < 5);
+        return  (measurement != null && measurement.distance_mm < 110);
     }
 
     public boolean hopperIsEmpty(){
         LaserCan.Measurement measurement = lc.getMeasurement();
-        return  (measurement != null && measurement.distance_mm > 450);
+        return  (measurement != null && measurement.distance_mm > 110);
     }
 
     // public boolean hasFuel() {

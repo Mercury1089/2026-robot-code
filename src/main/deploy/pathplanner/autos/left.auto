@@ -7,19 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "RightStartToFarRightNeutralZone"
+            "pathName": "leftStartToFarLeftNeutralZoneToLeftShoot"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "FarRightNeutralZoneToRightShoot"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "RightShootToMiddleRightNeutralZone"
+            "pathName": "leftShootToMiddleLeftNeutralZoneToLeftShoot"
           }
         }
       ]
