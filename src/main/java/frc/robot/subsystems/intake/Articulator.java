@@ -26,24 +26,9 @@ import frc.robot.Constants.CAN;
 public class Articulator extends SubsystemBase {
 
   /** Creates a new AlgaeArticulator. */
-  public static final int
-    ARM_PID_SLOT = 0;
 
-  private static final double 
-    ARM_NORMAL_P_VAL = 1.0 / 1.0,
-    ARM_NORMAL_I_VAL = 0.0,
-    ARM_NORMAL_D_VAL = 0.0;
-
-  private static final float ARM_SOFT_LIMIT_FWD = (float) 120;
-
-  private static final float ARM_SOFT_LIMIT_REV = (float) 50;
-
-  private static final double ANGLE_OFFSET = -3.5;
-
-  public final double GEAR_RATIO = 125.0 / 1.0;
   public final double THRESHOLD_DEGREES = 0.5;
 
-  
   private SparkMax articulator;
   private SparkClosedLoopController articulatorClosedLoopController;
   private AbsoluteEncoder absoluteEncoder;
@@ -83,7 +68,7 @@ public class Articulator extends SubsystemBase {
   }
   
   public void resetEncoders() {
-    articulatorClosedLoopController.setReference(0, SparkMax.ControlType.kPosition);
+    articulatorClosedLoopController.setSetpoint(0, SparkMax.ControlType.kPosition);
   }
 
   public void setSpeed(Supplier<Double> speedSupplier) {
@@ -129,7 +114,7 @@ public class Articulator extends SubsystemBase {
   
   public enum ArticulatorPosition {
     IN(0.0),
-    MIDDLE(75.0),
+    SAFE(75.0),
     OUT(150.0);
     
     public final double degreePos;

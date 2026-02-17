@@ -110,7 +110,7 @@ public class RobotContainer {
     articulator = new Articulator();
     articulator.setDefaultCommand(new RunCommand(() -> articulator.setSpeed(gamepadLeftY), articulator));
     gamepadPOVLeft.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
-    gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.MIDDLE), articulator));
+    gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
     gamepadPOVRight.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
 
     shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
