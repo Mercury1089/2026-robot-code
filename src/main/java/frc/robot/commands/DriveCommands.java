@@ -20,10 +20,13 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.SWERVE;
 import frc.robot.subsystems.drivetrain.Drivetrain;
+import frc.robot.subsystems.intake.Articulator;
+import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.outtake.Shooter;
 import frc.robot.util.KnownLocations;
 import frc.robot.util.MercMath;
@@ -136,6 +139,10 @@ public class DriveCommands {
     public static Command lockToHub(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Drivetrain drivetrain) {
         Supplier<Double> headingSupplier = () -> TargetUtils.getTargetHeadingToPoint(drivetrain.getPose(), KnownLocations.getKnownLocations().HUB.getTranslation()).getDegrees();
         return targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain);
+    }
+
+    public static Command autoPickUp(Articulator articulator, Intake intake, Drivetrain drivetrain) {
+        return new PrintCommand("Work in Progress");
     }
 
     public static Command shootOnTheMove(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Drivetrain drivetrain){
