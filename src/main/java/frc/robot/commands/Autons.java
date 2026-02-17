@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -102,39 +103,46 @@ public class Autons {
         return this.autonCommand;
     }
 
-    public void displayPaths(PathPlannerPath[] paths) {
+    public void displayPaths(List<PathPlannerPath> paths) {
         boolean isRedAlliance = (KnownLocations.getKnownLocations().alliance == Alliance.Red);
-        boolean isMiddleAuton = (autoType == AutonType.MIDDLE);
         int trajIndex = 0;
 
-        for (int i = 0; i < paths.length; i++) {
-            if (isMiddleAuton && i > 0) {
-                drivetrain.setTrajectorySmartdash(new Trajectory(), trajIndex + "");
-            } else {
-                PathPlannerPath path = isRedAlliance ? paths[i].flipPath() : paths[i];
+        for (int i = 0; i < paths.size(); i++) {
+                PathPlannerPath path = isRedAlliance ? paths.get(i).flipPath() : paths.get(i);
                 drivetrain.setTrajectorySmartdash(PathUtils.TrajectoryFromPath(path, config), trajIndex + "");
-            }
-
             trajIndex++;
         }
     }
 
 
     public Command buildAutonCommand(KnownLocations knownLocations) {
-        SequentialCommandGroup autonCommand = new SequentialCommandGroup();
+        // TODO: Add this logic in KnownLocations, and make sure to update based on alliance changes
+        // drivetrain.resetPose(startingPose);
+        // drivetrain.setStartingPosition(startingPose);
+        String autoName = "";
 
         switch (autoType) {
             case LEFT:
+                autoName = "left";
                 break;
             case MIDDLE:
+                autoName = "middle";
                 break;
             case RIGHT:
+                autoName = "right";
                 break;
             default:
+                autoName = "left";
                 break;
         }
 
-        return autonCommand;
+        try {
+            displayPaths(PathPlannerAuto.getPathGroupFromAutoFile(autoName));
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+
+        return new PathPlannerAuto(autoName);
     }
 
     public PathPlannerPath getBasePath() {
