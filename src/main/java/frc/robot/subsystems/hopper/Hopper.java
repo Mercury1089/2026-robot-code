@@ -18,10 +18,10 @@ import frc.robot.Constants;
 
 
 public class Hopper extends SubsystemBase {
-    private SparkMax hopper;
+    // private SparkMax hopper;
     private LaserCan lc;
     private ProximitySensor proxSensor;
-    private double setPosition;
+    // private double setPosition;
     // Changed to 1 and 2 to FRONT and BACK for clarity
     // private DigitalInput hopperBreakBeamFront;
     //private DigitalInput hopperBreakBeamBack;
@@ -30,13 +30,13 @@ public class Hopper extends SubsystemBase {
 
     public Hopper() {
 
-        hopper = new SparkMax(Constants.CAN.HOPPER, MotorType.kBrushless);
-        SparkMaxConfig hopperConfig = new SparkMaxConfig();
+        // hopper = new SparkMax(Constants.CAN.HOPPER, MotorType.kBrushless);
+        // SparkMaxConfig hopperConfig = new SparkMaxConfig();
 
-        hopperConfig.idleMode(IdleMode.kCoast)
-                .inverted(true);
+        // hopperConfig.idleMode(IdleMode.kCoast)
+        //         .inverted(true);
 
-        hopper.configure(hopperConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        // hopper.configure(hopperConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         // this.hopperBreakBeamFront = new DigitalInput(HOPPER_BREAKBEAM_FRONT);
         // this.hopperBreakBeamBack = new DigitalInput(HOPPER_BREAKBEAM_BACK);
 
@@ -45,26 +45,26 @@ public class Hopper extends SubsystemBase {
 
     }
 
-    public enum HopperSpeed {
-        INDEX(1.0),
-        STOP(0.0);
+    // public enum HopperSpeed {
+    //     INDEX(1.0),
+    //     STOP(0.0);
 
-        public final double speed;
+    //     public final double speed;
 
-        HopperSpeed(double speed) {
-            this.speed = speed;
-        }
-    }
+    //     HopperSpeed(double speed) {
+    //         this.speed = speed;
+    //     }
+    // }
     
 
-    public void setSpeed(HopperSpeed intakeSpeed) {
-        hopper.set(intakeSpeed.speed);
-    }
+    // public void setSpeed(HopperSpeed intakeSpeed) {
+    //     hopper.set(intakeSpeed.speed);
+    // }
 
-    public void setPosition(double pos) {
-        setPosition = pos;
-        hopperClosedLoopController.setSetpoint(pos, SparkMax.ControlType.kPosition);
-    }
+    // public void setPosition(double pos) {
+    //     setPosition = pos;
+    //     hopperClosedLoopController.setSetpoint(pos, SparkMax.ControlType.kPosition);
+    // }
 
     //!hopperBreakBeam1.get() is true if it is blocked (has fuel)
     public boolean hopperIsFull(){
