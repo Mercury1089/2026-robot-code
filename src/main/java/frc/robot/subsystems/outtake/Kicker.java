@@ -5,11 +5,14 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import frc.robot.Constants;
 
-public class Kicker {
+public class Kicker extends SubsystemBase{
     private SparkMax kicker;
 
   public Kicker() {

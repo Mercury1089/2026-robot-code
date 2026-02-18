@@ -145,7 +145,7 @@ public class DriveCommands {
         return new PrintCommand("Work in Progress");
     }
 
-    public static Command shootOnTheMove(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Drivetrain drivetrain){
+    public static Command shootOnTheMove(Drivetrain drivetrain){
         return new ParallelCommandGroup(
             // targetDrive(xSupplier, ySupplier, () -> drivetrain.getCompensatedVector().getAngle().getDegrees(), drivetrain)
             new SequentialCommandGroup(
