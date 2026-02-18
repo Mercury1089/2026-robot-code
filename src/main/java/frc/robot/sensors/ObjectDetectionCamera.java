@@ -4,12 +4,24 @@
 
 package frc.robot.sensors;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import frc.robot.subsystems.drivetrain.Drivetrain;
+import frc.robot.util.PathUtils;
+import frc.robot.util.TargetUtils;
+
 
 /** Wrapper for PhotonCamera class */
 public class ObjectDetectionCamera extends PhotonCamera {
@@ -20,6 +32,7 @@ public class ObjectDetectionCamera extends PhotonCamera {
     private final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(18.0); // height on robot (meters) TODO: CHECK THIS
     private final double CAMERA_PITCH_RADIANS = Rotation2d.fromDegrees(-25.0).getRadians(); // tilt of our camera (radians)
     private final double TARGET_HEIGHT_METERS = 0.0; // may need to change 
+    private final double MID_SCREEN = 400; //HALF OF RESOLUTION WIDTH IN PIXES
 
     public ObjectDetectionCamera() {
         super(DEFAULT_CAM_NAME);
@@ -51,6 +64,7 @@ public class ObjectDetectionCamera extends PhotonCamera {
 
     public int getTargetCount() {
         var result = getLatestResult();
+
         return result.hasTargets() ? 
             result.getTargets().size() :
             0;
@@ -67,9 +81,40 @@ public class ObjectDetectionCamera extends PhotonCamera {
         }
         return 0.0;
     }
+
+    public Pose2d getCoordinateOfHighestConcentration(Drivetrain drivetrain) {
+        var result = getLatestResult();
+
+        if (!result.hasTargets()) return new Pose2d(); // dont do this fix this
+
+        List<PhotonTrackedTarget> targets = result.targets;
+        List<Double[]> fuelPosesLeft = new ArrayList<>();
+        List<Double[]> fuelPosesRight = new ArrayList<>();
+        int countOfFuelOnLeft = 0;
+        int countOfFuelOnRight = 0;
+        for (int i = 0; i < targets.size(); i++) {
+
+            double xCoordinate = targets.get(i).getDetectedCorners().get(0).x;
+            double yCoordinate = targets.get(i).getDetectedCorners().get(0).x;
+
+
+            if (xCoordinate < 400) {
+                countOfFuelOnLeft++;
+                fuelPosesLeft.add(new Double[]{xCoordinate, yCoordinate});
+            } else {
+                countOfFuelOnRight++;
+                fuelPosesRight.add(new Double[]{xCoordinate, yCoordinate});
+            }
+        }
+
+        //get avereage point next we have all the coordinates
+    }
     
+
     // public Transform3d transformToNote() {
     //     Transform3d pose = getLatestResult().getBestTarget().getBestCameraToTarget();
     //     return pose;
     // }
+
+    
 }
