@@ -16,6 +16,9 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.reduxrobotics.sensors.canandcolor.Canandcolor;
+import com.reduxrobotics.sensors.canandgyro.Canandgyro;
+import com.reduxrobotics.sensors.canandgyro.CanandgyroSettings;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -56,7 +59,8 @@ import frc.robot.util.Shift;
 public class Drivetrain extends SubsystemBase {
 
   private MAXSwerveModule frontLeftModule, frontRightModule, backLeftModule, backRightModule;
-  private Pigeon2 pigeon;
+  // private Pigeon2 pigeon;
+  private Canandgyro gyro;
   private SwerveDrivePoseEstimator odometry;
   private SwerveDriveKinematics swerveKinematics;
   private AprilTagCamera leftCam, rightCam;
@@ -122,10 +126,12 @@ public class Drivetrain extends SubsystemBase {
     // backSensor = new DistanceSensors(CAN.BACK_LASER_CAN, 135.0); // check this
     // error
 
-    // configure gyro
-    pigeon = new Pigeon2(CAN.PIGEON_DRIVETRAIN);
-    pigeon.getConfigurator().apply(new Pigeon2Configuration());
-    pigeon.getYaw().setUpdateFrequency(10);
+
+    gyro = new Canandgyro(CAN.GYRO_DRIVETRAIN);
+    CanandgyroSettings gyroSettings = new CanandgyroSettings();
+    gyro.setSettings(gyroSettings);
+    // gyro.setPartyMode(1); //wooooo
+    gyro.setPartyMode(0);
 
     rotationPIDController = new PIDController(ROTATION_P, I, D);
     rotationPIDController.enableContinuousInput(-180, 180);
@@ -212,8 +218,13 @@ public class Drivetrain extends SubsystemBase {
    * Resets the Gyro of robot, or facing to 0
    */
   public void resetGyro() {
-    pigeon.reset();
+    // pigeon.reset();
+    gyro.setYaw(0);
     gyroOffset = Rotation2d.fromDegrees(0.0);
+  }
+
+  public void recalibrateGyro() {
+    gyro.startCalibration();
   }
 
   /**
@@ -392,7 +403,7 @@ public class Drivetrain extends SubsystemBase {
    */
   public Rotation2d getRotation() {
     // Note: Unlike getAngle(), getRotation2d is CCW positive.
-    return pigeon.getRotation2d();
+    return gyro.getRotation2d();
   }
 
   /**
@@ -629,6 +640,8 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putString("Drivetrain/currentZone", getCurrentZone().getString());
     SmartDashboard.putBoolean("Shift/isOurHubActive", shift.isOurHubActive());
     SmartDashboard.putString("Drivetrain/gameMessage", DriverStation.getGameSpecificMessage());
+    SmartDashboard.putNumber("Drivetrain/gyroReading", gyro.getRotation2d().getDegrees());
+    SmartDashboard.putBoolean("Drivetrain/gyroIsCalibrating", gyro.isCalibrating());
   }
 
   public enum Zone {

@@ -105,6 +105,7 @@ public class RobotContainer {
      * MANUAL CONTROL
      */
     left10.onTrue(new InstantCommand(() -> drivetrain.resetGyro(), drivetrain).ignoringDisable(true));
+    left11.onTrue(new InstantCommand(() -> drivetrain.recalibrateGyro(), drivetrain).ignoringDisable(true));
     right2.onTrue(drivetrain.getDefaultCommand());
     
     articulator = new Articulator();

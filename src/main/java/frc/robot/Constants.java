@@ -122,7 +122,7 @@ public final class Constants {
     public static final int DRIVING_BACK_RIGHT = 5;
     public static final int TURNING_BACK_RIGHT = 6;
     
-    public static final int PIGEON_DRIVETRAIN = 9;
+    public static final int GYRO_DRIVETRAIN = 9;
     public static final int SHOOTER = 11;
     // Secondary shooter SparkMax (follower)
     public static final int SHOOTER_FOLLOWER = 12;
