@@ -107,6 +107,8 @@ public class ObjectDetectionCamera extends PhotonCamera {
             }
         }
 
+        return new Pose2d();
+
         //get avereage point next we have all the coordinates
     }
     
