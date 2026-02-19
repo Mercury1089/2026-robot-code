@@ -10,6 +10,10 @@ public class MercMath {
     }
 
     public static double RPMToMetersPerSecond(double rpm, double radius) {
-        return (rpm * (2 * Math.PI * radius)) / 60.0; //TODO: fix placeholder number
+        return (rpm * (2 * Math.PI * radius)) / 60.0;
+    }
+
+    public static double metersPerSecondToRPM(double mps, double radius) {
+        return (mps * 60.0) / (2 * Math.PI * radius);
     }
 }
