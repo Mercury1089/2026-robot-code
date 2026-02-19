@@ -51,6 +51,7 @@ import frc.robot.sensors.AprilTagCamera;
 import frc.robot.sensors.ProximitySensor;
 import frc.robot.subsystems.outtake.Shooter;
 import frc.robot.util.KnownLocations;
+import frc.robot.util.MercMath;
 import frc.robot.util.PathUtils;
 import frc.robot.util.SwerveUtils;
 import frc.robot.util.TargetUtils;
@@ -108,7 +109,7 @@ public class Drivetrain extends SubsystemBase {
   private double prevTime = WPIUtilJNI.now() * 1e-6;
 
   /** Creates a new Drivetrain. */
-  public Drivetrain(Shooter shooter) {
+  public Drivetrain() {
     // configure swerve modules
     /**
      * Configuring Driving and Turning motors for each Swerve Module
@@ -482,7 +483,11 @@ public class Drivetrain extends SubsystemBase {
     return rotationDirStraight;
   }
 
-  public void setXDirStraight(double speed) {
+  public boolean isPointingAtHub() {
+    return Math.abs(getCompensatedVector().getAngle().getDegrees() - getPose().getRotation().getDegrees()) < THRESHOLD_DEGREES;
+  }
+
+  public void setXDirStraight() {
     // Translation2d current = new Translation2d(getXSpeeds(), getYSpeeds());
     // double magnitude = current.getNorm();
     // if (magnitude > 1e-6) {
@@ -499,7 +504,7 @@ public class Drivetrain extends SubsystemBase {
     }
   }
 
-  public void setYDirStraight(double speed) {
+  public void setYDirStraight() {
     // Translation2d current = new Translation2d(getXSpeeds(), getYSpeeds());
     // double magnitude = current.getNorm();
     // if (magnitude > 1e-6) {
@@ -530,6 +535,10 @@ public class Drivetrain extends SubsystemBase {
 
   public Translation2d getCompensatedVector() {
     return compensatedShotVector;
+  }
+
+  public void setShooter(Shooter shooter) {
+    this.shooter = shooter;
   }
 
   public Zone getCurrentZone() {
@@ -573,18 +582,6 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    shift.updateStatesForTeleop();
-
-    headingToHub = TargetUtils
-        .getTargetHeadingToPoint(getPose(), KnownLocations.getKnownLocations().HUB.getTranslation()).getDegrees();
-
-    robotVelocityVector = new Translation2d(getXSpeeds(), getYSpeeds());
-    
-    // TODO: might want to use current velocity of the shooter instead of theoretical
-    Translation2d exitVelocityVector = new Translation2d(shooter.getShootingRPM(),
-        Rotation2d.fromDegrees(headingToHub));
-    compensatedShotVector = exitVelocityVector.minus(robotVelocityVector);
-
     odometry.update(
         getRotation(),
         new SwerveModulePosition[] {
@@ -615,6 +612,18 @@ public class Drivetrain extends SubsystemBase {
     }
 
     smartdashField.setRobotPose(getPose());
+
+    shift.updateStatesForTeleop();
+
+    // Check if you are passing or shooting in hub
+    headingToHub = TargetUtils
+        .getTargetHeadingToPoint(getPose(), KnownLocations.getKnownLocations().HUB.getTranslation()).getDegrees();
+
+    robotVelocityVector = new Translation2d(getXSpeeds(), getYSpeeds());
+    
+    Translation2d exitVelocityVector = new Translation2d(MercMath.RPMToMetersPerSecond(shooter.getStaticShootingRPM(), 2.0),
+        Rotation2d.fromDegrees(headingToHub));
+    compensatedShotVector = exitVelocityVector.minus(robotVelocityVector);
 
     SmartDashboard.putNumber("Drivetrain/CurrentPose X", getPose().getX());
     SmartDashboard.putNumber("Drivetrain/CurrentPose Y", getPose().getY());

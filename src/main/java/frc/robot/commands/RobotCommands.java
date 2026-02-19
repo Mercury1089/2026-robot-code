@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import java.util.function.BooleanSupplier;
+
 import com.reduxrobotics.sensors.canandcolor.DigoutChannel.Index;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -17,6 +19,7 @@ import frc.robot.subsystems.outtake.Hood;
 import frc.robot.subsystems.outtake.Kicker;
 import frc.robot.subsystems.outtake.Shooter;
 import frc.robot.subsystems.outtake.Kicker.KickerSpeed;
+import frc.robot.util.MercMath;
 import frc.robot.subsystems.intake.Articulator.ArticulatorPosition;
 
 public class RobotCommands {
@@ -49,21 +52,40 @@ public class RobotCommands {
     }
 
     public static Command prepareHood(Hood hood) {
-        return new RunCommand(() -> hood.isInPosition(), hood);
+        return new RunCommand(() -> hood.setPosition(hood.getHoodToHubPosition()), hood);
     }
 
-    public static Command runShooter(Shooter shooter) {
-        return new RunCommand(() -> shooter.setSpeed(shooter.getShootingRPM()), shooter);
+    public static Command setShooterToHubRPM(Shooter shooter) {
+        return new RunCommand(() -> shooter.setSpeed(shooter.getStaticShootingRPM()), shooter);
     }
 
-    public static Command shoot(Shooter shooter, Kicker kicker, Hood hood, Indexer indexer, Articulator articulator, Drivetrain drivetrain) {
+    public static Command feedShooter(Indexer indexer, Kicker kicker, Articulator articulator) {
         return new ParallelCommandGroup(
-            DriveCommands.shootOnTheMove(drivetrain),
-            agitateIntake(articulator),
             runIndex(indexer),
             uptake(kicker),
+            agitateIntake(articulator)
+        );
+    }
+
+    public static Command setUpToShoot(Shooter shooter, Hood hood, Drivetrain drivetrain) {
+        return new ParallelCommandGroup(
             prepareHood(hood),
-            runShooter(shooter).onlyIf(() -> shooter.getVelocityRPM() == shooter.getShootingRPM())
+            setShooterToHubRPM(shooter),
+            DriveCommands.shootOnTheMove(drivetrain)
+        );
+    }
+
+    public static Command fire(Shooter shooter, Kicker kicker, Hood hood, Indexer indexer, Articulator articulator, Drivetrain drivetrain) {
+        BooleanSupplier canFire = 
+            () -> shooter.isAtShootingRPM() && 
+                    hood.isInPosition() &&
+                    drivetrain.isPointingAtHub();
+        return new SequentialCommandGroup(
+            setUpToShoot(shooter, hood, drivetrain).until(canFire),
+            new ParallelCommandGroup(
+                setUpToShoot(shooter, hood, drivetrain), // You want to keep setting up while firing
+                feedShooter(indexer, kicker, articulator)
+            )
         );
     }
 }

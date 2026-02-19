@@ -8,14 +8,20 @@ import frc.robot.Constants.DS_USB;
 import frc.robot.Constants.JOYSTICK_BUTTONS;
 import frc.robot.commands.Autons;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.RobotCommands;
 import frc.robot.subsystems.RobotModeLEDs;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.hopper.Indexer;
+import frc.robot.subsystems.hopper.Indexer.IndexerSpeed;
 import frc.robot.subsystems.intake.Articulator.ArticulatorPosition;
 import frc.robot.subsystems.intake.Articulator;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakeSpeed;
+import frc.robot.subsystems.outtake.Hood;
+import frc.robot.subsystems.outtake.Kicker;
 import frc.robot.subsystems.outtake.Shooter;
+import frc.robot.subsystems.outtake.Kicker.KickerSpeed;
 import frc.robot.util.KnownLocations;
 import frc.robot.util.TargetUtils;
 import frc.robot.util.Shift;
@@ -24,6 +30,7 @@ import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.TriggerEvent;
+import com.reduxrobotics.sensors.canandcolor.DigoutChannel.Index;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -71,6 +78,11 @@ public class RobotContainer {
   private Articulator articulator;
   private RobotModeLEDs leds;
   private Shift shift;
+  private Intake intake;
+  private Hopper hopper;
+  private Kicker kicker;
+  private Indexer indexer;
+  private Hood hood;
 
   private double manualThreshold = 0.2;
   
@@ -88,14 +100,32 @@ public class RobotContainer {
     gamepadHID = new GenericHID(DS_USB.GAMEPAD);
     configureBindings();
 
-    shooter = new Shooter();
-    drivetrain = new Drivetrain(shooter);
+    drivetrain = new Drivetrain();
     drivetrain.setDefaultCommand(DriveCommands.joyStickDrive(leftJoystickY, leftJoystickX, rightJoystickX, drivetrain));
     drivetrain.resetGyro();
 
-    Intake intake = new Intake();
+    intake = new Intake();
     intake.setDefaultCommand(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
-    Hopper hopper = new Hopper();
+
+    shooter = new Shooter(drivetrain);
+    drivetrain.setShooter(shooter);
+    shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
+
+    hopper = new Hopper();
+
+    hood = new Hood();
+    hood.setDefaultCommand(new RunCommand(() -> hood.setSpeed(gamepadRightY), hood));
+    // hood.setDefaultCommand(new RunCommand(() -> hood.setPosition(0.0), hood));
+
+    kicker = new Kicker();
+    kicker.setDefaultCommand(new RunCommand(() -> kicker.setSpeed(KickerSpeed.STOP), kicker));
+
+    indexer = new Indexer();
+    indexer.setDefaultCommand(new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer));
+
+    articulator = new Articulator();
+    // articulator.setDefaultCommand(new RunCommand(() -> articulator.setSpeed(gamepadLeftY), articulator));
+    articulator.setDefaultCommand(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
     
     auton = new Autons(drivetrain);
 
@@ -108,18 +138,9 @@ public class RobotContainer {
     left11.onTrue(new InstantCommand(() -> drivetrain.recalibrateGyro(), drivetrain).ignoringDisable(true));
     right2.onTrue(drivetrain.getDefaultCommand());
     
-    articulator = new Articulator();
-    articulator.setDefaultCommand(new RunCommand(() -> articulator.setSpeed(gamepadLeftY), articulator));
     gamepadPOVLeft.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
     gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
     gamepadPOVRight.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
-
-    shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
-    // gamepadA.onTrue(new RunCommand(() -> shooter.setVelocityRPM(1500.0), shooter));
-    // // gamepadA.onTrue(new RunCommand(() -> shooter.setSpeed(1.0), shooter));
-    // gamepadB.onTrue(new RunCommand(() -> shooter.stop(), shooter));
-    // gamepadY.onTrue(new RunCommand(() -> shooter.setVelocityRPM(5000.0), shooter));
-    // gamepadX.onTrue(new RunCommand(() -> shooter.setVelocityRPM(3000.0), shooter));
     
     gamepadA.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
       new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")) 
@@ -129,21 +150,29 @@ public class RobotContainer {
       new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")) 
     );
 
+    right1.whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
 
-    // left3.whileTrue(new SequentialCommandGroup(
-    //   new InstantCommand(() -> drivetrain.setXDirStraight(0.1), drivetrain),
-    //   new InstantCommand(() -> drivetrain.setYDirStraight(0.1), drivetrain),
-    //   new InstantCommand(() -> drivetrain.setRotationBeforeStraightDrive(drivetrain.getRotation()), drivetrain),
-    //   DriveCommands.driveStraightAtAngle(() -> drivetrain.getHeadingToHub(), drivetrain)
-    // ));
-
-    left3.whileTrue(DriveCommands.shootOnTheMove(leftJoystickY, leftJoystickX, drivetrain));
+    /**
+     * DRIVETRAIN AUTOMATION
+     */
+    // left3.whileTrue(DriveCommands.shootOnTheMove(drivetrain));
 
     left2.onTrue(DriveCommands.safelyDriveOverBump(leftJoystickY, leftJoystickX, drivetrain));
 
     right8.onTrue(DriveCommands.lockToHub(leftJoystickY, leftJoystickX, drivetrain));
 
-    right1.whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
+    /**
+     * INTAKE COMMANDS
+     */
+
+    // left1.whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
+    left1.whileTrue(RobotCommands.intake(intake, articulator));
+
+    /**
+     * SHOOTING/PASSING COMMANDS
+     */
+    right1.whileTrue(RobotCommands.fire(shooter, kicker, hood, indexer, articulator, drivetrain));
+    
   }
 
   public Drivetrain getDrivetrain() {

@@ -149,8 +149,8 @@ public class DriveCommands {
         return new ParallelCommandGroup(
             // targetDrive(xSupplier, ySupplier, () -> drivetrain.getCompensatedVector().getAngle().getDegrees(), drivetrain)
             new SequentialCommandGroup(
-                new InstantCommand(() -> drivetrain.setXDirStraight(0.1), drivetrain),
-                new InstantCommand(() -> drivetrain.setYDirStraight(0.1), drivetrain),
+                new InstantCommand(() -> drivetrain.setXDirStraight(), drivetrain),
+                new InstantCommand(() -> drivetrain.setYDirStraight(), drivetrain),
                 DriveCommands.driveStraightAtAngle(() -> drivetrain.getCompensatedVector().getAngle().getDegrees(), drivetrain)
                 )
         );

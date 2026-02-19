@@ -79,6 +79,10 @@ public class Hood extends SubsystemBase {
         setPosition(pos.degreePos);
     }
 
+    public double getHoodToHubPosition() {
+        return 0.0;
+    }
+
     public boolean isAtPosition(double pos) {
         return Math.abs(getPosition() - pos) < THRESHOLD_DEGREES;
     }

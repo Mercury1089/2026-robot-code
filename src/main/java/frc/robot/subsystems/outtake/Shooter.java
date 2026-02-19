@@ -18,6 +18,8 @@ import au.grapplerobotics.LaserCan;
 import com.revrobotics.spark.FeedbackSensor;
 
 import frc.robot.Constants;
+import frc.robot.subsystems.drivetrain.Drivetrain;
+import frc.robot.util.MercMath;
 
 /** Shooter subsystem with two NEO motors controlled by SPARK MAX closed-loop velocity control. */
 public class Shooter extends SubsystemBase {
@@ -28,8 +30,12 @@ public class Shooter extends SubsystemBase {
     private final SparkClosedLoopController leaderClosedLoop;
     private final SparkClosedLoopController followerClosedLoop;
     private LaserCan lc;
+    private Drivetrain drivetrain;
+    private double THRESHOLD_RPM = 100.0; // TODO: tune this threshold
 
-    public Shooter() {
+    public Shooter(Drivetrain drivetrain) {
+        this.drivetrain = drivetrain;
+
         leader = new SparkFlex(Constants.CAN.SHOOTER, MotorType.kBrushless);
         follower = new SparkFlex(Constants.CAN.SHOOTER_FOLLOWER, MotorType.kBrushless);
 
@@ -92,11 +98,15 @@ public class Shooter extends SubsystemBase {
     public double getVelocityRPM() {
         return encoder.getVelocity();
     }
-    /**
-     * @return target shooting speed in m/s
-     */
-    public double getShootingRPM() {
+    
+    // Make sure to return RPM, as in the Drivetrain periodic we convert this to m/s using MercMath.RPMToMetersPerSecond()
+    // Write an if-statement to see if you are passing or shooting, and return the appropriate RPM for each case
+    public double getStaticShootingRPM() {
         return 1.0;
+    }
+
+    public boolean isAtShootingRPM() {
+        return Math.abs(MercMath.metersPerSecondToRPM(drivetrain.getCompensatedVector().getNorm(), 2.0) - getVelocityRPM()) < THRESHOLD_RPM;
     }
     // public boolean fuelInShooter(){
     //     LaserCan.Measurement measurement;
