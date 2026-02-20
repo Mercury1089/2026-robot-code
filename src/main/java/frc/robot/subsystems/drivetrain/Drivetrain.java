@@ -48,6 +48,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.SWERVE;
 import frc.robot.sensors.AprilTagCamera;
+import frc.robot.sensors.ObjectDetectionCamera;
 import frc.robot.sensors.ProximitySensor;
 import frc.robot.subsystems.outtake.Shooter;
 import frc.robot.util.KnownLocations;
@@ -70,7 +71,7 @@ public class Drivetrain extends SubsystemBase {
   private Pose2d startingPosition;
   private Shooter shooter;
   private Shift shift;
-
+  private ObjectDetectionCamera objCam;
 
   private static final double ROTATION_P = 1.0 / 90.0, DIRECTION_P = 1 / 1.25, I = 0.0, D = 0.0;
   private final double THRESHOLD_DEGREES = 3.0;
@@ -107,6 +108,8 @@ public class Drivetrain extends SubsystemBase {
   private SlewRateLimiter magLimiter = new SlewRateLimiter(SWERVE.MAGNITUDE_SLEW_RATE);
   private SlewRateLimiter angularSpeedLimiter = new SlewRateLimiter(SWERVE.ROTATIONAL_SLEW_RATE);
   private double prevTime = WPIUtilJNI.now() * 1e-6;
+
+  private Translation2d fuelConcentrationTranslation = new Translation2d();
 
   /** Creates a new Drivetrain. */
   public Drivetrain() {
@@ -147,8 +150,10 @@ public class Drivetrain extends SubsystemBase {
     startingPosition = new Pose2d();
 
     // photonvision wrapper
-    leftCam = new AprilTagCamera("LeftCamera", leftCamTransform3d);
-    rightCam = new AprilTagCamera("RightCamera", rightCamTransform3d);
+    leftCam = new AprilTagCamera("ArducamRubik", leftCamTransform3d);
+    rightCam = new AprilTagCamera("ArducamRubik", rightCamTransform3d);
+
+    objCam = new ObjectDetectionCamera();
 
     smartdashField = new Field2d();
     SmartDashboard.putData("Swerve Odometry", smartdashField);
@@ -625,6 +630,10 @@ public class Drivetrain extends SubsystemBase {
         Rotation2d.fromDegrees(headingToHub));
     compensatedShotVector = exitVelocityVector.minus(robotVelocityVector);
 
+    fuelConcentrationTranslation = objCam.getTranslationOfHighestConcentration(this);
+
+    setPoseSmartdash(new Pose2d(fuelConcentrationTranslation, new Rotation2d()), "Average Fuel Pose");
+
     SmartDashboard.putNumber("Drivetrain/CurrentPose X", getPose().getX());
     SmartDashboard.putNumber("Drivetrain/CurrentPose Y", getPose().getY());
     SmartDashboard.putNumber("Drivetrain/getRotation", getRotation().getDegrees());
@@ -651,6 +660,9 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putString("Drivetrain/gameMessage", DriverStation.getGameSpecificMessage());
     SmartDashboard.putNumber("Drivetrain/gyroReading", gyro.getRotation2d().getDegrees());
     SmartDashboard.putBoolean("Drivetrain/gyroIsCalibrating", gyro.isCalibrating());
+    SmartDashboard.putNumber("Drivetrain/pointOfHighestFuelConcentrationRelativeToTheRobotXCoordinatePosition", fuelConcentrationTranslation.getX());
+    SmartDashboard.putNumber("Drivetrain/pointOfHighestFuelConcentrationRelativeToTheRobotYCoordinatePosition", fuelConcentrationTranslation.getY());
+    SmartDashboard.putNumber("Drivetrain/fuelCamCount", objCam.getTargetCount());
   }
 
   public enum Zone {

@@ -1,20 +1,19 @@
 package frc.robot.util;
 
+import java.lang.annotation.Target;
 import java.util.Optional;
 
-import javax.lang.model.util.ElementScanner14;
-import javax.management.openmbean.OpenType;
+import org.opencv.photo.Photo;
+import org.photonvision.PhotonUtils;
+import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.ADXL345_I2C.AllAxes;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.Robot;
-import frc.robot.commands.Autons;
-import frc.robot.subsystems.drivetrain.Drivetrain;
+import frc.robot.sensors.ObjectDetectionCamera;
 
 public class TargetUtils {
 
@@ -61,6 +60,18 @@ public class TargetUtils {
     public static double getDistanceToPoint(Pose2d pose, Translation2d point) {
         return pose.getTranslation().getDistance(point);
     }
+     public static Rotation2d getTargetHeadingToFuel(Pose2d robotPose, PhotonTrackedTarget target) {
+        Rotation2d targetRotation = Rotation2d.fromDegrees(-target.getYaw());
+        return target.getYaw() != 0.0 ?
+            robotPose.rotateBy(targetRotation).getRotation() :
+            robotPose.getRotation();
+    }
+
+   public static Translation2d getFuelTranslation(PhotonTrackedTarget target, Pose2d robotPose, double distance) {
+        return new Translation2d(distance + Units.inchesToMeters(5.0), getTargetHeadingToFuel(robotPose, target)).plus(robotPose.getTranslation());
+   }
+
+   
 }
 
 

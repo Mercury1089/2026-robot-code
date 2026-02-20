@@ -26,7 +26,7 @@ public class Hood extends SubsystemBase {
     private double setPosition;
     
     public Hood() {
-        hood = new SparkMax(CAN.ARTICULATOR, MotorType.kBrushed);
+        hood = new SparkMax(CAN.HOOD, MotorType.kBrushed);
 
         SparkMaxConfig hoodConfig = new SparkMaxConfig();
 
