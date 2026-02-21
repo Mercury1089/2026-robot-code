@@ -645,8 +645,11 @@ public class Drivetrain extends SubsystemBase {
     compensatedShotVector = exitVelocityVector.minus(robotVelocityVector);
 
     fuelConcentrationTranslation = objCam.getTranslationOfHighestConcentration(this);
-
+    //TODO: this
+    double timeBeforeCalculation = WPIUtilJNI.now() * 1e-6;
     setPoseSmartdash(new Pose2d(fuelConcentrationTranslation, new Rotation2d()), "Average Fuel Pose");
+    double timeAfterCalculation = WPIUtilJNI.now() * 1e-6;
+
 
     SmartDashboard.putNumber("Drivetrain/CurrentPose X", getPose().getX());
     SmartDashboard.putNumber("Drivetrain/CurrentPose Y", getPose().getY());
@@ -677,6 +680,7 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Drivetrain/pointOfHighestFuelConcentrationRelativeToTheRobotXCoordinatePosition", fuelConcentrationTranslation.getX());
     SmartDashboard.putNumber("Drivetrain/pointOfHighestFuelConcentrationRelativeToTheRobotYCoordinatePosition", fuelConcentrationTranslation.getY());
     SmartDashboard.putNumber("Drivetrain/fuelCamCount", objCam.getTargetCount());
+    SmartDashboard.putNumber("Drivetrain/timeSpentCalculatingFuelConcentration", timeAfterCalculation - timeBeforeCalculation);
   }
 
   public enum Zone {

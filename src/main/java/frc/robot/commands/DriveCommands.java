@@ -143,7 +143,7 @@ public class DriveCommands {
         return targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain);
     }
 
-    //Only Aligns to Pickup for now. We need to manually drive. 
+    //doesn't actually intake
     public static Command autoPickUp(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Intake intake, Articulator articulator, Drivetrain drivetrain) {
         Translation2d midpoint = drivetrain.getObjCam().getTranslationOfHighestConcentration(drivetrain);
         //Pose2d fuelPose2d = new Pose2d(midpoint, new Rotation2d(midpoint.getX(), midpoint.getY()));
@@ -162,7 +162,7 @@ public class DriveCommands {
                 new InstantCommand(() -> drivetrain.setXDirStraight(), drivetrain),
                 new InstantCommand(() -> drivetrain.setYDirStraight(), drivetrain),
                 DriveCommands.driveStraightAtAngle(() -> drivetrain.getCompensatedVector().getAngle().getDegrees(), drivetrain)
-                )
+            )
         );
     }
 }

@@ -136,8 +136,11 @@ public final class Constants {
     public static final int ARTICULATOR = 29;
     public static final int HOOD = 30;
 
-    public static final int LASER_CAN = 21;
-    public static final int PROX_SENSOR = 22;
+    public static final int LASER_CAN_HOPPER_1 = 21;
+    public static final int LASER_CAN_HOPPER_2 = 22;
+    public static final int LASER_CAN_SHOOTER = 23;
+    public static final int LASER_CAN_KICKER = 24;
+    public static final int INDEXER = 25;
 
     private CAN() {} 
   }

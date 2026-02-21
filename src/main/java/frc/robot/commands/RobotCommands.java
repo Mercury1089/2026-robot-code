@@ -36,6 +36,24 @@ public class RobotCommands {
         );
     }
 
+    // Considers that the default pos of the articulator is at SAFE POS
+    public static Command stopIntake(Intake intake, Articulator articulator) {
+        return new ParallelCommandGroup(
+            new RunCommand(() -> intake.setSpeed(Intake.IntakeSpeed.STOP), intake),
+            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator).until(() -> articulator.isAtPosition(ArticulatorPosition.OUT))
+        );
+    }
+
+    // public static Command intakeAuton(Intake intake, Articulator articulator, Hopper hopper) {
+    //     return new SequentialCommandGroup(
+    //         intake(intake, articulator).until(() -> hopper.hopperIsFull()),
+    //         new ParallelCommandGroup(
+    //             new RunCommand(() -> intake.setSpeed(Intake.IntakeSpeed.STOP), intake),
+    //             new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator)
+    //         )
+    //     );
+    // }
+
     public static Command agitateIntake(Articulator articulator) {
         return new SequentialCommandGroup(
             new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator).until(() -> articulator.isAtPosition(ArticulatorPosition.IN)),
@@ -75,6 +93,7 @@ public class RobotCommands {
         );
     }
 
+    //calls shootOnTheMove so it'll lock driving in a certain direction
     public static Command fire(Shooter shooter, Kicker kicker, Hood hood, Indexer indexer, Articulator articulator, Drivetrain drivetrain) {
         BooleanSupplier canFire = 
             () -> shooter.isAtShootingRPM() && 
@@ -90,5 +109,26 @@ public class RobotCommands {
             )
         );
     }
+
+    public static Command stopFire(Shooter shooter, Kicker kicker, Articulator articulator, Indexer indexer) {
+        return new ParallelCommandGroup(
+            new RunCommand(() -> kicker.setSpeed(KickerSpeed.STOP), kicker),
+            new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer),
+            new RunCommand(() -> shooter.stop()), //should we be doing this?
+            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator)
+        );
+    }
+
+    // //calls shootOnTheMove so it'll lock driving in a certain direction
+    // public static Command fireAuton(Shooter shooter, Kicker kicker, Hood hood, Indexer indexer, Articulator articulator, Drivetrain drivetrain, Hopper hopper) {
+    //     return new SequentialCommandGroup(
+    //         fire(shooter, kicker, hood, indexer, articulator, drivetrain).until(() -> hopper.hopperIsEmpty()),
+    //         new ParallelCommandGroup(
+    //             new RunCommand(() -> kicker.setSpeed(KickerSpeed.STOP), kicker),
+    //             new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer),
+    //             new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator)
+    //         )
+    //     );
+    // }
 }
  

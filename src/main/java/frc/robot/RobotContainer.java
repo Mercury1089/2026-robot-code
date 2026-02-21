@@ -27,6 +27,8 @@ import frc.robot.util.KnownLocations;
 import frc.robot.util.TargetUtils;
 import frc.robot.util.Shift;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -133,6 +135,14 @@ public class RobotContainer {
 
     leds = new RobotModeLEDs();
 
+    Map<String, Command> commands = new HashMap<String, Command>();
+
+    commands.put("intake", RobotCommands.intake(intake, articulator));
+    commands.put("stopIntake", RobotCommands.stopIntake(intake, articulator));
+    commands.put("shoot", RobotCommands.fire(shooter, kicker, hood, indexer, articulator, drivetrain));
+    commands.put("stopShooting", RobotCommands.stopFire(shooter, kicker, articulator, indexer));
+    
+    NamedCommands.registerCommands(commands);
     /**
      * MANUAL CONTROL
      */
