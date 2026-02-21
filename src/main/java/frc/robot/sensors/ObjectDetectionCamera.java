@@ -30,6 +30,7 @@ public class ObjectDetectionCamera extends PhotonCamera {
     private final double CAMERA_PITCH_RADIANS = Rotation2d.fromDegrees(-15.0).getRadians(); // tilt of our camera (radians)
     private final double TARGET_HEIGHT_METERS = 0.0; // may need to change 
     private final double MID_SCREEN = 400; //HALF OF RESOLUTION WIDTH IN PIXES
+    private List<PhotonTrackedTarget> filtered = new ArrayList<PhotonTrackedTarget>();
 
     public ObjectDetectionCamera() {
         super(DEFAULT_CAM_NAME);
@@ -83,13 +84,10 @@ public class ObjectDetectionCamera extends PhotonCamera {
         List<PhotonTrackedTarget> fuelTargets = result.targets;
         // List<PhotonTrackedTarget> fuelPosesLeft = new ArrayList<>();
         // List<PhotonTrackedTarget> fuelPosesRight = new ArrayList<>();
-
-        List<PhotonTrackedTarget> filtered = new ArrayList<PhotonTrackedTarget>();
-
+    
         for (int i = 0; i < fuelTargets.size(); i++) {
 
             double x = fuelTargets.get(i).getMinAreaRectCorners().get(0).x;
-            System.out.println(x);
             // sort each fuel int the right or left half
             if (x > 200 && x < 600) {
                 filtered.add(fuelTargets.get(i));
@@ -129,6 +127,7 @@ public class ObjectDetectionCamera extends PhotonCamera {
             totalY += fuelTranslation2d.getY();
         }
 
+        filtered.clear();
         return new Translation2d(totalX / fuelTargets.size(), totalY / fuelTargets.size());
     }
 

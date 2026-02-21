@@ -109,7 +109,7 @@ public class Drivetrain extends SubsystemBase {
   private SlewRateLimiter angularSpeedLimiter = new SlewRateLimiter(SWERVE.ROTATIONAL_SLEW_RATE);
   private double prevTime = WPIUtilJNI.now() * 1e-6;
 
-  private Translation2d fuelConcentrationTranslation = new Translation2d();
+  private Translation2d fuelConcentrationTranslation;
 
   /** Creates a new Drivetrain. */
   public Drivetrain() {
@@ -153,6 +153,8 @@ public class Drivetrain extends SubsystemBase {
     rightCam = new AprilTagCamera("ArducamRubik", rightCamTransform3d);
 
     objCam = new ObjectDetectionCamera();
+
+    fuelConcentrationTranslation = new Translation2d();
 
     smartdashField = new Field2d();
     SmartDashboard.putData("Swerve Odometry", smartdashField);
@@ -644,11 +646,14 @@ public class Drivetrain extends SubsystemBase {
         Rotation2d.fromDegrees(finalHeading));
     compensatedShotVector = exitVelocityVector.minus(robotVelocityVector);
 
+    long timeBeforeCalculation = WPIUtilJNI.now();
     fuelConcentrationTranslation = objCam.getTranslationOfHighestConcentration(this);
+    // objCam.getLatestResult();
+    long timeAfterCalculation = WPIUtilJNI.now();
     //TODO: this
-    double timeBeforeCalculation = WPIUtilJNI.now() * 1e-6;
+    
     setPoseSmartdash(new Pose2d(fuelConcentrationTranslation, new Rotation2d()), "Average Fuel Pose");
-    double timeAfterCalculation = WPIUtilJNI.now() * 1e-6;
+    
 
 
     SmartDashboard.putNumber("Drivetrain/CurrentPose X", getPose().getX());

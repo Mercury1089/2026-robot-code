@@ -140,7 +140,6 @@ public final class Constants {
     public static final int LASER_CAN_HOPPER_2 = 22;
     public static final int LASER_CAN_SHOOTER = 23;
     public static final int LASER_CAN_KICKER = 24;
-    public static final int INDEXER = 25;
 
     private CAN() {} 
   }

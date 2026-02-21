@@ -105,8 +105,8 @@ public class KnownLocations {
             NEUTRAL_EDGE = new Pose2d(middleAprilTagPos.getX() + Units.inchesToMeters(47), 
                               middleAprilTagPos.getY(),
                               middleAprilTagPos.getRotation()); 
-            PASSING_TARGET_LEFT = new Translation2d(45.5, 238.831);
-            PASSING_TARGET_RIGHT = new Translation2d(45.5, 79.988);
+            PASSING_TARGET_LEFT = new Pose2d(45.5, 238.831, new Rotation2d(580.7, 238.831));
+            PASSING_TARGET_RIGHT = new Pose2d(45.5, 79.988, new Rotation2d(580.7, 79.988));
             
         } else {
             // Assumes we start with the robot facing away
