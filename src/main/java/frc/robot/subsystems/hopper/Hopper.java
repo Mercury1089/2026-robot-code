@@ -19,7 +19,7 @@ import frc.robot.Constants;
 
 public class Hopper extends SubsystemBase {
     // private SparkMax hopper;
-    private LaserCan lc;
+    private LaserCan lc, lc2;
     private ProximitySensor proxSensor;
     // private double setPosition;
     // Changed to 1 and 2 to FRONT and BACK for clarity
@@ -40,8 +40,8 @@ public class Hopper extends SubsystemBase {
         // this.hopperBreakBeamFront = new DigitalInput(HOPPER_BREAKBEAM_FRONT);
         // this.hopperBreakBeamBack = new DigitalInput(HOPPER_BREAKBEAM_BACK);
 
-        lc = new LaserCan(Constants.CAN.LASER_CAN);
-        proxSensor = new ProximitySensor(Constants.CAN.PROX_SENSOR, 0.2);
+        lc = new LaserCan(Constants.CAN.LASER_CAN_HOPPER_1);
+        lc2 = new LaserCan(Constants.CAN.LASER_CAN_HOPPER_2);
 
     }
 
@@ -68,13 +68,15 @@ public class Hopper extends SubsystemBase {
 
     //!hopperBreakBeam1.get() is true if it is blocked (has fuel)
     public boolean hopperIsFull(){
-        LaserCan.Measurement measurement = lc.getMeasurement();
-        return  (measurement != null && measurement.distance_mm < 110);
+        LaserCan.Measurement measurement1 = lc.getMeasurement();
+        LaserCan.Measurement measurement2 = lc2.getMeasurement();
+        return  ((measurement1 != null && measurement1.distance_mm < 110) && (measurement2 != null && measurement2.distance_mm < 110));
     }
 
     public boolean hopperIsEmpty(){
-        LaserCan.Measurement measurement = lc.getMeasurement();
-        return  (measurement != null && measurement.distance_mm > 110);
+        LaserCan.Measurement measurement1 = lc.getMeasurement();
+        LaserCan.Measurement measurement2 = lc2.getMeasurement();
+        return  (measurement1 != null && measurement1.distance_mm > 110) && (measurement2 != null && measurement2.distance_mm > 110);
     }
 
     // public boolean hasFuel() {

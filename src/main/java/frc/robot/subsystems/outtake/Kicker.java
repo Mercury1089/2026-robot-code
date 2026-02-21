@@ -6,6 +6,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import au.grapplerobotics.LaserCan;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -14,11 +15,14 @@ import frc.robot.Constants;
 
 public class Kicker extends SubsystemBase{
     private SparkMax kicker;
+    private LaserCan lc;
 
   public Kicker() {
 
     kicker = new SparkMax(Constants.CAN.KICKER, MotorType.kBrushless);
     SparkMaxConfig kickerConfig = new SparkMaxConfig();
+
+    lc = new LaserCan(Constants.CAN.LASER_CAN_KICKER);
 
     kickerConfig.idleMode(IdleMode.kCoast)
         .inverted(true);
@@ -39,5 +43,16 @@ public class Kicker extends SubsystemBase{
 
     public void setSpeed(KickerSpeed intakeSpeed) {
         kicker.set(intakeSpeed.speed);
+    }
+
+    public boolean noFuelInKicker(){
+        LaserCan.Measurement measurement;
+        measurement = lc.getMeasurement();
+        if (measurement != null){
+            return  (measurement.distance_mm > 450);
+        }
+        else{
+            return false;
+        }
     }
 }

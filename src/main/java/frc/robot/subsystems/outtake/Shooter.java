@@ -39,6 +39,8 @@ public class Shooter extends SubsystemBase {
         leader = new SparkFlex(Constants.CAN.SHOOTER, MotorType.kBrushless);
         follower = new SparkFlex(Constants.CAN.SHOOTER_FOLLOWER, MotorType.kBrushless);
 
+        lc = new LaserCan(Constants.CAN.LASER_CAN_SHOOTER);
+
         // Build the shooter SparkMaxConfig inline (previously in ShooterConfigs)
         SparkFlexConfig leader_config = new SparkFlexConfig();
         leader_config.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
@@ -108,16 +110,16 @@ public class Shooter extends SubsystemBase {
     public boolean isAtShootingRPM() {
         return Math.abs(MercMath.metersPerSecondToRPM(drivetrain.getCompensatedVector().getNorm(), 2.0) - getVelocityRPM()) < THRESHOLD_RPM;
     }
-    // public boolean fuelInShooter(){
-    //     LaserCan.Measurement measurement;
-    //     measurement = lc.getMeasurement();
-    //     if (measurement != null){
-    //         return  (measurement.distance_mm < 450);
-    //     }
-    //     else{
-    //         return false;
-    //     }
-    // }
+    public boolean fuelInShooter(){
+        LaserCan.Measurement measurement;
+        measurement = lc.getMeasurement();
+        if (measurement != null){
+            return  (measurement.distance_mm < 450);
+        }
+        else{
+            return false;
+        }
+    }
 
     public void periodic() {
         SmartDashboard.putNumber("ShooterRPM", getVelocityRPM());
