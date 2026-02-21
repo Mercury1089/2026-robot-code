@@ -43,6 +43,10 @@ public class KnownLocations {
     public final Pose2d STARTING_LINE;
     public final Pose2d NEUTRAL_EDGE;
 
+    public final Pose2d PASSING_TARGET_RIGHT;
+    public final Pose2d PASSING_TARGET_LEFT;
+
+
     /**
      * Load the field layout for the current year (currently REEFSCAPE).
      * 
@@ -101,8 +105,9 @@ public class KnownLocations {
             NEUTRAL_EDGE = new Pose2d(middleAprilTagPos.getX() + Units.inchesToMeters(47), 
                               middleAprilTagPos.getY(),
                               middleAprilTagPos.getRotation()); 
+            PASSING_TARGET_LEFT = new Translation2d(45.5, 238.831);
+            PASSING_TARGET_RIGHT = new Translation2d(45.5, 79.988);
             
-
         } else {
             // Assumes we start with the robot facing away
             zeroGyroRotation = Rotation2d.fromDegrees(180);
@@ -116,6 +121,8 @@ public class KnownLocations {
                               middleAprilTagPos.getY(),
                               middleAprilTagPos.getRotation()); 
             
+            PASSING_TARGET_RIGHT = new Pose2d(580.7, 238.831, new Rotation2d(580.7, 238.831));
+            PASSING_TARGET_LEFT = new Pose2d(580.7, 79.988, new Rotation2d(580.7, 79.988));
         }
 
     }

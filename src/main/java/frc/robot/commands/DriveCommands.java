@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.Robot;
 import frc.robot.Constants.SWERVE;
 import frc.robot.sensors.ObjectDetectionCamera;
 import frc.robot.subsystems.drivetrain.Drivetrain;
@@ -149,10 +150,9 @@ public class DriveCommands {
         // PathPlannerPath pathToFuelPose = PathUtils.generatePath(drivetrain.getPose(), fuelPose2d);
         Supplier<Double> headingSupplier = () -> TargetUtils.getTargetHeadingToPoint(drivetrain.getPose(), midpoint).getDegrees();
 
-        return targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain);
-            //driveToPose(drivetrain, () -> fuelPose2d);
-
-
+        return new ParallelCommandGroup(
+            targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain),
+            RobotCommands.intake(intake, articulator));
     }
 
     public static Command shootOnTheMove(Drivetrain drivetrain){

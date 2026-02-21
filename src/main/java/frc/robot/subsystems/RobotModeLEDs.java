@@ -16,7 +16,23 @@ public class RobotModeLEDs extends SubsystemBase {
   /** Creates a new GamePieceLEDs. */
   public RobotModeLEDs() {
     this.blinkin = new Spark(0);
-    robotMode = RobotMode.FIDODISABLED;
+    robotMode = RobotMode.AUTOSHOOTDISABLED;
+  }
+
+  public void enableAutoShoot() {
+    robotMode = RobotMode.AUTOSHOOT;
+  }
+
+  public void disableAutoShoot() {
+    robotMode = RobotMode.AUTOSHOOTDISABLED;
+  }
+
+  public boolean isAutoShootEnabled() {
+    return robotMode == RobotMode.AUTOSHOOT;
+  }
+
+  public void toggleAutoShoot() {
+    robotMode = robotMode == RobotMode.AUTOSHOOT ? RobotMode.AUTOSHOOTDISABLED : RobotMode.AUTOSHOOT;
   }
 
   /** set by the buttons
@@ -38,8 +54,8 @@ public class RobotModeLEDs extends SubsystemBase {
   }
 
   public enum RobotMode {
-    FIDOENABLED,
-    FIDODISABLED
+    AUTOSHOOT,
+    AUTOSHOOTDISABLED
   }
 
   @Override

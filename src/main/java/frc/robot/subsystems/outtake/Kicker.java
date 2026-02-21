@@ -12,19 +12,19 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import frc.robot.Constants;
 
-public class Kicker extends SubsystemBase{
+public class Kicker extends SubsystemBase {
     private SparkMax kicker;
 
-  public Kicker() {
+    public Kicker() {
 
-    kicker = new SparkMax(Constants.CAN.KICKER, MotorType.kBrushless);
-    SparkMaxConfig kickerConfig = new SparkMaxConfig();
+        kicker = new SparkMax(Constants.CAN.KICKER, MotorType.kBrushless);
+        SparkMaxConfig kickerConfig = new SparkMaxConfig();
 
-    kickerConfig.idleMode(IdleMode.kCoast)
-        .inverted(true);
+        kickerConfig.idleMode(IdleMode.kCoast)
+                .inverted(true);
 
-    kicker.configure(kickerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-  }
+        kicker.configure(kickerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    }
 
     public enum KickerSpeed {
         INDEX(1.0),

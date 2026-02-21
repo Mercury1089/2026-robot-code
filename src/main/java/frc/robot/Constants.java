@@ -125,16 +125,19 @@ public final class Constants {
     public static final int GYRO_DRIVETRAIN = 9;
     public static final int SHOOTER = 11;
     // Secondary shooter SparkMax (follower)
-    public static final int SHOOTER_FOLLOWER = 12;
-    public static final int HOPPER = 13;
-    public static final int KICKER = 14;
-    public static final int INTAKE = 15;
-    public static final int ARTICULATOR = 16;
-    public static final int HOOD = 17;
+    public static final int SHOOTER_FOLLOWER_FIRST = 12;
+    public static final int SHOOTER_FOLLOWER_SECOND = 13;
+    public static final int SHOOTER_FOLLOWER_THIRD = 14;
+
+    public static final int INDEXER = 25;
+    public static final int HOPPER = 26;
+    public static final int KICKER = 27;
+    public static final int INTAKE = 28;
+    public static final int ARTICULATOR = 29;
+    public static final int HOOD = 30;
 
     public static final int LASER_CAN = 21;
     public static final int PROX_SENSOR = 22;
-    public static final int INDEXER = 25;
 
     private CAN() {} 
   }

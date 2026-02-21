@@ -27,6 +27,7 @@ import frc.robot.util.KnownLocations;
 import frc.robot.util.TargetUtils;
 import frc.robot.util.Shift;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.NamedCommands;
@@ -114,7 +115,7 @@ public class RobotContainer {
 
     hopper = new Hopper();
 
-    hood = new Hood();
+    hood = new Hood(drivetrain);
     hood.setDefaultCommand(new RunCommand(() -> hood.setSpeed(gamepadRightY), hood));
     // hood.setDefaultCommand(new RunCommand(() -> hood.setPosition(0.0), hood));
 
@@ -142,23 +143,25 @@ public class RobotContainer {
     gamepadPOVLeft.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
     gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
     gamepadPOVRight.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
-
-    gamepadA.and(() -> drivetrain.drivetrainSeesFuel()).whileTrue(DriveCommands.autoPickUp(gamepadLeftX, gamepadLeftY, intake, articulator, drivetrain));
     
-   // gamepadA.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
-   //   new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")) 
-   // );
+   gamepadA.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
+     new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")) 
+   );
 
     gamepadB.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
       new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")) 
     );
 
-    right1.whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
+    left1.onTrue(new InstantCommand(() -> leds.toggleAutoShoot(), leds));
+
+    // right1.whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
 
     /**
      * DRIVETRAIN AUTOMATION
      */
     // left3.whileTrue(DriveCommands.shootOnTheMove(drivetrain));
+
+    right1.and(() -> drivetrain.drivetrainSeesFuel()).whileTrue(DriveCommands.autoPickUp(leftJoystickX, leftJoystickY, intake, articulator, drivetrain));
 
     left2.onTrue(DriveCommands.safelyDriveOverBump(leftJoystickY, leftJoystickX, drivetrain));
 
@@ -174,8 +177,14 @@ public class RobotContainer {
     /**
      * SHOOTING/PASSING COMMANDS
      */
-    right1.whileTrue(RobotCommands.fire(shooter, kicker, hood, indexer, articulator, drivetrain));
-    
+
+    // This automation will only handle the shooting, not the passing, even though the fire command itself handles passing/shooting
+    Trigger autoEnableShooting = new Trigger(() -> drivetrain.getShift().isOurHubActive() && hopper.hopperIsFull() && drivetrain.isDrivetrainInAllianceZone() && DriverStation.isTeleop());
+    autoEnableShooting.onTrue(new InstantCommand(() -> leds.enableAutoShoot(), leds))
+      .onFalse(new InstantCommand(() -> leds.disableAutoShoot(), leds));
+
+    Trigger startFiring = new Trigger(() -> leds.isAutoShootEnabled());
+    startFiring.whileTrue(RobotCommands.fire(shooter, kicker, hood, indexer, articulator, drivetrain));
   }
 
   public Drivetrain getDrivetrain() {

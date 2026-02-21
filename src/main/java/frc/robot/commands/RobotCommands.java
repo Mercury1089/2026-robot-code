@@ -52,7 +52,7 @@ public class RobotCommands {
     }
 
     public static Command prepareHood(Hood hood) {
-        return new RunCommand(() -> hood.setPosition(hood.getHoodToHubPosition()), hood);
+        return new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition()), hood);
     }
 
     public static Command setShooterToHubRPM(Shooter shooter) {
@@ -79,7 +79,9 @@ public class RobotCommands {
         BooleanSupplier canFire = 
             () -> shooter.isAtShootingRPM() && 
                     hood.isInPosition() &&
-                    drivetrain.isPointingAtHub();
+                    drivetrain.isPointingAtVector();
+        
+
         return new SequentialCommandGroup(
             setUpToShoot(shooter, hood, drivetrain).until(canFire),
             new ParallelCommandGroup(

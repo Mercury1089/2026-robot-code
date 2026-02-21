@@ -15,6 +15,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
+import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.intake.Articulator.ArticulatorPosition;
 
 public class Hood extends SubsystemBase {
@@ -25,8 +26,12 @@ public class Hood extends SubsystemBase {
     private AbsoluteEncoder absoluteEncoder;
     private double setPosition;
     
-    public Hood() {
+    private Drivetrain drivetrain;
+    
+    public Hood(Drivetrain drivetrain) {
         hood = new SparkMax(CAN.HOOD, MotorType.kBrushed);
+
+        this.drivetrain = drivetrain;
 
         SparkMaxConfig hoodConfig = new SparkMaxConfig();
 
@@ -35,7 +40,7 @@ public class Hood extends SubsystemBase {
                 .inverted(true);
         hoodConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-                .pid(0.1, 0, 0)
+                .pid(1.0 / 10.0, 0, 0)
                 // .positionWrappingEnabled(true) we don't actually want this
                 // .positionWrappingInputRange(0.0, 360.0)
                 .positionWrappingEnabled(false)
@@ -79,8 +84,12 @@ public class Hood extends SubsystemBase {
         setPosition(pos.degreePos);
     }
 
-    public double getHoodToHubPosition() {
-        return 0.0;
+    public double getHoodToFirePosition() {
+        if(drivetrain.isDrivetrainInAllianceZone()) {
+            return 0.0; // shooting function
+        } else {
+            return 0.0; // passing function
+        }
     }
 
     public boolean isAtPosition(double pos) {

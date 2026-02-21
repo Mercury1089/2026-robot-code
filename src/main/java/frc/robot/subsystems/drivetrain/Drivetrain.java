@@ -81,7 +81,7 @@ public class Drivetrain extends SubsystemBase {
   private Translation2d targetHubVelocityVector;
   private Translation2d compensatedShotVector;
 
-  private double headingToHub = 0.0;
+  private double finalHeading = 0.0;
 
   private double xDirStraight = 0.0, yDirStraight = 0.0;
   private Rotation2d rotationDirStraight = new Rotation2d();
@@ -121,8 +121,7 @@ public class Drivetrain extends SubsystemBase {
     frontRightModule = new MAXSwerveModule(CAN.DRIVING_FRONT_RIGHT, CAN.TURNING_FRONT_RIGHT, 0);
     backLeftModule = new MAXSwerveModule(CAN.DRIVING_BACK_LEFT, CAN.TURNING_BACK_LEFT, Math.PI);
     backRightModule = new MAXSwerveModule(CAN.DRIVING_BACK_RIGHT, CAN.TURNING_BACK_RIGHT, Math.PI / 2);
-    this.shooter = shooter;
-
+    
     // leftSensors = new DistanceSensors(CAN.LEFT_INNER_LASER_CAN,
     // CAN.LEFT_OUTER_LASER_CAN, 430, 445, 400);
     // rightSensors = new DistanceSensors(CAN.RIGHT_INNER_LASER_CAN,
@@ -488,8 +487,8 @@ public class Drivetrain extends SubsystemBase {
     return rotationDirStraight;
   }
 
-  public boolean isPointingAtHub() {
-    return Math.abs(getCompensatedVector().getAngle().getDegrees() - getPose().getRotation().getDegrees()) < THRESHOLD_DEGREES;
+  public boolean isPointingAtVector() {
+    return Math.abs(getCompensatedVector().getAngle().getDegrees( ) - getPose().getRotation().getDegrees()) < THRESHOLD_DEGREES;
   }
 
   public void setXDirStraight() {
@@ -530,8 +529,8 @@ public class Drivetrain extends SubsystemBase {
     rotationDirStraight = rotation;
   }
 
-  public double getHeadingToHub() {
-    return headingToHub;
+  public double getFinalHeading() {
+    return finalHeading;
   }
 
   public Shift getShift() {
@@ -557,13 +556,10 @@ public class Drivetrain extends SubsystemBase {
         return Zone.ALLIANCE_LEFT;
       } else if (x < locs.STARTING_LINE.getX() && y < locs.HUB.getY()) {
         return Zone.ALLIANCE_RIGHT;
-      } else if (x > locs.NEUTRAL_EDGE.getX() && y > locs.HUB.getY() + Units.inchesToMeters(23.5)) {
+      } else if (x > locs.NEUTRAL_EDGE.getX() && y > locs.HUB.getY()) {
         return Zone.NEUTRAL_LEFT;
-      } else if (x > locs.NEUTRAL_EDGE.getX() && y < locs.HUB.getY() - Units.inchesToMeters(23.5)) {
+      } else if (x > locs.NEUTRAL_EDGE.getX() && y < locs.HUB.getY()) {
         return Zone.NEUTRAL_RIGHT;
-      } else if (x > locs.NEUTRAL_EDGE.getX() && y < locs.HUB.getY() + Units.inchesToMeters(23.5)
-          && y > locs.HUB.getY() - Units.inchesToMeters(23.5)) {
-        return Zone.NEUTRAL_MIDDLE;
       }
     } else {
       if (x > locs.NEUTRAL_EDGE.getX() && x < locs.STARTING_LINE.getX()) {
@@ -572,16 +568,18 @@ public class Drivetrain extends SubsystemBase {
         return Zone.ALLIANCE_LEFT;
       } else if (x > locs.STARTING_LINE.getX() && y > locs.HUB.getY()) {
         return Zone.ALLIANCE_RIGHT;
-      } else if (x < locs.NEUTRAL_EDGE.getX() && y < locs.HUB.getY() - Units.inchesToMeters(23.5)) {
+      } else if (x < locs.NEUTRAL_EDGE.getX() && y < locs.HUB.getY()) {
         return Zone.NEUTRAL_LEFT;
-      } else if (x < locs.NEUTRAL_EDGE.getX() && y > locs.HUB.getY() + Units.inchesToMeters(23.5)) {
+      } else if (x < locs.NEUTRAL_EDGE.getX() && y > locs.HUB.getY()) {
         return Zone.NEUTRAL_RIGHT;
-      } else if (x < locs.NEUTRAL_EDGE.getX() && y > locs.HUB.getY() - Units.inchesToMeters(23.5)
-          && y < locs.HUB.getY() + Units.inchesToMeters(23.5)) {
-        return Zone.NEUTRAL_MIDDLE;
       }
     }
     return Zone.BETWEEN; // should never get here
+  }
+
+  public boolean isDrivetrainInAllianceZone() {
+    Zone currentZone = getCurrentZone();
+    return currentZone == Zone.ALLIANCE_LEFT || currentZone == Zone.ALLIANCE_RIGHT;
   }
 
   public ObjectDetectionCamera getObjCam() {
@@ -629,13 +627,21 @@ public class Drivetrain extends SubsystemBase {
     shift.updateStatesForTeleop();
 
     // Check if you are passing or shooting in hub
-    headingToHub = TargetUtils
+    if (getCurrentZone() == Zone.NEUTRAL_LEFT) {
+      finalHeading = TargetUtils
+        .getTargetHeadingToPoint(getPose(), KnownLocations.getKnownLocations().PASSING_TARGET_LEFT.getTranslation()).getDegrees();
+    } else if ((getCurrentZone() == Zone.NEUTRAL_RIGHT)) {
+      finalHeading = TargetUtils
+        .getTargetHeadingToPoint(getPose(), KnownLocations.getKnownLocations().PASSING_TARGET_RIGHT.getTranslation()).getDegrees();
+    } else {
+      finalHeading = TargetUtils 
         .getTargetHeadingToPoint(getPose(), KnownLocations.getKnownLocations().HUB.getTranslation()).getDegrees();
+    }
 
     robotVelocityVector = new Translation2d(getXSpeeds(), getYSpeeds());
     
     Translation2d exitVelocityVector = new Translation2d(MercMath.RPMToMetersPerSecond(shooter.getStaticShootingRPM(), 2.0),
-        Rotation2d.fromDegrees(headingToHub));
+        Rotation2d.fromDegrees(finalHeading));
     compensatedShotVector = exitVelocityVector.minus(robotVelocityVector);
 
     fuelConcentrationTranslation = objCam.getTranslationOfHighestConcentration(this);
@@ -660,7 +666,7 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Drivetrain/ySpeedCappedStraight", getYSpeedCappedStraightDrive());
     SmartDashboard.putData(smartdashField);
     SmartDashboard.putNumber("Drivetrain/shootHereAngle", compensatedShotVector.getAngle().getDegrees());
-    SmartDashboard.putNumber("Drivetrain/headingToHub", headingToHub);
+    SmartDashboard.putNumber("Drivetrain/headingToHub", finalHeading);
     SmartDashboard.putNumber("Drivetrain/headingThingIDK",
         this.getPose().getRotation().plus(KnownLocations.getKnownLocations().zeroGyroRotation).getDegrees());
     SmartDashboard.putString("Drivetrain/currentZone", getCurrentZone().getString());
@@ -677,7 +683,6 @@ public class Drivetrain extends SubsystemBase {
     ALLIANCE_LEFT("allianceLeft"),
     ALLIANCE_RIGHT("allianceRight"), // do we need left and right?
     NEUTRAL_LEFT("neutralLeft"),
-    NEUTRAL_MIDDLE("neutralMiddle"),
     NEUTRAL_RIGHT("neutralRight"),
     BETWEEN("between");
 

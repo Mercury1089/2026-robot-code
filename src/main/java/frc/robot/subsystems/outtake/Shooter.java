@@ -24,11 +24,10 @@ import frc.robot.util.MercMath;
 /** Shooter subsystem with two NEO motors controlled by SPARK MAX closed-loop velocity control. */
 public class Shooter extends SubsystemBase {
     private final SparkFlex leader;
-    private final SparkFlex follower;
+    private final SparkFlex follower_first, follower_second, follower_third;
 
     private final RelativeEncoder encoder;
     private final SparkClosedLoopController leaderClosedLoop;
-    private final SparkClosedLoopController followerClosedLoop;
     private LaserCan lc;
     private Drivetrain drivetrain;
     private double THRESHOLD_RPM = 100.0; // TODO: tune this threshold
@@ -36,8 +35,10 @@ public class Shooter extends SubsystemBase {
     public Shooter(Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
 
-        leader = new SparkFlex(Constants.CAN.SHOOTER, MotorType.kBrushless);
-        follower = new SparkFlex(Constants.CAN.SHOOTER_FOLLOWER, MotorType.kBrushless);
+        leader = new SparkFlex(Constants.CAN.SHOOTER, MotorType.kBrushless); // all the way to the right
+        follower_first = new SparkFlex(Constants.CAN.SHOOTER_FOLLOWER_FIRST, MotorType.kBrushless); // one in
+        follower_second = new SparkFlex(Constants.CAN.SHOOTER_FOLLOWER_SECOND, MotorType.kBrushless);
+        follower_third = new SparkFlex(Constants.CAN.SHOOTER_FOLLOWER_THIRD, MotorType.kBrushless);
 
         // Build the shooter SparkMaxConfig inline (previously in ShooterConfigs)
         SparkFlexConfig leader_config = new SparkFlexConfig();
@@ -68,11 +69,12 @@ public class Shooter extends SubsystemBase {
 
         // Apply configuration and persist parameters (consistent with existing project style)
         leader.configure(leader_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        follower.configure(follower_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        follower_first.configure(follower_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        follower_second.configure(follower_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        follower_third.configure(follower_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         encoder = leader.getEncoder();
         leaderClosedLoop = leader.getClosedLoopController();
-        followerClosedLoop = follower.getClosedLoopController();
     }
 
     /**
@@ -102,7 +104,11 @@ public class Shooter extends SubsystemBase {
     // Make sure to return RPM, as in the Drivetrain periodic we convert this to m/s using MercMath.RPMToMetersPerSecond()
     // Write an if-statement to see if you are passing or shooting, and return the appropriate RPM for each case
     public double getStaticShootingRPM() {
-        return 1.0;
+        if(drivetrain.isDrivetrainInAllianceZone()) {
+            return 4000.0;
+        } else {
+            return 4000.0; // Enter the passing function (this is the only spot to enter any passing information)
+        }
     }
 
     public boolean isAtShootingRPM() {

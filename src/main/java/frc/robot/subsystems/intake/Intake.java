@@ -3,8 +3,10 @@ package frc.robot.subsystems.intake;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -12,12 +14,12 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {
-  private SparkMax intake;
+  private SparkFlex intake;
 
   public Intake() {
 
-    intake = new SparkMax(Constants.CAN.INTAKE, MotorType.kBrushless);
-    SparkMaxConfig intakeConfig = new SparkMaxConfig();
+    intake = new SparkFlex(Constants.CAN.INTAKE, MotorType.kBrushless);
+    SparkFlexConfig intakeConfig = new SparkFlexConfig();
 
     intakeConfig.idleMode(IdleMode.kBrake)
         .inverted(true);
