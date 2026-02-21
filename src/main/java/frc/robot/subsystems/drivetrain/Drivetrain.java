@@ -584,6 +584,14 @@ public class Drivetrain extends SubsystemBase {
     return Zone.BETWEEN; // should never get here
   }
 
+  public ObjectDetectionCamera getObjCam() {
+    return objCam;
+  }
+
+  public boolean drivetrainSeesFuel() {
+    return getObjCam().getTargetCount() != 0.0;
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

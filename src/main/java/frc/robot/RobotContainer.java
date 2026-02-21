@@ -9,6 +9,7 @@ import frc.robot.Constants.JOYSTICK_BUTTONS;
 import frc.robot.commands.Autons;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.RobotCommands;
+import frc.robot.sensors.ObjectDetectionCamera;
 import frc.robot.subsystems.RobotModeLEDs;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.hopper.Hopper;
@@ -141,10 +142,12 @@ public class RobotContainer {
     gamepadPOVLeft.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
     gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
     gamepadPOVRight.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
+
+    gamepadA.and(() -> drivetrain.drivetrainSeesFuel()).whileTrue(DriveCommands.autoPickUp(gamepadLeftX, gamepadLeftY, intake, articulator, drivetrain));
     
-    gamepadA.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
-      new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")) 
-    );
+   // gamepadA.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
+   //   new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")) 
+   // );
 
     gamepadB.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
       new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")) 

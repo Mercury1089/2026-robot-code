@@ -73,8 +73,8 @@ public class PathUtils {
      * @return The constructed path.
      */
     // public static PathPlannerPath generatePath(Rotation2d endStateRotation, Pose2d... poses) {   
-    //     List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(poses);
-    //     return new PathPlannerPath(
+    //      List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(poses);
+    //      return new PathPlannerPath(
     //         bezierPoints,
     //         PathUtils.pathConstraints,
     //         new GoalEndState(0.0, endStateRotation, true));

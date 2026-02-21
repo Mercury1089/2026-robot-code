@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.SWERVE;
+import frc.robot.sensors.ObjectDetectionCamera;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.intake.Articulator;
 import frc.robot.subsystems.intake.Intake;
@@ -141,8 +142,17 @@ public class DriveCommands {
         return targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain);
     }
 
-    public static Command autoPickUp(Articulator articulator, Intake intake, Drivetrain drivetrain) {
-        return new PrintCommand("Work in Progress");
+    //Only Aligns to Pickup for now. We need to manually drive. 
+    public static Command autoPickUp(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Intake intake, Articulator articulator, Drivetrain drivetrain) {
+        Translation2d midpoint = drivetrain.getObjCam().getTranslationOfHighestConcentration(drivetrain);
+        //Pose2d fuelPose2d = new Pose2d(midpoint, new Rotation2d(midpoint.getX(), midpoint.getY()));
+        // PathPlannerPath pathToFuelPose = PathUtils.generatePath(drivetrain.getPose(), fuelPose2d);
+        Supplier<Double> headingSupplier = () -> TargetUtils.getTargetHeadingToPoint(drivetrain.getPose(), midpoint).getDegrees();
+
+        return targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain);
+            //driveToPose(drivetrain, () -> fuelPose2d);
+
+
     }
 
     public static Command shootOnTheMove(Drivetrain drivetrain){

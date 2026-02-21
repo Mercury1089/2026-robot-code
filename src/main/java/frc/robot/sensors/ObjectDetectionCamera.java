@@ -6,6 +6,7 @@ package frc.robot.sensors;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.DoubleBinaryOperator;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
@@ -15,6 +16,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.drivetrain.Drivetrain;
+import frc.robot.util.MercMath;
 import frc.robot.util.TargetUtils;
 
 
@@ -24,8 +26,8 @@ public class ObjectDetectionCamera extends PhotonCamera {
     // Camera angles for calculating target distance.
     // Used for https://javadocs.photonvision.org/org/photonvision/PhotonUtils.html#calculateDistanceToTargetMeters(double,double,double,double)
     private static final String DEFAULT_CAM_NAME = "FuelCam";
-    private final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(18.0); // height on robot (meters) TODO: CHECK THIS
-    private final double CAMERA_PITCH_RADIANS = Rotation2d.fromDegrees(-25.0).getRadians(); // tilt of our camera (radians)
+    private final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(20.5); // height on robot (meters) TODO: CHECK THIS
+    private final double CAMERA_PITCH_RADIANS = Rotation2d.fromDegrees(-15.0).getRadians(); // tilt of our camera (radians)
     private final double TARGET_HEIGHT_METERS = 0.0; // may need to change 
     private final double MID_SCREEN = 400; //HALF OF RESOLUTION WIDTH IN PIXES
 
@@ -79,38 +81,55 @@ public class ObjectDetectionCamera extends PhotonCamera {
         if (!result.hasTargets()) return new Translation2d(); 
 
         List<PhotonTrackedTarget> fuelTargets = result.targets;
-        List<PhotonTrackedTarget> fuelPosesLeft = new ArrayList<>();
-        List<PhotonTrackedTarget> fuelPosesRight = new ArrayList<>();
+        // List<PhotonTrackedTarget> fuelPosesLeft = new ArrayList<>();
+        // List<PhotonTrackedTarget> fuelPosesRight = new ArrayList<>();
+
+        List<PhotonTrackedTarget> filtered = new ArrayList<PhotonTrackedTarget>();
 
         for (int i = 0; i < fuelTargets.size(); i++) {
 
-            double y = fuelTargets.get(i).getBestCameraToTarget().getY();
-            // sort each fuel into the right or left half
-            if (y <= 0) {
-                fuelPosesLeft.add(fuelTargets.get(i));
-            } else {
-                fuelPosesRight.add(fuelTargets.get(i));
+            double x = fuelTargets.get(i).getMinAreaRectCorners().get(0).x;
+            System.out.println(x);
+            // sort each fuel int the right or left half
+            if (x > 200 && x < 600) {
+                filtered.add(fuelTargets.get(i));
             }
         }
 
-        int leftCount = fuelPosesLeft.size();
-        int rightCount = fuelPosesRight.size();
+        // int leftCount = fuelPosesLeft.size();
+        // int rightCount = fuelPosesRight.size();
 
-        if (leftCount == 0 && rightCount == 0) {
-            return new Translation2d();
-        }
+        // if (leftCount == 0 && rightCount == 0) {
+        //     return new Translation2d();
+        // }
 
-        List<PhotonTrackedTarget> mostCountOfFuel = leftCount > rightCount ? fuelPosesLeft : fuelPosesRight;
+        
+
+        // // List<PhotonTrackedTarget> mostCountOfFuel = leftCount > rightCount ? fuelPosesLeft : fuelPosesRight;
+        // List<PhotonTrackedTarget> mostCountOfFuel = result.targets;
+        // List<PhotonTrackedTarget> filtered = new ArrayList<PhotonTrackedTarget>();
+        // List<Double> allXDoubles = new ArrayList<Double>();
+        // for (PhotonTrackedTarget photonTrackedTarget : filtered) {
+        //     allXDoubles.add(photonTrackedTarget.getMinAreaRectCorners().get(0).x);
+        // }
+        // allXDoubles = MercMath.removeOutliersIQR(allXDoubles);
+
+        // for (int i = 0; i < fuelTargets.size(); i++) {
+        //     if(!allXDoubles.contains(fuelTargets.get(i).getMinAreaRectCorners().get(0).x)) {
+        //         fuelTargets.remove(i);
+        //     }
+        // }
+
         double totalX = 0.0;
         double totalY = 0.0;
 
-        for (PhotonTrackedTarget photonTrackedTarget : mostCountOfFuel) {
+        for (PhotonTrackedTarget photonTrackedTarget : filtered) {
             Translation2d fuelTranslation2d = TargetUtils.getFuelTranslation(photonTrackedTarget, drivetrain.getPose(), getDistanceToTarget(photonTrackedTarget));
             totalX += fuelTranslation2d.getX();
             totalY += fuelTranslation2d.getY();
         }
 
-        return new Translation2d(totalX / mostCountOfFuel.size(), totalY / mostCountOfFuel.size());
+        return new Translation2d(totalX / fuelTargets.size(), totalY / fuelTargets.size());
     }
 
     // public Transform3d transformToNote() {
