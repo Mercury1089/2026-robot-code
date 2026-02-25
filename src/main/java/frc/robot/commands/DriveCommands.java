@@ -143,16 +143,11 @@ public class DriveCommands {
         return targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain);
     }
 
-    //doesn't actually intake
-    public static Command autoPickUp(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Intake intake, Articulator articulator, Drivetrain drivetrain) {
-        Translation2d midpoint = drivetrain.getObjCam().getTranslationOfHighestConcentration(drivetrain);
-        //Pose2d fuelPose2d = new Pose2d(midpoint, new Rotation2d(midpoint.getX(), midpoint.getY()));
-        // PathPlannerPath pathToFuelPose = PathUtils.generatePath(drivetrain.getPose(), fuelPose2d);
-        Supplier<Double> headingSupplier = () -> TargetUtils.getTargetHeadingToPoint(drivetrain.getPose(), midpoint).getDegrees();
+    public static Command autoPickUp(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Drivetrain drivetrain) {
+        Supplier<Double> headingSupplier = () -> drivetrain.getAverageFuelPose().getRotation().getDegrees();
 
         return new ParallelCommandGroup(
-            targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain),
-            RobotCommands.intake(intake, articulator));
+            targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain));
     }
 
     public static Command shootOnTheMove(Drivetrain drivetrain){

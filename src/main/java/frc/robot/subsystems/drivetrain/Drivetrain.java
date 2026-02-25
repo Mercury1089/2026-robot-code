@@ -80,6 +80,7 @@ public class Drivetrain extends SubsystemBase {
   private Translation2d targetHubVector;
   private Translation2d targetHubVelocityVector;
   private Translation2d compensatedShotVector;
+  private Pose2d averageFuelPose;
 
   private double finalHeading = 0.0;
 
@@ -592,6 +593,10 @@ public class Drivetrain extends SubsystemBase {
     return getObjCam().getTargetCount() != 0.0;
   }
 
+  public Pose2d getAverageFuelPose() {
+    return averageFuelPose;
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
@@ -652,7 +657,9 @@ public class Drivetrain extends SubsystemBase {
     long timeAfterCalculation = WPIUtilJNI.now();
     //TODO: this
     
-    setPoseSmartdash(new Pose2d(fuelConcentrationTranslation, new Rotation2d()), "Average Fuel Pose");
+    
+    averageFuelPose = new Pose2d(fuelConcentrationTranslation, TargetUtils.getTargetHeadingToPoint(getPose(), getObjCam().getTranslationOfHighestConcentration(this)));
+    setPoseSmartdash(averageFuelPose, "Average Fuel Pose");
     
 
 

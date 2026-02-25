@@ -77,11 +77,11 @@ public class RobotCommands {
         return new RunCommand(() -> shooter.setSpeed(shooter.getStaticShootingRPM()), shooter);
     }
 
-    public static Command feedShooter(Indexer indexer, Kicker kicker, Articulator articulator) {
+    public static Command feedShooter(Indexer indexer, Kicker kicker) {
         return new ParallelCommandGroup(
             runIndex(indexer),
-            uptake(kicker),
-            agitateIntake(articulator)
+            uptake(kicker)
+            // agitateIntake(articulator) // Do this seperately? So that you can intake while firing?
         );
     }
 
@@ -94,7 +94,7 @@ public class RobotCommands {
     }
 
     //calls shootOnTheMove so it'll lock driving in a certain direction
-    public static Command fire(Shooter shooter, Kicker kicker, Hood hood, Indexer indexer, Articulator articulator, Drivetrain drivetrain) {
+    public static Command fire(Shooter shooter, Kicker kicker, Hood hood, Indexer indexer, Drivetrain drivetrain) {
         BooleanSupplier canFire = 
             () -> shooter.isAtShootingRPM() && 
                     hood.isInPosition() &&
@@ -105,7 +105,7 @@ public class RobotCommands {
             setUpToShoot(shooter, hood, drivetrain).until(canFire),
             new ParallelCommandGroup(
                 setUpToShoot(shooter, hood, drivetrain), // You want to keep setting up while firing
-                feedShooter(indexer, kicker, articulator)
+                feedShooter(indexer, kicker)
             )
         );
     }

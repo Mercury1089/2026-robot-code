@@ -4,52 +4,39 @@
 
 package frc.robot;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+
+import com.pathplanner.lib.auto.NamedCommands;
+
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DS_USB;
 import frc.robot.Constants.JOYSTICK_BUTTONS;
 import frc.robot.commands.Autons;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.RobotCommands;
-import frc.robot.sensors.ObjectDetectionCamera;
 import frc.robot.subsystems.RobotModeLEDs;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.hopper.Indexer;
 import frc.robot.subsystems.hopper.Indexer.IndexerSpeed;
-import frc.robot.subsystems.intake.Articulator.ArticulatorPosition;
 import frc.robot.subsystems.intake.Articulator;
+import frc.robot.subsystems.intake.Articulator.ArticulatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakeSpeed;
 import frc.robot.subsystems.outtake.Hood;
 import frc.robot.subsystems.outtake.Kicker;
-import frc.robot.subsystems.outtake.Shooter;
 import frc.robot.subsystems.outtake.Kicker.KickerSpeed;
-import frc.robot.util.KnownLocations;
-import frc.robot.util.TargetUtils;
+import frc.robot.subsystems.outtake.Shooter;
 import frc.robot.util.Shift;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
-
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.events.TriggerEvent;
-import com.reduxrobotics.sensors.canandcolor.DigoutChannel.Index;
-
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController; 
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 
 /**
@@ -113,11 +100,13 @@ public class RobotContainer {
 
     shooter = new Shooter(drivetrain);
     drivetrain.setShooter(shooter);
+    // In the final code, the default should always be setting shooter speed to getStaticShootingRPM()
     shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
 
     hopper = new Hopper();
 
     hood = new Hood(drivetrain);
+    // In the final code, the default should always be setting hood position to getHoodToFirePosition()
     hood.setDefaultCommand(new RunCommand(() -> hood.setSpeed(gamepadRightY), hood));
     // hood.setDefaultCommand(new RunCommand(() -> hood.setPosition(0.0), hood));
 
@@ -131,15 +120,15 @@ public class RobotContainer {
     // articulator.setDefaultCommand(new RunCommand(() -> articulator.setSpeed(gamepadLeftY), articulator));
     articulator.setDefaultCommand(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
     
+    leds = new RobotModeLEDs(drivetrain);
+    
     auton = new Autons(drivetrain);
-
-    leds = new RobotModeLEDs();
 
     Map<String, Command> commands = new HashMap<String, Command>();
 
     commands.put("intake", RobotCommands.intake(intake, articulator));
     commands.put("stopIntake", RobotCommands.stopIntake(intake, articulator));
-    commands.put("shoot", RobotCommands.fire(shooter, kicker, hood, indexer, articulator, drivetrain));
+    commands.put("shoot", RobotCommands.fire(shooter, kicker, hood, indexer, drivetrain));
     commands.put("stopShooting", RobotCommands.stopFire(shooter, kicker, articulator, indexer));
     
     NamedCommands.registerCommands(commands);
@@ -154,15 +143,17 @@ public class RobotContainer {
     gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
     gamepadPOVRight.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
     
-   gamepadA.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
-     new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")) 
-   );
+    gamepadA.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
+      new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")) 
+    );
 
     gamepadB.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
       new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")) 
     );
 
-    left1.onTrue(new InstantCommand(() -> leds.toggleAutoShoot(), leds));
+    // right1.onTrue(new InstantCommand(() -> leds.toggleAutoShoot(), leds));
+
+    right2.whileTrue(RobotCommands.agitateIntake(articulator));
 
     // right1.whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
 
@@ -170,9 +161,7 @@ public class RobotContainer {
      * DRIVETRAIN AUTOMATION
      */
     // left3.whileTrue(DriveCommands.shootOnTheMove(drivetrain));
-
-    right1.and(() -> drivetrain.drivetrainSeesFuel()).whileTrue(DriveCommands.autoPickUp(leftJoystickX, leftJoystickY, intake, articulator, drivetrain));
-
+    
     left2.onTrue(DriveCommands.safelyDriveOverBump(leftJoystickY, leftJoystickX, drivetrain));
 
     right8.onTrue(DriveCommands.lockToHub(leftJoystickY, leftJoystickX, drivetrain));
@@ -182,6 +171,9 @@ public class RobotContainer {
      */
 
     // left1.whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
+    Trigger fuelInRange = new Trigger(() -> drivetrain.drivetrainSeesFuel() && DriverStation.isTeleop());
+    
+    left1.and(fuelInRange).whileTrue(DriveCommands.autoPickUp(leftJoystickX, leftJoystickY, drivetrain));
     left1.whileTrue(RobotCommands.intake(intake, articulator));
 
     /**
@@ -189,12 +181,22 @@ public class RobotContainer {
      */
 
     // This automation will only handle the shooting, not the passing, even though the fire command itself handles passing/shooting
-    Trigger autoEnableShooting = new Trigger(() -> drivetrain.getShift().isOurHubActive() && hopper.hopperIsFull() && drivetrain.isDrivetrainInAllianceZone() && DriverStation.isTeleop());
-    autoEnableShooting.onTrue(new InstantCommand(() -> leds.enableAutoShoot(), leds))
+    // Trigger autoEnableShooting = new Trigger(() -> drivetrain.getShift().isOurHubActive() && hopper.hopperIsFull() && drivetrain.isDrivetrainInAllianceZone() && DriverStation.isTeleop());
+    // autoEnableShooting.onTrue(new InstantCommand(() -> leds.enableAutoShoot(), leds))
+    //   .onFalse(new InstantCommand(() -> leds.disableAutoShoot(), leds));
+
+    // Trigger startFiring = new Trigger(() -> leds.isAutoShootEnabled()); // Don't think this is necessary as you will shoot/stop frequently
+    // right1.whileTrue(RobotCommands.fire(shooter, kicker, hood, indexer, drivetrain));
+
+    right1.whileTrue(DriveCommands.shootOnTheMove(drivetrain))
       .onFalse(new InstantCommand(() -> leds.disableAutoShoot(), leds));
 
-    Trigger startFiring = new Trigger(() -> leds.isAutoShootEnabled());
-    startFiring.whileTrue(RobotCommands.fire(shooter, kicker, hood, indexer, articulator, drivetrain));
+    Trigger canPass = new Trigger(() -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && leds.isPassingMode() && DriverStation.isTeleop());
+    Trigger canShoot = new Trigger(() -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && leds.isShootingMode() && drivetrain.getShift().isOurHubActive() && DriverStation.isTeleop());
+    canPass.or(canShoot).onTrue(new InstantCommand(() -> leds.enableAutoShoot(), leds));
+
+    Trigger autoShooting = new Trigger(() -> leds.isAutoShootEnabled() && DriverStation.isTeleop());
+    autoShooting.whileTrue(RobotCommands.feedShooter(indexer, kicker));
   }
 
   public Drivetrain getDrivetrain() {

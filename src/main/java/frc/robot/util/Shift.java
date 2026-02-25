@@ -14,6 +14,8 @@ public class Shift {
     private boolean isHubActive = true;
     private double timeUntilTransition = 0;
 
+    private double startEarlyShiftTime = 1.0;
+
     private String manualAutonWinner = "";
 
     private class TimeSegment {
@@ -31,14 +33,14 @@ public class Shift {
     }
 
     private final TimeSegment[] TeleopHubActiveTimesForAutoWinner = new TimeSegment[] {
-            new TimeSegment(0, 55), // Shift 4 combines with End game
-            new TimeSegment((1 * 60) + 20, (1 * 60) + 45), // Shift 2
-            new TimeSegment((2 * 60) + 10, (2 * 60) + 20) // Transition Shift
+            new TimeSegment(0, 55 + startEarlyShiftTime), // Shift 4 combines with End game
+            new TimeSegment((1 * 60) + 20, (1 * 60) + 45 + startEarlyShiftTime), // Shift 2
+            new TimeSegment((2 * 60) + 10, (2 * 60) + 20 + startEarlyShiftTime) // Transition Shift
     };
     private final TimeSegment[] TeleopHubActiveTimesForAutoLoser = new TimeSegment[] {
-            new TimeSegment(0, 30), // End game
-            new TimeSegment(55, (1 * 60) + 20), // Shift 3
-            new TimeSegment((1 * 60) + 45, (2 * 60) + 20) // Shift 1 combines with transition shift
+            new TimeSegment(0, 30 + startEarlyShiftTime), // End game
+            new TimeSegment(55, (1 * 60) + 20 + startEarlyShiftTime), // Shift 3
+            new TimeSegment((1 * 60) + 45, (2 * 60) + 20 + startEarlyShiftTime) // Shift 1 combines with transition shift
     };
 
     public boolean isOurHubActive() {
