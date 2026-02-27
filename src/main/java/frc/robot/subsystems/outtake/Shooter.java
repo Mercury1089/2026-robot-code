@@ -48,7 +48,7 @@ public class Shooter extends SubsystemBase {
         // use RPM units for encoder velocity here (1.0 = pass-through)
         leader_config.encoder.velocityConversionFactor(1.0);
 
-        double kP = 0.001;
+        double kP = 0.0001;
         double kI = 0.0;
         double kD = 0.0;
         double nominalVoltage = 12.0;

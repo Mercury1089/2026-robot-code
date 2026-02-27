@@ -157,9 +157,9 @@ public class RobotContainer {
     gamepadRT.onTrue(new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer));
     gamepadLT.onTrue(new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer));
 
-    gamepadA.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(360.0), shooter));
+    gamepadA.whileTrue(new RunCommand(() -> shooter.setSpeed(0.25), shooter));
     // gamepadB.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(720.0), shooter));
-    gamepadB.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(1440.0), shooter));
+    gamepadB.onTrue (new RunCommand(() -> shooter.setVelocityRPM(1000), shooter));
 
     // gamepadY.whileTrue(new RunCommand(() -> hood.setPosition(ArticulatorPosition.OUT), hood)); put back later
     gamepadY.whileTrue(new RunCommand(() -> hood.setPosition(hood.plusOneDegree()), hood));
