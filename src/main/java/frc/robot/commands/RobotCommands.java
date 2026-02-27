@@ -85,50 +85,59 @@ public class RobotCommands {
         );
     }
 
-    public static Command setUpToShoot(Shooter shooter, Hood hood, Drivetrain drivetrain) {
+    public static Command setUpToShoot(Shooter shooter, Hood hood, Drivetrain drivetrain, Articulator articulator) {
         return new ParallelCommandGroup(
             prepareHood(hood),
             setShooterToHubRPM(shooter),
+            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator),
             DriveCommands.shootOnTheMove(drivetrain)
         );
     }
 
-    //calls shootOnTheMove so it'll lock driving in a certain direction
-    //auton
-    public static Command fire(Shooter shooter, Kicker kicker, Hood hood, Indexer indexer, Drivetrain drivetrain) {
-        BooleanSupplier canFire = 
-            () -> shooter.isAtShootingRPM() && 
-                    hood.isInPosition() &&
-                    drivetrain.isPointingAtVector();
-        
-
-        return new SequentialCommandGroup(
-            setUpToShoot(shooter, hood, drivetrain).until(canFire),
-            new ParallelCommandGroup(
-                setUpToShoot(shooter, hood, drivetrain), // You want to keep setting up while firing
-                feedShooter(indexer, kicker)
-            )
-        );
-    }
 
     //auton
     public static Command stopFire(Shooter shooter, Kicker kicker, Articulator articulator, Indexer indexer) {
         return new ParallelCommandGroup(
             new RunCommand(() -> kicker.setSpeed(KickerSpeed.STOP), kicker),
             new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer),
-            new RunCommand(() -> shooter.stop()), //should we be doing this?
+            // new RunCommand(() -> shooter.stop()), //really shouldn't be doing this, shooter should be constantly running
             new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator)
         );
     }
 
+
     // //calls shootOnTheMove so it'll lock driving in a certain direction
-    // public static Command fireAuton(Shooter shooter, Kicker kicker, Hood hood, Indexer indexer, Articulator articulator, Drivetrain drivetrain, Hopper hopper) {
+    public static Command fireAuton(Shooter shooter, Kicker kicker, Hood hood, Indexer indexer, Articulator articulator, Drivetrain drivetrain, Hopper hopper) {
+        BooleanSupplier canFire = 
+            () -> shooter.isAtShootingRPM() && 
+                    hood.isInPosition() &&
+                    drivetrain.isPointingAtVector();
+        
+        return new SequentialCommandGroup(
+            new SequentialCommandGroup(
+                setUpToShoot(shooter, hood, drivetrain, articulator).until(canFire),
+                new ParallelCommandGroup(
+                    setUpToShoot(shooter, hood, drivetrain, articulator), // You want to keep setting up while firing
+                    feedShooter(indexer, kicker)
+                ).withTimeout(3),//always shoot for 3 seconds, TODO: adjust later as needed
+                stopFire(shooter, kicker, articulator, indexer)
+            )
+        );
+    }
+
+    // calls shootOnTheMove so it'll lock driving in a certain direction
+    // we don't use this actually
+    // public static Command fire(Shooter shooter, Kicker kicker, Hood hood, Indexer indexer, Drivetrain drivetrain, Articulator articulator) {
+    //     BooleanSupplier canFire = 
+    //         () -> shooter.isAtShootingRPM() && 
+    //                 hood.isInPosition() &&
+    //                 drivetrain.isPointingAtVector();
+        
     //     return new SequentialCommandGroup(
-    //         fire(shooter, kicker, hood, indexer, articulator, drivetrain).until(() -> hopper.hopperIsEmpty()),
+    //         setUpToShoot(shooter, hood, drivetrain, articulator).until(canFire),
     //         new ParallelCommandGroup(
-    //             new RunCommand(() -> kicker.setSpeed(KickerSpeed.STOP), kicker),
-    //             new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer),
-    //             new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator)
+    //             setUpToShoot(shooter, hood, drivetrain, articulator), // You want to keep setting up while firing
+    //             feedShooter(indexer, kicker)
     //         )
     //     );
     // }

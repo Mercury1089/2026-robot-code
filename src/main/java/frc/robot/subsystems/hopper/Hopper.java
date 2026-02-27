@@ -55,7 +55,6 @@ public class Hopper extends SubsystemBase {
     //         this.speed = speed;
     //     }
     // }
-    
 
     // public void setSpeed(HopperSpeed intakeSpeed) {
     //     hopper.set(intakeSpeed.speed);
@@ -67,6 +66,7 @@ public class Hopper extends SubsystemBase {
     // }
 
     //!hopperBreakBeam1.get() is true if it is blocked (has fuel)
+    //TODO: tweak values if necessary
     public boolean hopperIsFull(){
         LaserCan.Measurement measurement1 = lc.getMeasurement();
         LaserCan.Measurement measurement2 = lc2.getMeasurement();

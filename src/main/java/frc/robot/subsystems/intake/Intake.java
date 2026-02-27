@@ -1,11 +1,8 @@
 package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;

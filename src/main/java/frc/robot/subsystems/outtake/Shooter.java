@@ -67,11 +67,12 @@ public class Shooter extends SubsystemBase {
         follower_config_left.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
         // use RPM units for encoder velocity here (1.0 = pass-through)
         follower_config_left.encoder.velocityConversionFactor(1.0);
-        follower_config_left.follow(Constants.CAN.SHOOTER, false);
+        follower_config_left.follow(Constants.CAN.SHOOTER, true);//assumes invert of leader affects followers
 
         SparkFlexConfig follower_config_right = new SparkFlexConfig();
         follower_config_right.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
-        follower_config_right.follow(Constants.CAN.SHOOTER, true);
+        follower_config_right.encoder.velocityConversionFactor(1.0);
+        follower_config_right.follow(Constants.CAN.SHOOTER, false);
 
 
         // Apply configuration and persist parameters (consistent with existing project style)
@@ -96,7 +97,7 @@ public class Shooter extends SubsystemBase {
         leader.set(speed);
     }
 
-    /** Stop the shooter (velocity -> 0 RPM). */
+    /** Stop the shooter (velocity -> 0 RPM). avoid calling this*/
     public void stop() {
         setVelocityRPM(0.0);
     }
@@ -111,9 +112,9 @@ public class Shooter extends SubsystemBase {
     // Make sure to return RPM, as in the Drivetrain periodic we convert this to m/s using MercMath.RPMToMetersPerSecond()
     // Write an if-statement to see if you are passing or shooting, and return the appropriate RPM for each case
     public double getStaticShootingRPM() {
-        if(drivetrain.isDrivetrainInAllianceZone()) {
+        if(drivetrain.isDrivetrainInAllianceZone()) {//TODO: tweak values as necessary
             return 4000.0;
-        } else {
+        } else { 
             return 4000.0; // Enter the passing function (this is the only spot to enter any passing information)
         }
     }
@@ -125,7 +126,7 @@ public class Shooter extends SubsystemBase {
         LaserCan.Measurement measurement;
         measurement = lc.getMeasurement();
         if (measurement != null){
-            return  (measurement.distance_mm < 450);
+            return  (measurement.distance_mm < 450); //TODO: tweak values as necessary
         }
         else{
             return false;

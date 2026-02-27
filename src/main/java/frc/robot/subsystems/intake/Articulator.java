@@ -51,9 +51,9 @@ public class Articulator extends SubsystemBase {
       .outputRange(-1,1);
     articulatorConfig.absoluteEncoder
       .positionConversionFactor(360.0)
-      .zeroCentered(true); // -180 to 180
+      .zeroCentered(true); // -180 to 180 
     articulatorConfig.softLimit
-      .forwardSoftLimitEnabled(false)
+      .forwardSoftLimitEnabled(false)//TODO: tweak rotation values as necessary, potentially disable zeroCentered
       .forwardSoftLimit(320.0)
       .reverseSoftLimitEnabled(false)
       .reverseSoftLimit(191.0);
@@ -71,11 +71,11 @@ public class Articulator extends SubsystemBase {
     articulatorClosedLoopController.setSetpoint(0, SparkMax.ControlType.kPosition);
   }
 
-  public void setSpeed(Supplier<Double> speedSupplier) {
+  public void setSpeed(Supplier<Double> speedSupplier) {//why do we have this
     articulator.set((speedSupplier.get() * 0.5));
   }
 
-  public void changePos() {
+  public void changePos() {//???
     setPosition(SmartDashboard.getNumber("Articulator/Position", 110.0));
   }
 
@@ -112,7 +112,7 @@ public class Articulator extends SubsystemBase {
 
   }
   
-  public enum ArticulatorPosition {
+  public enum ArticulatorPosition {//TODO: tweak rotation values as necessary, potentially disable zeroCentered
     IN(0.0),
     SAFE(75.0),
     OUT(150.0);
@@ -122,6 +122,5 @@ public class Articulator extends SubsystemBase {
         this.degreePos = degreePos;
       }
   }
-  
 
 }

@@ -48,7 +48,7 @@ public class Hood extends SubsystemBase {
         hoodConfig.absoluteEncoder
                 .positionConversionFactor(360.0)
                 .zeroCentered(true); // -180 to 180
-        hoodConfig.softLimit
+        hoodConfig.softLimit//TODO: tweak rotation values as necessary, potentially disable zeroCentered
                 .forwardSoftLimitEnabled(false)
                 .forwardSoftLimit(320.0)
                 .reverseSoftLimitEnabled(false)
@@ -71,6 +71,7 @@ public class Hood extends SubsystemBase {
         hoodClosedLoopController.setSetpoint(0, SparkMax.ControlType.kPosition);
     }
 
+    //same weird stuff as articulator
     public void setSpeed(Supplier<Double> speedSupplier) {
         hood.set((speedSupplier.get() * 0.5));
     }
@@ -89,7 +90,7 @@ public class Hood extends SubsystemBase {
     }
 
     public double getHoodToFirePosition() {
-        if(drivetrain.isDrivetrainInAllianceZone()) {
+        if(drivetrain.isDrivetrainInAllianceZone()) {//TODO: actually do this, very important
             return 0.0; // shooting function
         } else {
             return 0.0; // passing function

@@ -130,8 +130,9 @@ public class RobotContainer {
 
     commands.put("intake", RobotCommands.intake(intake, articulator));
     commands.put("stopIntake", RobotCommands.stopIntake(intake, articulator));
-    commands.put("shoot", RobotCommands.fire(shooter, kicker, hood, indexer, drivetrain));
-    commands.put("stopShooting", RobotCommands.stopFire(shooter, kicker, articulator, indexer));
+    commands.put("shoot", RobotCommands.fireAuton(shooter, kicker, hood, indexer, articulator, drivetrain, hopper));
+    //should stop shooting after 3 seconds
+    // commands.put("stopShooting", RobotCommands.stopFire(shooter, kicker, articulator, indexer));
     
     NamedCommands.registerCommands(commands);
     /**

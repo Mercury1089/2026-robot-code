@@ -655,11 +655,8 @@ public class Drivetrain extends SubsystemBase {
         Rotation2d.fromDegrees(finalHeading));
     compensatedShotVector = exitVelocityVector.minus(robotVelocityVector);
 
-    long timeBeforeCalculation = WPIUtilJNI.now();
+    //we only use this one for rendering, consider removing if time is an issue
     fuelConcentrationTranslation = objCam.getTranslationOfHighestConcentration(this);
-    // objCam.getLatestResult();
-    long timeAfterCalculation = WPIUtilJNI.now();
-    //TODO: this
     
     
     averageFuelPose = new Pose2d(fuelConcentrationTranslation, TargetUtils.getTargetHeadingToPoint(getPose(), getObjCam().getTranslationOfHighestConcentration(this)));
@@ -696,7 +693,6 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Drivetrain/pointOfHighestFuelConcentrationRelativeToTheRobotXCoordinatePosition", fuelConcentrationTranslation.getX());
     SmartDashboard.putNumber("Drivetrain/pointOfHighestFuelConcentrationRelativeToTheRobotYCoordinatePosition", fuelConcentrationTranslation.getY());
     SmartDashboard.putNumber("Drivetrain/fuelCamCount", objCam.getTargetCount());
-    SmartDashboard.putNumber("Drivetrain/timeSpentCalculatingFuelConcentration", timeAfterCalculation - timeBeforeCalculation);
     SmartDashboard.putNumber("Drivetrain/getCompVectorMag", MercMath.metersPerSecondToRPM(getCompensatedVector().getNorm(), 2.0));
     SmartDashboard.putNumber("Drivetrain/getCompVectorDir", getCompensatedVector().getAngle().getDegrees());
 
