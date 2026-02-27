@@ -63,6 +63,10 @@ public class Hood extends SubsystemBase {
         setPosition = getPosition();
     }
 
+    public double getSetPosition() {
+        return setPosition;
+    }
+
     public void resetEncoders() {
         hoodClosedLoopController.setSetpoint(0, SparkMax.ControlType.kPosition);
     }
@@ -106,6 +110,9 @@ public class Hood extends SubsystemBase {
 
     public boolean isInPosition() {
         return isAtPosition(setPosition);
+    }
+    public double plusOneDegree() {
+        return (setPosition + 1);
     }
 
     @Override

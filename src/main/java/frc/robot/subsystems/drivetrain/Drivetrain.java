@@ -57,6 +57,7 @@ import frc.robot.util.PathUtils;
 import frc.robot.util.SwerveUtils;
 import frc.robot.util.TargetUtils;
 import frc.robot.util.Shift;
+import frc.robot.subsystems.outtake.Hood;;
 
 public class Drivetrain extends SubsystemBase {
 
@@ -72,6 +73,7 @@ public class Drivetrain extends SubsystemBase {
   private Shooter shooter;
   private Shift shift;
   private ObjectDetectionCamera objCam;
+  private Hood hood;
 
   private static final double ROTATION_P = 1.0 / 90.0, DIRECTION_P = 1 / 1.25, I = 0.0, D = 0.0;
   private final double THRESHOLD_DEGREES = 3.0;
@@ -188,6 +190,8 @@ public class Drivetrain extends SubsystemBase {
         new Pose2d(0, 0, getRotation()));
 
     shift = new Shift();
+
+    compensatedShotVector = new Translation2d();
   }
 
   public PIDController getRotationalController() {
@@ -211,7 +215,7 @@ public class Drivetrain extends SubsystemBase {
    *
    * @return The pose.
    */
-  public Pose2d getPose() {
+  public Pose2d   getPose() {
     return odometry.getEstimatedPosition();
   }
 
@@ -693,6 +697,9 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Drivetrain/pointOfHighestFuelConcentrationRelativeToTheRobotYCoordinatePosition", fuelConcentrationTranslation.getY());
     SmartDashboard.putNumber("Drivetrain/fuelCamCount", objCam.getTargetCount());
     SmartDashboard.putNumber("Drivetrain/timeSpentCalculatingFuelConcentration", timeAfterCalculation - timeBeforeCalculation);
+    SmartDashboard.putNumber("Drivetrain/getCompVectorMag", MercMath.metersPerSecondToRPM(getCompensatedVector().getNorm(), 2.0));
+    SmartDashboard.putNumber("Drivetrain/getCompVectorDir", getCompensatedVector().getAngle().getDegrees());
+
   }
 
   public enum Zone {

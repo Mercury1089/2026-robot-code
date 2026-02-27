@@ -24,7 +24,7 @@ import frc.robot.util.MercMath;
 /** Shooter subsystem with two NEO motors controlled by SPARK MAX closed-loop velocity control. */
 public class Shooter extends SubsystemBase {
     private final SparkFlex leader;
-    private final SparkFlex follower_first, follower_second, follower_third;
+    private final SparkFlex follower_first_right, follower_second_left, follower_third_left;
 
     private final RelativeEncoder encoder;
     private final SparkClosedLoopController leaderClosedLoop;
@@ -36,9 +36,9 @@ public class Shooter extends SubsystemBase {
         this.drivetrain = drivetrain;
 
         leader = new SparkFlex(Constants.CAN.SHOOTER, MotorType.kBrushless); // all the way to the right
-        follower_first = new SparkFlex(Constants.CAN.SHOOTER_FOLLOWER_FIRST, MotorType.kBrushless); // one in
-        follower_second = new SparkFlex(Constants.CAN.SHOOTER_FOLLOWER_SECOND, MotorType.kBrushless);
-        follower_third = new SparkFlex(Constants.CAN.SHOOTER_FOLLOWER_THIRD, MotorType.kBrushless);
+        follower_first_right = new SparkFlex(Constants.CAN.SHOOTER_FOLLOWER_FIRST, MotorType.kBrushless); // one in
+        follower_second_left = new SparkFlex(Constants.CAN.SHOOTER_FOLLOWER_SECOND, MotorType.kBrushless);
+        follower_third_left = new SparkFlex(Constants.CAN.SHOOTER_FOLLOWER_THIRD, MotorType.kBrushless);
 
         lc = new LaserCan(Constants.CAN.LASER_CAN_SHOOTER);
 
@@ -63,17 +63,22 @@ public class Shooter extends SubsystemBase {
         leader_config.inverted(true);
 
         // Build the shooter SparkMaxConfig inline (previously in ShooterConfigs)
-        SparkFlexConfig follower_config = new SparkFlexConfig();
-        follower_config.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
+        SparkFlexConfig follower_config_left = new SparkFlexConfig();
+        follower_config_left.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
         // use RPM units for encoder velocity here (1.0 = pass-through)
-        follower_config.encoder.velocityConversionFactor(1.0);
-        follower_config.follow(Constants.CAN.SHOOTER, true);
+        follower_config_left.encoder.velocityConversionFactor(1.0);
+        follower_config_left.follow(Constants.CAN.SHOOTER, false);
+
+        SparkFlexConfig follower_config_right = new SparkFlexConfig();
+        follower_config_right.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
+        follower_config_right.follow(Constants.CAN.SHOOTER, true);
+
 
         // Apply configuration and persist parameters (consistent with existing project style)
         leader.configure(leader_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        follower_first.configure(follower_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        follower_second.configure(follower_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        follower_third.configure(follower_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        follower_first_right.configure(follower_config_right, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        follower_second_left.configure(follower_config_left, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        follower_third_left.configure(follower_config_left, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         encoder = leader.getEncoder();
         leaderClosedLoop = leader.getClosedLoopController();

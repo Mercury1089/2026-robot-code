@@ -102,12 +102,14 @@ public class RobotContainer {
     drivetrain.setShooter(shooter);
     // In the final code, the default should always be setting shooter speed to getStaticShootingRPM()
     shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
+    // shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM()), shooter));
 
     hopper = new Hopper();
 
     hood = new Hood(drivetrain);
     // In the final code, the default should always be setting hood position to getHoodToFirePosition()
-    hood.setDefaultCommand(new RunCommand(() -> hood.setSpeed(gamepadRightY), hood));
+    hood.setDefaultCommand(new RunCommand(() -> hood.setPosition(hood.getSetPosition()), hood));
+    // hood.setDefaultCommand(new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition()), hood));
     // hood.setDefaultCommand(new RunCommand(() -> hood.setPosition(0.0), hood));
 
     kicker = new Kicker();
@@ -143,13 +145,27 @@ public class RobotContainer {
     gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
     gamepadPOVRight.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
     
-    gamepadA.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
-      new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")) 
-    );
+    // gamepadA.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
+    //   new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")) 
+    // );
 
-    gamepadB.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
-      new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")) 
-    );
+    // gamepadB.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
+    //   new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")) 
+    // );
+
+    gamepadRT.onTrue(new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer));
+    gamepadLT.onTrue(new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer));
+
+    gamepadA.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(360.0), shooter));
+    // gamepadB.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(720.0), shooter));
+    gamepadB.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(1440.0), shooter));
+
+    // gamepadY.whileTrue(new RunCommand(() -> hood.setPosition(ArticulatorPosition.OUT), hood)); put back later
+    gamepadY.whileTrue(new RunCommand(() -> hood.setPosition(hood.plusOneDegree()), hood));
+    gamepadX.whileTrue(new RunCommand(() -> hood.setPosition(ArticulatorPosition.SAFE), hood));
+
+    gamepadRB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
+    gamepadLB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
 
     // right1.onTrue(new InstantCommand(() -> leds.toggleAutoShoot(), leds));
 

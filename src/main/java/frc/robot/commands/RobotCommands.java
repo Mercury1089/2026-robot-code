@@ -94,6 +94,7 @@ public class RobotCommands {
     }
 
     //calls shootOnTheMove so it'll lock driving in a certain direction
+    //auton
     public static Command fire(Shooter shooter, Kicker kicker, Hood hood, Indexer indexer, Drivetrain drivetrain) {
         BooleanSupplier canFire = 
             () -> shooter.isAtShootingRPM() && 
@@ -110,6 +111,7 @@ public class RobotCommands {
         );
     }
 
+    //auton
     public static Command stopFire(Shooter shooter, Kicker kicker, Articulator articulator, Indexer indexer) {
         return new ParallelCommandGroup(
             new RunCommand(() -> kicker.setSpeed(KickerSpeed.STOP), kicker),
