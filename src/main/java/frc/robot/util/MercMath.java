@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
+
 public class MercMath {
     public static Supplier<Double> zeroSupplier = () -> 0.0;
 
@@ -12,12 +15,12 @@ public class MercMath {
         return input > 0.0 ? Math.pow(input, 2) : -Math.pow(input, 2);
     }
 
-    public static double RPMToMetersPerSecond(double rpm, double radius) {
-        return (rpm * (2 * Math.PI * radius)) / 60.0;
+    public static double RPMToMetersPerSecond(double rpm, double radiusInches) {
+        return (rpm * (2 * Math.PI * Units.inchesToMeters(radiusInches))) / 60.0;
     }
 
-    public static double metersPerSecondToRPM(double mps, double radius) {
-        return (mps * 60.0) / (2 * Math.PI * radius);
+    public static double metersPerSecondToRPM(double mps, double radiusInches) {
+        return (mps * 60.0) / (2 * Math.PI * Units.inchesToMeters(radiusInches));
     }
 
     public static List<Double> removeOutliersIQR(List<Double> data) {

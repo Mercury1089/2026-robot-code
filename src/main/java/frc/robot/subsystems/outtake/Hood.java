@@ -85,8 +85,12 @@ public class Hood extends SubsystemBase {
         hoodClosedLoopController.setSetpoint(pos, SparkMax.ControlType.kPosition);
     }
 
-    public void setPosition(ArticulatorPosition pos) {
-        setPosition(pos.degreePos);
+    public void minusOneDegree() {
+        setPosition = setPosition - 1.0;
+    }  
+
+    public void plusOneDegree() {
+        setPosition = setPosition + 1.0;
     }
 
     public double getHoodToFirePosition() {
@@ -101,19 +105,12 @@ public class Hood extends SubsystemBase {
         return Math.abs(getPosition() - pos) < THRESHOLD_DEGREES;
     }
 
-    public boolean isAtPosition(ArticulatorPosition pos) {
-        return Math.abs(getPosition() - pos.degreePos) < THRESHOLD_DEGREES;
-    }
-
     public double getPosition() {
         return absoluteEncoder.getPosition();
     }
 
     public boolean isInPosition() {
         return isAtPosition(setPosition);
-    }
-    public double plusOneDegree() {
-        return (setPosition + 1);
     }
 
     @Override

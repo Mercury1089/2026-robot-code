@@ -32,6 +32,8 @@ public class Shooter extends SubsystemBase {
     private Drivetrain drivetrain;
     private double THRESHOLD_RPM = 100.0; // TODO: tune this threshold
 
+    private double setRPM = 0.0;
+
     public Shooter(Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
 
@@ -90,6 +92,7 @@ public class Shooter extends SubsystemBase {
      * @param rpm target velocity in rotations per minute
      */
     public void setVelocityRPM(double rpm) {
+        setRPM = rpm;
         leaderClosedLoop.setSetpoint(rpm, ControlType.kVelocity);
     }
 
@@ -107,6 +110,18 @@ public class Shooter extends SubsystemBase {
      */
     public double getVelocityRPM() {
         return encoder.getVelocity();
+    }
+
+    public void increaseRPM() {
+        setRPM = setRPM + 250.0;
+    }
+
+    public void decreaseRPM() {
+        setRPM = setRPM - 250.0;
+    }
+
+    public double getSetRPM() {
+        return setRPM;
     }
     
     // Make sure to return RPM, as in the Drivetrain periodic we convert this to m/s using MercMath.RPMToMetersPerSecond()

@@ -404,7 +404,7 @@ public class Drivetrain extends SubsystemBase {
 
   public Translation2d getVelocityVector() {
     return new Translation2d(getXSpeeds(), getYSpeeds())
-        .rotateBy(getRotation().plus(KnownLocations.getKnownLocations().zeroGyroRotation));
+        .rotateBy(getPose().getRotation().plus(KnownLocations.getKnownLocations().zeroGyroRotation)); // should getRotation or getPose.getRotation() be used here? I think getPose().getRotation() should be used?
   }
 
   /**
@@ -649,7 +649,8 @@ public class Drivetrain extends SubsystemBase {
         .getTargetHeadingToPoint(getPose(), KnownLocations.getKnownLocations().HUB.getTranslation()).getDegrees();
     }
 
-    robotVelocityVector = new Translation2d(getXSpeeds(), getYSpeeds());
+    // robotVelocityVector = new Translation2d(getXSpeeds(), getYSpeeds());
+    robotVelocityVector = getVelocityVector(); // it might have to be this, needs to be tested, fix zeroGyro if it breaks
     
     Translation2d exitVelocityVector = new Translation2d(MercMath.RPMToMetersPerSecond(shooter.getStaticShootingRPM(), 2.0),
         Rotation2d.fromDegrees(finalHeading));
@@ -658,12 +659,10 @@ public class Drivetrain extends SubsystemBase {
     //we only use this one for rendering, consider removing if time is an issue
     fuelConcentrationTranslation = objCam.getTranslationOfHighestConcentration(this);
     
-    
     averageFuelPose = new Pose2d(fuelConcentrationTranslation, TargetUtils.getTargetHeadingToPoint(getPose(), getObjCam().getTranslationOfHighestConcentration(this)));
     setPoseSmartdash(averageFuelPose, "Average Fuel Pose");
     
-
-
+    
     SmartDashboard.putNumber("Drivetrain/CurrentPose X", getPose().getX());
     SmartDashboard.putNumber("Drivetrain/CurrentPose Y", getPose().getY());
     SmartDashboard.putNumber("Drivetrain/getRotation", getRotation().getDegrees());

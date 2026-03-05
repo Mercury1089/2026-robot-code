@@ -38,14 +38,6 @@ public class RobotModeLEDs extends SubsystemBase {
     robotMode = robotMode == RobotMode.AUTOSHOOT ? RobotMode.AUTOSHOOTDISABLED : RobotMode.AUTOSHOOT;
   }
 
-  public boolean isPassingMode() {
-    return robotMode == RobotMode.PASSING;
-  }
-
-  public boolean isShootingMode() {
-    return robotMode == RobotMode.SHOOTING;
-  }
-
   /** set by the buttons
    * - saves the game state
    * - sets the SD boolean box to color
@@ -66,18 +58,11 @@ public class RobotModeLEDs extends SubsystemBase {
 
   public enum RobotMode {
     AUTOSHOOT,
-    AUTOSHOOTDISABLED,
-    SHOOTING,
-    PASSING
+    AUTOSHOOTDISABLED
   }
 
   @Override
   public void periodic() {
-    if(drivetrain.isDrivetrainInAllianceZone()) {
-      robotMode = RobotMode.SHOOTING;
-    } else {
-      robotMode = RobotMode.PASSING;
-    }
     SmartDashboard.putString("LED Color", robotMode.toString());
   }
 }

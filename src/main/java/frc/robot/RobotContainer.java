@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -101,8 +102,9 @@ public class RobotContainer {
     shooter = new Shooter(drivetrain);
     drivetrain.setShooter(shooter);
     // In the final code, the default should always be setting shooter speed to getStaticShootingRPM()
-    shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
+    // shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM()), shooter));
+    shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getSetRPM()), shooter));
 
     hopper = new Hopper();
 
@@ -154,16 +156,23 @@ public class RobotContainer {
     //   new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")) 
     // );
 
-    gamepadRT.onTrue(new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer));
-    gamepadLT.onTrue(new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer));
+    gamepadRT.onTrue(new ParallelCommandGroup(
+      new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer),
+      new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker)
+    ));
+
+    gamepadLT.onTrue(new ParallelCommandGroup(
+      new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer),
+      new RunCommand(() -> kicker.setSpeed(KickerSpeed.STOP), kicker)
+    ));
 
     gamepadA.whileTrue(new RunCommand(() -> shooter.setSpeed(0.25), shooter));
     // gamepadB.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(720.0), shooter));
-    gamepadB.onTrue (new RunCommand(() -> shooter.setVelocityRPM(1000), shooter));
+    gamepadB.onTrue(new InstantCommand(() -> shooter.increaseRPM(), shooter));
 
     // gamepadY.whileTrue(new RunCommand(() -> hood.setPosition(ArticulatorPosition.OUT), hood)); put back later
-    gamepadY.whileTrue(new RunCommand(() -> hood.setPosition(hood.plusOneDegree()), hood));
-    gamepadX.whileTrue(new RunCommand(() -> hood.setPosition(ArticulatorPosition.SAFE), hood));
+    gamepadY.onTrue(new InstantCommand(() -> hood.plusOneDegree(), hood));
+    gamepadX.onTrue(new InstantCommand(() -> hood.minusOneDegree(), hood));
 
     gamepadRB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
     gamepadLB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
@@ -208,8 +217,8 @@ public class RobotContainer {
     right1.whileTrue(DriveCommands.shootOnTheMove(drivetrain))
       .onFalse(new InstantCommand(() -> leds.disableAutoShoot(), leds));
 
-    Trigger canPass = new Trigger(() -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && leds.isPassingMode() && DriverStation.isTeleop());
-    Trigger canShoot = new Trigger(() -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && leds.isShootingMode() && drivetrain.getShift().isOurHubActive() && DriverStation.isTeleop());
+    Trigger canPass = new Trigger(() -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && DriverStation.isTeleop());
+    Trigger canShoot = new Trigger(() -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && drivetrain.isDrivetrainInAllianceZone() && drivetrain.getShift().isOurHubActive() && DriverStation.isTeleop());
     canPass.or(canShoot).onTrue(new InstantCommand(() -> leds.enableAutoShoot(), leds));
 
     Trigger autoShooting = new Trigger(() -> leds.isAutoShootEnabled() && DriverStation.isTeleop());
