@@ -75,6 +75,7 @@ public class Hood extends SubsystemBase {
 
     public void goToSetPosition() {
         setPosition(setPosition);
+        // setPosition(getHoodToFirePosition());
     }
 
     public void resetEncoders() {
@@ -103,7 +104,7 @@ public class Hood extends SubsystemBase {
         setPosition = setPosition + 1.0;
     }
 
-    public double getHoodToFirePosition(double velocity) {
+    public double getHoodToFirePosition() {
         Translation2d point = new Translation2d();
 
         if(drivetrain.isDrivetrainInAllianceZone()) {
@@ -115,17 +116,17 @@ public class Hood extends SubsystemBase {
         }
 
         double distance = TargetUtils.getDistanceToPoint(drivetrain.getPose(), point);
-        double var = 4.9 * (distance*distance) / (velocity*velocity);
-        double discriminant = (distance*distance) + (4*var*-50) - (4*var*var);//50 is eyeballed lol fix it later
-        //TODO: test the hell out of this, especially RADIANSTOHOODANGLE
-        if (discriminant > 0)
-            return Math.atan((distance-Math.sqrt(discriminant)) / (2*var)) * RADIANSTOHOODANGLE;
-        return 0.0;
-        // if(drivetrain.isDrivetrainInAllianceZone()) {
-            
-        // } else {
-        //     return 0.0; // passing function
-        // }
+        // double var = 4.9 * (distance*distance) / (velocity*velocity);
+        // double discriminant = (distance*distance) + (4*var*-50) - (4*var*var);//50 is eyeballed lol fix it later
+        // //TODO: test the hell out of this, especially RADIANSTOHOODANGLE
+        // if (discriminant > 0)
+        //     return Math.atan((distance-Math.sqrt(discriminant)) / (2*var)) * RADIANSTOHOODANGLE;
+        // return 0.0;
+        if(drivetrain.isDrivetrainInAllianceZone()) {
+            return 0.0; // shooting function
+        } else {
+            return 0.0; // passing function
+        }
     }
 
     public boolean isAtPosition(double pos) {

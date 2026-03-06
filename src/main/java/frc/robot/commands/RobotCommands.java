@@ -69,8 +69,8 @@ public class RobotCommands {
         return new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker);
     }
 
-    public static Command prepareHood(Hood hood, double speed) {
-        return new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition(speed)), hood);
+    public static Command prepareHood(Hood hood) {
+        return new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition()), hood);
     }
 
     public static Command setShooterToHubRPM(Shooter shooter) {
@@ -87,7 +87,7 @@ public class RobotCommands {
 
     public static Command setUpToShoot(Shooter shooter, Hood hood, Drivetrain drivetrain, Articulator articulator) {
         return new ParallelCommandGroup(
-            prepareHood(hood, MercMath.RPMToMetersPerSecond(shooter.getVelocityRPM(),2)),
+            prepareHood(hood),
             setShooterToHubRPM(shooter),
             new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator),
             DriveCommands.shootOnTheMove(drivetrain)
