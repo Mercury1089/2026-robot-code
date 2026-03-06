@@ -131,6 +131,9 @@ public class Autons {
             case RIGHT:
                 autoName = "right";
                 break;
+            case SIMPLE_AUTO:
+                autoName = "simple_auto";
+                break;
             default:
                 autoName = "left";
                 break;
@@ -202,6 +205,7 @@ public class Autons {
     }
 
     public enum AutonType {
+        SIMPLE_AUTO,
         LEFT,
         MIDDLE,
         RIGHT;
