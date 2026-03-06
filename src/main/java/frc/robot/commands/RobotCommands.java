@@ -24,15 +24,15 @@ import frc.robot.subsystems.intake.Articulator.ArticulatorPosition;
 
 public class RobotCommands {
 
-    public static Command intakeInCommand(Articulator articulator) {
-         return new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator).until(() -> articulator.isAtPosition(ArticulatorPosition.IN));
-    }
+    // public static Command intakeInCommand(Articulator articulator) {
+    //      return new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator);
+    // }
 
     // Considers that the default pos of the articulator is at SAFE POS
     public static Command intake(Intake intake, Articulator articulator) {
         return new ParallelCommandGroup(
             new RunCommand(() -> intake.setSpeed(Intake.IntakeSpeed.INTAKE), intake),
-            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator).until(() -> articulator.isAtPosition(ArticulatorPosition.OUT))
+            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator)
         );
     }
 
@@ -40,7 +40,7 @@ public class RobotCommands {
     public static Command stopIntake(Intake intake, Articulator articulator) {
         return new ParallelCommandGroup(
             new RunCommand(() -> intake.setSpeed(Intake.IntakeSpeed.STOP), intake),
-            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator).until(() -> articulator.isAtPosition(ArticulatorPosition.OUT))
+            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator)
         );
     }
 
@@ -69,8 +69,8 @@ public class RobotCommands {
         return new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker);
     }
 
-    public static Command prepareHood(Hood hood) {
-        return new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition()), hood);
+    public static Command prepareHood(Hood hood, double speed) {
+        return new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition(speed)), hood);
     }
 
     public static Command setShooterToHubRPM(Shooter shooter) {
@@ -87,7 +87,7 @@ public class RobotCommands {
 
     public static Command setUpToShoot(Shooter shooter, Hood hood, Drivetrain drivetrain, Articulator articulator) {
         return new ParallelCommandGroup(
-            prepareHood(hood),
+            prepareHood(hood, MercMath.RPMToMetersPerSecond(shooter.getVelocityRPM(),2)),
             setShooterToHubRPM(shooter),
             new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator),
             DriveCommands.shootOnTheMove(drivetrain)
@@ -118,7 +118,8 @@ public class RobotCommands {
                 setUpToShoot(shooter, hood, drivetrain, articulator).until(canFire),
                 new ParallelCommandGroup(
                     setUpToShoot(shooter, hood, drivetrain, articulator), // You want to keep setting up while firing
-                    feedShooter(indexer, kicker)
+                    feedShooter(indexer, kicker),
+                    agitateIntake(articulator)
                 ).withTimeout(3),//always shoot for 3 seconds, TODO: adjust later as needed
                 stopFire(shooter, kicker, articulator, indexer)
             )

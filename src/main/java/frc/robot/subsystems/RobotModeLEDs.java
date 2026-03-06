@@ -64,5 +64,6 @@ public class RobotModeLEDs extends SubsystemBase {
   @Override
   public void periodic() {
     SmartDashboard.putString("LED Color", robotMode.toString());
+    SmartDashboard.putBoolean("autoShoot", isAutoShootEnabled());
   }
 }

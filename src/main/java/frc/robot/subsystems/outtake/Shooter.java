@@ -112,6 +112,10 @@ public class Shooter extends SubsystemBase {
         return encoder.getVelocity();
     }
 
+    public void goToSetRPM() {
+        setVelocityRPM(setRPM);
+    }
+
     public void increaseRPM() {
         setRPM = setRPM + 250.0;
     }
@@ -150,6 +154,7 @@ public class Shooter extends SubsystemBase {
 
     public void periodic() {
         SmartDashboard.putNumber("ShooterRPM", getVelocityRPM());
+        SmartDashboard.putBoolean("Shooter/isAtRPM", isAtShootingRPM());
         // SmartDashboard.putBoolean("Shooter/isFuelInShooter", fuelInShooter());
     }
 }

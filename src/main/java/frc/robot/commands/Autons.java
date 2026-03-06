@@ -77,7 +77,7 @@ public class Autons {
         AutoBuilder.configure(
                 () -> drivetrain.getPose(), // Robot pose supplier
                 (pose) -> drivetrain.resetPose(pose), // Method to reset odometry (will be called if your auto has starting pose)
-                () -> drivetrain.getFieldRelativSpeeds(), // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+                () -> drivetrain.getFieldRelativeSpeeds(), // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
                 (chassisSpeeds) -> drivetrain.drive(chassisSpeeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
                 new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
                     new PIDConstants(TRANSLATION_P, 0.0, 0.0), // Translation PID constants

@@ -57,7 +57,7 @@ import frc.robot.util.PathUtils;
 import frc.robot.util.SwerveUtils;
 import frc.robot.util.TargetUtils;
 import frc.robot.util.Shift;
-import frc.robot.subsystems.outtake.Hood;;
+import frc.robot.subsystems.outtake.Hood;
 
 public class Drivetrain extends SubsystemBase {
 
@@ -152,8 +152,8 @@ public class Drivetrain extends SubsystemBase {
     startingPosition = new Pose2d();
 
     // photonvision wrapper
-    leftCam = new AprilTagCamera("ArducamRubik", leftCamTransform3d);
-    rightCam = new AprilTagCamera("ArducamRubik", rightCamTransform3d);
+    leftCam = new AprilTagCamera("ApriltagCamLeft", leftCamTransform3d);
+    rightCam = new AprilTagCamera("ApriltagCamRight", rightCamTransform3d);
 
     objCam = new ObjectDetectionCamera();
 
@@ -382,7 +382,7 @@ public class Drivetrain extends SubsystemBase {
         pose);
   }
 
-  public ChassisSpeeds getFieldRelativSpeeds() {
+  public ChassisSpeeds getFieldRelativeSpeeds() {
     return swerveKinematics.toChassisSpeeds(new SwerveModuleState[] {
         frontLeftModule.getState(),
         frontRightModule.getState(),
@@ -394,12 +394,12 @@ public class Drivetrain extends SubsystemBase {
   // meters/second
   // up is pos
   public double getXSpeeds() {
-    return getFieldRelativSpeeds().vxMetersPerSecond;// NOT FIELD RELATIVE??????
+    return getFieldRelativeSpeeds().vxMetersPerSecond;// NOT FIELD RELATIVE??????
   }
 
   // left is pos
   public double getYSpeeds() {
-    return getFieldRelativSpeeds().vyMetersPerSecond;// has presumably the same issue as above
+    return getFieldRelativeSpeeds().vyMetersPerSecond;// has presumably the same issue as above
   }
 
   public Translation2d getVelocityVector() {
@@ -661,7 +661,9 @@ public class Drivetrain extends SubsystemBase {
     
     averageFuelPose = new Pose2d(fuelConcentrationTranslation, TargetUtils.getTargetHeadingToPoint(getPose(), getObjCam().getTranslationOfHighestConcentration(this)));
     setPoseSmartdash(averageFuelPose, "Average Fuel Pose");
-    
+
+    // setPoseSmartdash(KnownLocations.getKnownLocations().PASSING_TARGET_LEFT, "PassingLeft");
+    // setPoseSmartdash(KnownLocations.getKnownLocations().PASSING_TARGET_RIGHT, "PassingRight");    
     
     SmartDashboard.putNumber("Drivetrain/CurrentPose X", getPose().getX());
     SmartDashboard.putNumber("Drivetrain/CurrentPose Y", getPose().getY());
@@ -685,6 +687,7 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Drivetrain/headingThingIDK",
         this.getPose().getRotation().plus(KnownLocations.getKnownLocations().zeroGyroRotation).getDegrees());
     SmartDashboard.putString("Drivetrain/currentZone", getCurrentZone().getString());
+    SmartDashboard.putBoolean("Drivetrain/isInAllianceZone", isDrivetrainInAllianceZone());
     SmartDashboard.putBoolean("Shift/isOurHubActive", shift.isOurHubActive());
     SmartDashboard.putString("Drivetrain/gameMessage", DriverStation.getGameSpecificMessage());
     SmartDashboard.putNumber("Drivetrain/gyroReading", gyro.getRotation2d().getDegrees());
@@ -694,6 +697,8 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Drivetrain/fuelCamCount", objCam.getTargetCount());
     SmartDashboard.putNumber("Drivetrain/getCompVectorMag", MercMath.metersPerSecondToRPM(getCompensatedVector().getNorm(), 2.0));
     SmartDashboard.putNumber("Drivetrain/getCompVectorDir", getCompensatedVector().getAngle().getDegrees());
+
+    SmartDashboard.putBoolean("Drivetrain/isPointingAtVector", isPointingAtVector());
 
   }
 

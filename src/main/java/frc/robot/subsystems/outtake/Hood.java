@@ -1,5 +1,6 @@
 package frc.robot.subsystems.outtake;
 
+import java.lang.annotation.Target;
 import java.util.function.Supplier;
 
 import com.revrobotics.AbsoluteEncoder;
@@ -12,14 +13,19 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.subsystems.drivetrain.Drivetrain;
+import frc.robot.subsystems.drivetrain.Drivetrain.Zone;
 import frc.robot.subsystems.intake.Articulator.ArticulatorPosition;
+import frc.robot.util.KnownLocations;
+import frc.robot.util.TargetUtils;
 
 public class Hood extends SubsystemBase {
     public final double THRESHOLD_DEGREES = 0.5;
+    private final double RADIANSTOHOODANGLE = 100;
 
     private SparkMax hood;
     private SparkClosedLoopController hoodClosedLoopController;
@@ -67,6 +73,10 @@ public class Hood extends SubsystemBase {
         return setPosition;
     }
 
+    public void goToSetPosition() {
+        setPosition(setPosition);
+    }
+
     public void resetEncoders() {
         hoodClosedLoopController.setSetpoint(0, SparkMax.ControlType.kPosition);
     }
@@ -93,12 +103,29 @@ public class Hood extends SubsystemBase {
         setPosition = setPosition + 1.0;
     }
 
-    public double getHoodToFirePosition() {
-        if(drivetrain.isDrivetrainInAllianceZone()) {//TODO: actually do this, very important
-            return 0.0; // shooting function
-        } else {
-            return 0.0; // passing function
+    public double getHoodToFirePosition(double velocity) {
+        Translation2d point = new Translation2d();
+
+        if(drivetrain.isDrivetrainInAllianceZone()) {
+            point = KnownLocations.getKnownLocations().HUB.getTranslation();
+        } else if(drivetrain.getCurrentZone() == Zone.NEUTRAL_LEFT) {
+            point = KnownLocations.getKnownLocations().PASSING_TARGET_LEFT.getTranslation();
+        } else if(drivetrain.getCurrentZone() == Zone.NEUTRAL_RIGHT) {
+            point = KnownLocations.getKnownLocations().PASSING_TARGET_RIGHT.getTranslation();
         }
+
+        double distance = TargetUtils.getDistanceToPoint(drivetrain.getPose(), point);
+        double var = 4.9 * (distance*distance) / (velocity*velocity);
+        double discriminant = (distance*distance) + (4*var*-50) - (4*var*var);//50 is eyeballed lol fix it later
+        //TODO: test the hell out of this, especially RADIANSTOHOODANGLE
+        if (discriminant > 0)
+            return Math.atan((distance-Math.sqrt(discriminant)) / (2*var)) * RADIANSTOHOODANGLE;
+        return 0.0;
+        // if(drivetrain.isDrivetrainInAllianceZone()) {
+            
+        // } else {
+        //     return 0.0; // passing function
+        // }
     }
 
     public boolean isAtPosition(double pos) {
@@ -117,7 +144,7 @@ public class Hood extends SubsystemBase {
     public void periodic() {
         // This method will be called once per scheduler run
         SmartDashboard.putNumber("Hood/Position", getPosition());
-        SmartDashboard.putBoolean("Hood/isInPosition", isInPosition());
+        SmartDashboard.putBoolean("Hood/hoodIsInPosition", isInPosition());
 
     }
     

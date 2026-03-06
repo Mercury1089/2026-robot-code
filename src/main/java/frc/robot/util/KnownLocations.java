@@ -105,9 +105,9 @@ public class KnownLocations {
             NEUTRAL_EDGE = new Pose2d(middleAprilTagPos.getX() + Units.inchesToMeters(47), 
                               middleAprilTagPos.getY(),
                               middleAprilTagPos.getRotation()); 
-            PASSING_TARGET_LEFT = new Pose2d(45.5, 238.831, new Rotation2d(580.7, 238.831));
-            PASSING_TARGET_RIGHT = new Pose2d(45.5, 79.988, new Rotation2d(580.7, 79.988));
             
+            PASSING_TARGET_LEFT = PathPointInch(45.5, 238.831, 180.0);
+            PASSING_TARGET_RIGHT = PathPointInch(45.5, 79.988, 180.0);            
         } else {
             // Assumes we start with the robot facing away
             zeroGyroRotation = Rotation2d.fromDegrees(180);
@@ -121,8 +121,8 @@ public class KnownLocations {
                               middleAprilTagPos.getY(),
                               middleAprilTagPos.getRotation()); 
             
-            PASSING_TARGET_RIGHT = new Pose2d(580.7, 238.831, new Rotation2d(580.7, 238.831));
-            PASSING_TARGET_LEFT = new Pose2d(580.7, 79.988, new Rotation2d(580.7, 79.988));
+            PASSING_TARGET_RIGHT = PathPointInch(580.7, 238.831, 0.0);
+            PASSING_TARGET_LEFT = PathPointInch(580.7, 79.988, 0.0);
         }
 
     }
