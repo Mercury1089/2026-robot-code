@@ -119,7 +119,7 @@ public class RobotContainer {
 
     leds = new RobotModeLEDs(drivetrain);
     
-    auton = new Autons(drivetrain);
+    auton = new Autons(drivetrain, shooter, indexer, kicker);
 
     Map<String, Command> commands = new HashMap<String, Command>();
 
@@ -204,7 +204,7 @@ public class RobotContainer {
     
     // left2.onTrue(DriveCommands.safelyDriveOverBump(leftJoystickY, leftJoystickX, drivetrain));
 
-    right8.onTrue(DriveCommands.lockToHub(leftJoystickY, leftJoystickX, drivetrain));
+    right8.onTrue(DriveCommands.lockToNearestShootingPosition(drivetrain));
 
     /**
      * INTAKE COMMANDS
@@ -218,11 +218,6 @@ public class RobotContainer {
     /**
      * SHOOTING/PASSING COMMANDS
      */
-
-    // This automation will only handle the shooting, not the passing, even though the fire command itself handles passing/shooting
-    // Trigger autoEnableShooting = new Trigger(() -> drivetrain.getShift().isOurHubActive() && hopper.hopperIsFull() && drivetrain.isDrivetrainInAllianceZone() && DriverStation.isTeleop());
-    // autoEnableShooting.onTrue(new InstantCommand(() -> leds.enableAutoShoot(), leds))
-    //   .onFalse(new InstantCommand(() -> leds.disableAutoShoot(), leds));
 
     // Trigger startFiring = new Trigger(() -> leds.isAutoShootEnabled()); // Don't think this is necessary as you will shoot/stop frequently
     // right1.whileTrue(RobotCommands.fire(shooter, kicker, hood, indexer, drivetrain));
@@ -241,6 +236,7 @@ public class RobotContainer {
     //     RobotCommands.intake(intake, articulator)
     //   ));
 
+    // remove lockToHub if nearestShootingLock works as it will be a double drivetrain requirement
     right1.whileTrue(
       new SequentialCommandGroup(
         new ParallelCommandGroup(

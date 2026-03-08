@@ -46,6 +46,9 @@ public class KnownLocations {
     public final Pose2d PASSING_TARGET_RIGHT;
     public final Pose2d PASSING_TARGET_LEFT;
 
+    public final Pose2d TOWER_LEFT,
+        TOWER_RIGHT;
+
 
     /**
      * Load the field layout for the current year (currently REEFSCAPE).
@@ -107,7 +110,11 @@ public class KnownLocations {
                               middleAprilTagPos.getRotation()); 
             
             PASSING_TARGET_LEFT = PathPointInch(45.5, 238.831, 180.0);
-            PASSING_TARGET_RIGHT = PathPointInch(45.5, 79.988, 180.0);            
+            PASSING_TARGET_RIGHT = PathPointInch(45.5, 79.988, 180.0);     
+            
+            // need right values for these, just placeholders for now
+            TOWER_LEFT = PathPointInch(42.510712, 200.0, 180.0);
+            TOWER_RIGHT = PathPointInch(42.510712, 159.0, 180.0);
         } else {
             // Assumes we start with the robot facing away
             zeroGyroRotation = Rotation2d.fromDegrees(180);
@@ -123,6 +130,9 @@ public class KnownLocations {
             
             PASSING_TARGET_RIGHT = PathPointInch(580.7, 238.831, 0.0);
             PASSING_TARGET_LEFT = PathPointInch(580.7, 79.988, 0.0);
+
+            TOWER_LEFT = PathPointInch(608.580088, 120.0, 0.0);
+            TOWER_RIGHT = PathPointInch(608.580088, 220.0, 0.0);
         }
 
     }

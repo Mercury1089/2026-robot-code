@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 import javax.xml.crypto.dsig.spec.HMACParameterSpec;
@@ -141,6 +142,16 @@ public class DriveCommands {
     public static Command lockToHub(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Drivetrain drivetrain) {
         Supplier<Double> headingSupplier = () -> TargetUtils.getTargetHeadingToPoint(drivetrain.getPose(), KnownLocations.getKnownLocations().HUB.getTranslation()).getDegrees();
         return targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain);
+    }
+
+    public static Command lockToNearestShootingPosition(Drivetrain drivetrain) {
+        Supplier<KnownLocations> locsSupplier = KnownLocations::getKnownLocations;
+        Supplier<List<Pose2d>> shootingPoses = () -> List.of(locsSupplier.get().TOWER_LEFT, locsSupplier.get().TOWER_RIGHT);
+        Supplier<Pose2d> nearestShootingPose = () -> drivetrain.getPose().nearest(shootingPoses.get());
+
+        Supplier<Double> headingSupplier = () -> TargetUtils.getTargetHeadingToPoint(drivetrain.getPose(), nearestShootingPose.get().getTranslation()).getDegrees();
+        Supplier<Pose2d> finalDesiredPose = () -> new Pose2d(nearestShootingPose.get().getTranslation(), Rotation2d.fromDegrees(headingSupplier.get()));
+        return driveToPose(drivetrain, finalDesiredPose);
     }
 
     // public static Command autoPickUp(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Drivetrain drivetrain) {
