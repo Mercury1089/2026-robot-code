@@ -149,7 +149,19 @@ public class Autons {
                 
                 }
                 break;
-            case SIMPLE_AUTO:
+            case SIMPLE_AUTO_LEFT:
+                try {
+                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToShoot")));
+                } catch (Exception e) {
+                
+                }
+                break;
+            case SIMPLE_AUTO_RIGHT:
+                try {
+                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("rightStartToShoot")));
+                } catch (Exception e) {
+                
+                }
                 break;
             default:
                 break;
@@ -168,6 +180,18 @@ public class Autons {
                 paths.add(PathPlannerPath.fromPathFile("leftStartToFarLeftNeutralZoneToLeftShoot"));
             } catch (Exception e) {
                 
+            }
+        } else if (autoType == AutonType.SIMPLE_AUTO_LEFT) {
+            try {
+                paths.add(PathPlannerPath.fromPathFile("leftStartToShoot"));
+            } catch (Exception e) {
+            
+            }
+        } else if (autoType == AutonType.SIMPLE_AUTO_RIGHT) {
+            try {
+                paths.add(PathPlannerPath.fromPathFile("rightStartToShoot"));
+            } catch (Exception e) {
+            
             }
         }
 
@@ -246,8 +270,11 @@ public class Autons {
     public void setChoosers(KnownLocations knownLocations) {
         autonTypeChooser = new SendableChooser<AutonType>();
         autonTypeChooser.setDefaultOption("RIGHT", AutonType.RIGHT);
-        autonTypeChooser.addOption("MIDDLE", AutonType.MIDDLE);
+        // autonTypeChooser.addOption("MIDDLE", AutonType.MIDDLE);
         autonTypeChooser.addOption("LEFT", AutonType.LEFT);
+        autonTypeChooser.addOption("SIMPLE_LEFT", AutonType.SIMPLE_AUTO_LEFT);
+        autonTypeChooser.addOption("SIMPLE_RIGHT", AutonType.SIMPLE_AUTO_RIGHT);
+
 
         SmartDashboard.putData("Auton Type Chooser", autonTypeChooser);
     }
@@ -257,7 +284,8 @@ public class Autons {
     }
 
     public enum AutonType {
-        SIMPLE_AUTO,
+        SIMPLE_AUTO_LEFT,
+        SIMPLE_AUTO_RIGHT,
         LEFT,
         MIDDLE,
         RIGHT;
