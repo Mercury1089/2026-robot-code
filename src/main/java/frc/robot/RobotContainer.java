@@ -139,7 +139,8 @@ public class RobotContainer {
     
     shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(1000.0), shooter));
     
-    hood.setDefaultCommand(new RunCommand(() -> hood.setSpeed(gamepadRightY), hood));
+    hood.setDefaultCommand(new RunCommand(() -> hood.setSpeed(() -> 0.0), hood));
+    // hood.setDefaultCommand(new RunCommand(() -> hood.setSpeed(gamepadRightY), hood));
     // hood.setDefaultCommand(new RunCommand(() -> hood.goToSetPosition(), hood));
     
     kicker.setDefaultCommand(new RunCommand(() -> kicker.setSpeed(KickerSpeed.STOP), kicker));
@@ -180,8 +181,9 @@ public class RobotContainer {
 
     // gamepadA.whileTrue(new RunCommand(() -> shooter.setSpeed(0.25), shooter));
     // gamepadB.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(720.0), shooter));
-    gamepadA.onTrue(new InstantCommand(() -> shooter.increaseRPM(), shooter));
-    gamepadB.onTrue(new InstantCommand(() -> shooter.decreaseRPM(), shooter));
+    // gamepadA.onTrue(new InstantCommand(() -> shooter.increaseRPM(), shooter));
+    // gamepadB.onTrue(new InstantCommand(() -> shooter.decreaseRPM(), shooter));
+    // gamepadPOVDown.whileTrue(new RunCommand(() -> hood.setSpeed(gamepadRightY), hood));
     // gamepadRightStickButton.onTrue(new InstantCommand(() -> shooter.setVelocityRPM(3000), shooter));
 
     // gamepadY.whileTrue(new RunCommand(() -> hood.setPosition(ArticulatorPosition.OUT), hood)); put back later
@@ -241,13 +243,13 @@ public class RobotContainer {
       new SequentialCommandGroup(
         new ParallelCommandGroup(
           // new RunCommand(() -> hood.setPosition(0.0), hood),
-          DriveCommands.lockToHub(leftJoystickY, leftJoystickX, drivetrain),
-          new RunCommand(() -> shooter.setVelocityRPM(2600.0), shooter)
+          DriveCommands.lockToNearestDrivingAction(leftJoystickY, leftJoystickX, drivetrain),
+          new RunCommand(() -> shooter.setVelocityRPM(2700.0), shooter)
         ).until(() -> /*hood.isInPosition() && */shooter.isShooterAtManualShotRPM()),
         new ParallelCommandGroup(
           // new RunCommand(() -> hood.setPosition(0.0), hood),
-          DriveCommands.lockToHub(leftJoystickY, leftJoystickX, drivetrain),
-          new RunCommand(() -> shooter.setVelocityRPM(2600.0), shooter),
+          DriveCommands.lockToNearestDrivingAction(leftJoystickY, leftJoystickX, drivetrain),
+          new RunCommand(() -> shooter.setVelocityRPM(2700.0), shooter),
           new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer),
           new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker)
         )

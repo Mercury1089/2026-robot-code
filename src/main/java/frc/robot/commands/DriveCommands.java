@@ -28,6 +28,7 @@ import frc.robot.Robot;
 import frc.robot.Constants.SWERVE;
 import frc.robot.sensors.ObjectDetectionCamera;
 import frc.robot.subsystems.drivetrain.Drivetrain;
+import frc.robot.subsystems.drivetrain.Drivetrain.Zone;
 import frc.robot.subsystems.intake.Articulator;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.outtake.Shooter;
@@ -152,6 +153,10 @@ public class DriveCommands {
         Supplier<Double> headingSupplier = () -> TargetUtils.getTargetHeadingToPoint(drivetrain.getPose(), nearestShootingPose.get().getTranslation()).getDegrees();
         Supplier<Pose2d> finalDesiredPose = () -> new Pose2d(nearestShootingPose.get().getTranslation(), Rotation2d.fromDegrees(headingSupplier.get()));
         return driveToPose(drivetrain, finalDesiredPose);
+    }
+
+    public static Command lockToNearestDrivingAction(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Drivetrain drivetrain) {
+        return targetDrive(xSupplier, ySupplier, () -> drivetrain.getFinalHeading(), drivetrain);
     }
 
     // public static Command autoPickUp(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Drivetrain drivetrain) {

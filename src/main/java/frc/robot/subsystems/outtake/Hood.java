@@ -56,9 +56,9 @@ public class Hood extends SubsystemBase {
                 .zeroCentered(true); // -180 to 180
         hoodConfig.softLimit//TODO: tweak rotation values as necessary, potentially disable zeroCentered
                 .forwardSoftLimitEnabled(true)
-                .forwardSoftLimit(130.0)
+                .forwardSoftLimit(150.0)
                 .reverseSoftLimitEnabled(true)
-                .reverseSoftLimit(-150.0);
+                .reverseSoftLimit(-114.0);
 
         hood.configure(hoodConfig, ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
