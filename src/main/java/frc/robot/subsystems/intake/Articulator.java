@@ -41,22 +41,22 @@ public class Articulator extends SubsystemBase {
 
     articulatorConfig
       .idleMode(IdleMode.kBrake)
-      .inverted(true);
+      .inverted(false);
     articulatorConfig.closedLoop
       .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
       .pid(1.0 / 10.0,0,0)
       // .positionWrappingEnabled(true) we don't actually want this 
       // .positionWrappingInputRange(0.0, 360.0)
       .positionWrappingEnabled(false)
-      .outputRange(-1,1);
+      .outputRange(-0.6,1);
     articulatorConfig.absoluteEncoder
       .positionConversionFactor(360.0)
       .zeroCentered(true); // -180 to 180 
     articulatorConfig.softLimit
-      .forwardSoftLimitEnabled(false)//TODO: tweak rotation values as necessary, potentially disable zeroCentered
-      .forwardSoftLimit(320.0)
-      .reverseSoftLimitEnabled(false)
-      .reverseSoftLimit(191.0);
+      .forwardSoftLimitEnabled(true)
+      .forwardSoftLimit(54.0)
+      .reverseSoftLimitEnabled(true)
+      .reverseSoftLimit(-50.0);
     
     articulator.configure(articulatorConfig, ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
@@ -72,7 +72,7 @@ public class Articulator extends SubsystemBase {
   }
 
   public void setSpeed(Supplier<Double> speedSupplier) {//why do we have this
-    articulator.set((speedSupplier.get() * 0.5));
+    articulator.set((speedSupplier.get() * .8));
   }
 
   public void changePos() {//???
@@ -113,9 +113,9 @@ public class Articulator extends SubsystemBase {
   }
   
   public enum ArticulatorPosition {//TODO: tweak rotation values as necessary, potentially disable zeroCentered
-    IN(0.0),
-    SAFE(75.0),
-    OUT(150.0);
+    IN(30.0),
+    SAFE(-17.0),
+    OUT(-50.0);
     
     public final double degreePos;
       ArticulatorPosition(double degreePos) {

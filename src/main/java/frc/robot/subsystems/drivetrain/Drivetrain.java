@@ -72,7 +72,7 @@ public class Drivetrain extends SubsystemBase {
   private Pose2d startingPosition;
   private Shooter shooter;
   private Shift shift;
-  private ObjectDetectionCamera objCam;
+  // private ObjectDetectionCamera objCam;
   private Hood hood;
 
   private static final double ROTATION_P = 1.0 / 90.0, DIRECTION_P = 1 / 1.25, I = 0.0, D = 0.0;
@@ -89,17 +89,17 @@ public class Drivetrain extends SubsystemBase {
   private double xDirStraight = 0.0, yDirStraight = 0.0;
   private Rotation2d rotationDirStraight = new Rotation2d();
 
-  private Transform3d leftCamTransform3d = new Transform3d(
-      new Translation3d(Units.inchesToMeters(9.0), Units.inchesToMeters(12.375), Units.inchesToMeters(9.0)),
-      new Rotation3d(0.0, Rotation2d.fromDegrees(13).getRadians(), Rotation2d.fromDegrees(0).getRadians()));
-
   private Transform3d rightCamTransform3d = new Transform3d(
-      new Translation3d(Units.inchesToMeters(9.0), Units.inchesToMeters(1.0), Units.inchesToMeters(9.0)),
-      new Rotation3d(0.0, Rotation2d.fromDegrees(13).getRadians(), Rotation2d.fromDegrees(0).getRadians()));
+      new Translation3d(Units.inchesToMeters(-3.625), Units.inchesToMeters(9.75), Units.inchesToMeters(26+2.5)),
+      new Rotation3d(0.0, Rotation2d.fromDegrees(-15).getRadians(), Rotation2d.fromDegrees(180+35).getRadians()));
+
+  private Transform3d leftCamTransform3d = new Transform3d(
+      new Translation3d(Units.inchesToMeters(-3.625), Units.inchesToMeters(-9.75), Units.inchesToMeters(26+2.5)),
+      new Rotation3d(0.0, Rotation2d.fromDegrees(-15).getRadians(), Rotation2d.fromDegrees(180-35).getRadians()));
 
   // // distance between wheels
-  private final double WHEEL_WIDTH = 23.5; // distance between front/back wheels (in inches)
-  private final double WHEEL_LENGTH = 28.5; // distance between left/right wheels (in inches)
+  private final double WHEEL_WIDTH = 27-2*(2+5/8); // distance between front/back wheels (in inches)
+  private final double WHEEL_LENGTH = 27-2*(2+5/8); // distance between left/right wheels (in inches)
 
   private Rotation2d gyroOffset = Rotation2d.fromDegrees(0); // Offset to apply to gyro for field oriented
 
@@ -137,7 +137,7 @@ public class Drivetrain extends SubsystemBase {
     CanandgyroSettings gyroSettings = new CanandgyroSettings();
     gyro.setSettings(gyroSettings);
     // gyro.setPartyMode(1); //wooooo
-    gyro.setPartyMode(0);
+    // gyro.setPartyMode(0);
 
     rotationPIDController = new PIDController(ROTATION_P, I, D);
     rotationPIDController.enableContinuousInput(-180, 180);
@@ -155,7 +155,7 @@ public class Drivetrain extends SubsystemBase {
     leftCam = new AprilTagCamera("ApriltagCamLeft", leftCamTransform3d);
     rightCam = new AprilTagCamera("ApriltagCamRight", rightCamTransform3d);
 
-    objCam = new ObjectDetectionCamera();
+    // objCam = new ObjectDetectionCamera();
 
     fuelConcentrationTranslation = new Translation2d();
 
@@ -415,7 +415,7 @@ public class Drivetrain extends SubsystemBase {
    */
   public Rotation2d getRotation() {
     // Note: Unlike getAngle(), getRotation2d is CCW positive.
-    return gyro.getRotation2d();
+    return gyro.getRotation2d().plus(Rotation2d.fromDegrees(180));
   }
 
   /**
@@ -589,17 +589,17 @@ public class Drivetrain extends SubsystemBase {
     return currentZone == Zone.ALLIANCE_LEFT || currentZone == Zone.ALLIANCE_RIGHT;
   }
 
-  public ObjectDetectionCamera getObjCam() {
-    return objCam;
-  }
+  // public ObjectDetectionCamera getObjCam() {
+  //   return objCam;
+  // }
 
-  public boolean drivetrainSeesFuel() {
-    return getObjCam().getTargetCount() != 0.0;
-  }
+  // public boolean drivetrainSeesFuel() {
+  //   return getObjCam().getTargetCount() != 0.0;
+  // }
 
-  public Pose2d getAverageFuelPose() {
-    return averageFuelPose;
-  }
+  // public Pose2d getAverageFuelPose() {
+  //   return averageFuelPose;
+  // }
 
   @Override
   public void periodic() {
@@ -657,10 +657,10 @@ public class Drivetrain extends SubsystemBase {
     compensatedShotVector = exitVelocityVector.minus(robotVelocityVector);
 
     //we only use this one for rendering, consider removing if time is an issue
-    fuelConcentrationTranslation = objCam.getTranslationOfHighestConcentration(this);
+    // fuelConcentrationTranslation = objCam.getTranslationOfHighestConcentration(this);
     
-    averageFuelPose = new Pose2d(fuelConcentrationTranslation, TargetUtils.getTargetHeadingToPoint(getPose(), getObjCam().getTranslationOfHighestConcentration(this)));
-    setPoseSmartdash(averageFuelPose, "Average Fuel Pose");
+    // averageFuelPose = new Pose2d(fuelConcentrationTranslation, TargetUtils.getTargetHeadingToPoint(getPose(), getObjCam().getTranslationOfHighestConcentration(this)));
+    // setPoseSmartdash(averageFuelPose, "Average Fuel Pose");
 
     // setPoseSmartdash(KnownLocations.getKnownLocations().PASSING_TARGET_LEFT, "PassingLeft");
     // setPoseSmartdash(KnownLocations.getKnownLocations().PASSING_TARGET_RIGHT, "PassingRight");    
@@ -694,12 +694,12 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putBoolean("Drivetrain/gyroIsCalibrating", gyro.isCalibrating());
     SmartDashboard.putNumber("Drivetrain/pointOfHighestFuelConcentrationRelativeToTheRobotXCoordinatePosition", fuelConcentrationTranslation.getX());
     SmartDashboard.putNumber("Drivetrain/pointOfHighestFuelConcentrationRelativeToTheRobotYCoordinatePosition", fuelConcentrationTranslation.getY());
-    SmartDashboard.putNumber("Drivetrain/fuelCamCount", objCam.getTargetCount());
+    // SmartDashboard.putNumber("Drivetrain/fuelCamCount", objCam.getTargetCount());
     SmartDashboard.putNumber("Drivetrain/getCompVectorMag", MercMath.metersPerSecondToRPM(getCompensatedVector().getNorm(), 2.0));
     SmartDashboard.putNumber("Drivetrain/getCompVectorDir", getCompensatedVector().getAngle().getDegrees());
 
     SmartDashboard.putBoolean("Drivetrain/isPointingAtVector", isPointingAtVector());
-
+    SmartDashboard.putNumber("Drivetrain/distanceToHub", getPose().getTranslation().getDistance(KnownLocations.getKnownLocations().HUB.getTranslation()));
   }
 
   public enum Zone {

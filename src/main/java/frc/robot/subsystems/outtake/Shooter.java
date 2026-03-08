@@ -30,7 +30,7 @@ public class Shooter extends SubsystemBase {
     private final SparkClosedLoopController leaderClosedLoop;
     private LaserCan lc;
     private Drivetrain drivetrain;
-    private double THRESHOLD_RPM = 100.0; // TODO: tune this threshold
+    private double THRESHOLD_RPM = 250.0; // TODO: tune this threshold
 
     private double setRPM = 0.0;
 
@@ -62,14 +62,14 @@ public class Shooter extends SubsystemBase {
             .outputRange(-1.0, 1.0)
             .feedForward.kV(velocityFF);
 
-        leader_config.inverted(true);
+        leader_config.inverted(false);
 
         // Build the shooter SparkMaxConfig inline (previously in ShooterConfigs)
         SparkFlexConfig follower_config_left = new SparkFlexConfig();
         follower_config_left.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
         // use RPM units for encoder velocity here (1.0 = pass-through)
         follower_config_left.encoder.velocityConversionFactor(1.0);
-        follower_config_left.follow(Constants.CAN.SHOOTER, true);//assumes invert of leader affects followers
+        follower_config_left.follow(Constants.CAN.SHOOTER, true);//assumes invert of leader affects followers. which is true
 
         SparkFlexConfig follower_config_right = new SparkFlexConfig();
         follower_config_right.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
@@ -117,11 +117,11 @@ public class Shooter extends SubsystemBase {
     }
 
     public void increaseRPM() {
-        setRPM = setRPM + 250.0;
+        setRPM = setRPM + 50.0;
     }
 
     public void decreaseRPM() {
-        setRPM = setRPM - 250.0;
+        setRPM = setRPM - 50.0;
     }
 
     public double getSetRPM() {
@@ -138,8 +138,12 @@ public class Shooter extends SubsystemBase {
         }
     }
 
+    public boolean isShooterAtManualShotRPM() {
+        return Math.abs(getVelocityRPM()) > 2400;
+    }
+
     public boolean isAtShootingRPM() {
-        return Math.abs(MercMath.metersPerSecondToRPM(drivetrain.getCompensatedVector().getNorm(), 2.0) - getVelocityRPM()) < THRESHOLD_RPM;
+        return Math.abs(getSetRPM() - getVelocityRPM()) < THRESHOLD_RPM;
     }
     public boolean fuelInShooter(){
         LaserCan.Measurement measurement;

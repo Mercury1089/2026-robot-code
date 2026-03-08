@@ -20,13 +20,13 @@ public class Indexer extends SubsystemBase {
     SparkMaxConfig indexerConfig = new SparkMaxConfig();
 
     indexerConfig.idleMode(IdleMode.kBrake)
-        .inverted(true);
+        .inverted(false);
 
     indexer.configure(indexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   public enum IndexerSpeed {
-    INDEX(1.0),
+    INDEX(.5),
     STOP(0.0);
 
     public final double speed;

@@ -55,10 +55,10 @@ public class Hood extends SubsystemBase {
                 .positionConversionFactor(360.0)
                 .zeroCentered(true); // -180 to 180
         hoodConfig.softLimit//TODO: tweak rotation values as necessary, potentially disable zeroCentered
-                .forwardSoftLimitEnabled(false)
-                .forwardSoftLimit(320.0)
-                .reverseSoftLimitEnabled(false)
-                .reverseSoftLimit(191.0);
+                .forwardSoftLimitEnabled(true)
+                .forwardSoftLimit(130.0)
+                .reverseSoftLimitEnabled(true)
+                .reverseSoftLimit(-150.0);
 
         hood.configure(hoodConfig, ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
@@ -118,7 +118,7 @@ public class Hood extends SubsystemBase {
         double distance = TargetUtils.getDistanceToPoint(drivetrain.getPose(), point);
         // double var = 4.9 * (distance*distance) / (velocity*velocity);
         // double discriminant = (distance*distance) + (4*var*-50) - (4*var*var);//50 is eyeballed lol fix it later
-        // //TODO: test the hell out of this, especially RADIANSTOHOODANGLE
+        // //TODO: test the hell out of this, especially RADIANSTOHOODANGLE. also does not account for shooting while moving
         // if (discriminant > 0)
         //     return Math.atan((distance-Math.sqrt(discriminant)) / (2*var)) * RADIANSTOHOODANGLE;
         // return 0.0;

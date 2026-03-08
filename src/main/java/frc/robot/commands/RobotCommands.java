@@ -15,6 +15,7 @@ import frc.robot.subsystems.hopper.Indexer;
 import frc.robot.subsystems.hopper.Indexer.IndexerSpeed;
 import frc.robot.subsystems.intake.Articulator;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.Intake.IntakeSpeed;
 import frc.robot.subsystems.outtake.Hood;
 import frc.robot.subsystems.outtake.Kicker;
 import frc.robot.subsystems.outtake.Shooter;
@@ -31,7 +32,7 @@ public class RobotCommands {
     // Considers that the default pos of the articulator is at SAFE POS
     public static Command intake(Intake intake, Articulator articulator) {
         return new ParallelCommandGroup(
-            new RunCommand(() -> intake.setSpeed(Intake.IntakeSpeed.INTAKE), intake),
+            new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake),
             new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator)
         );
     }
@@ -124,8 +125,8 @@ public class RobotCommands {
                 setUpToShootAuton(shooter, hood, articulator).until(canFire),
                 new ParallelCommandGroup(
                     setUpToShootAuton(shooter, hood, articulator), // You want to keep setting up while firing
-                    feedShooter(indexer, kicker),
-                    agitateIntake(articulator)
+                    feedShooter(indexer, kicker)
+                    // agitateIntake(articulator)
                 ).withTimeout(3),//always shoot for 3 seconds, TODO: adjust later as needed
                 stopFire(shooter, kicker, articulator, indexer)
             )

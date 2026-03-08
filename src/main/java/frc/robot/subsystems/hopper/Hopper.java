@@ -19,8 +19,8 @@ import frc.robot.Constants;
 
 public class Hopper extends SubsystemBase {
     // private SparkMax hopper;
-    private LaserCan lc, lc2;
-    private ProximitySensor proxSensor;
+    // private LaserCan lc, lc2;
+    // private ProximitySensor proxSensor;
     // private double setPosition;
     // Changed to 1 and 2 to FRONT and BACK for clarity
     // private DigitalInput hopperBreakBeamFront;
@@ -40,8 +40,8 @@ public class Hopper extends SubsystemBase {
         // this.hopperBreakBeamFront = new DigitalInput(HOPPER_BREAKBEAM_FRONT);
         // this.hopperBreakBeamBack = new DigitalInput(HOPPER_BREAKBEAM_BACK);
 
-        lc = new LaserCan(Constants.CAN.LASER_CAN_HOPPER_1);
-        lc2 = new LaserCan(Constants.CAN.LASER_CAN_HOPPER_2);
+        // lc = new LaserCan(Constants.CAN.LASER_CAN_HOPPER_1);
+        // lc2 = new LaserCan(Constants.CAN.LASER_CAN_HOPPER_2);
 
     }
 
@@ -67,17 +67,17 @@ public class Hopper extends SubsystemBase {
 
     //!hopperBreakBeam1.get() is true if it is blocked (has fuel)
     //TODO: tweak values if necessary
-    public boolean hopperIsFull(){
-        LaserCan.Measurement measurement1 = lc.getMeasurement();
-        LaserCan.Measurement measurement2 = lc2.getMeasurement();
-        return  ((measurement1 != null && measurement1.distance_mm < 110) && (measurement2 != null && measurement2.distance_mm < 110));
-    }
+    // public boolean hopperIsFull(){
+    //     LaserCan.Measurement measurement1 = lc.getMeasurement();
+    //     LaserCan.Measurement measurement2 = lc2.getMeasurement();
+    //     return  ((measurement1 != null && measurement1.distance_mm < 110) && (measurement2 != null && measurement2.distance_mm < 110));
+    // }
 
-    public boolean hopperIsEmpty(){
-        LaserCan.Measurement measurement1 = lc.getMeasurement();
-        LaserCan.Measurement measurement2 = lc2.getMeasurement();
-        return  (measurement1 != null && measurement1.distance_mm > 110) && (measurement2 != null && measurement2.distance_mm > 110);
-    }
+    // public boolean hopperIsEmpty(){
+    //     LaserCan.Measurement measurement1 = lc.getMeasurement();
+    //     LaserCan.Measurement measurement2 = lc2.getMeasurement();
+    //     return  (measurement1 != null && measurement1.distance_mm > 110) && (measurement2 != null && measurement2.distance_mm > 110);
+    // }
 
     // public boolean hasFuel() {
     //     return frontHasFuel() || backHasFuel();
@@ -91,16 +91,16 @@ public class Hopper extends SubsystemBase {
     //     return frontHasFuel() && backHasFuel();
     // }
 
-    @Override
-    public void periodic() {
-        LaserCan.Measurement measurement = lc.getMeasurement();
-        if (measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT) {
-            SmartDashboard.putNumber("Hopper/LaserCanMeasurement", measurement.distance_mm);
-        }
-        SmartDashboard.putBoolean("Hopper/isHopperFull", hopperIsFull());
-        SmartDashboard.putBoolean("Hopper/isHopperEmpty", hopperIsEmpty());
+    // @Override
+    // public void periodic() {
+    //     LaserCan.Measurement measurement = lc.getMeasurement();
+    //     if (measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT) {
+    //         SmartDashboard.putNumber("Hopper/LaserCanMeasurement", measurement.distance_mm);
+    //     }
+    //     SmartDashboard.putBoolean("Hopper/isHopperFull", hopperIsFull());
+    //     SmartDashboard.putBoolean("Hopper/isHopperEmpty", hopperIsEmpty());
         
-        // SmartDashboard.putBoolean("Hopper/ProxSensorIsTriggered", proxSensor.isTriggered());
-        // SmartDashboard.putNumber("Hopper/ProxSensorDistance", proxSensor.getProximity());
-    }
+    //     // SmartDashboard.putBoolean("Hopper/ProxSensorIsTriggered", proxSensor.isTriggered());
+    //     // SmartDashboard.putNumber("Hopper/ProxSensorDistance", proxSensor.getProximity());
+    // }
 }

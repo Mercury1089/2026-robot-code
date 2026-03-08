@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -97,7 +98,9 @@ public class RobotContainer {
 
     shooter = new Shooter(drivetrain);
     drivetrain.setShooter(shooter);
-    // In the final code, the default should always be setting shooter speed to getStaticShootingRPM()
+    // In the final code, the default should always be s 
+    
+    // etting shooter speed to getStaticShootingRPM()
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM()), shooter));
 
@@ -134,7 +137,7 @@ public class RobotContainer {
     
     intake.setDefaultCommand(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
     
-    shooter.setDefaultCommand(new RunCommand(() -> shooter.goToSetRPM(), shooter));
+    shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(1000.0), shooter));
     
     hood.setDefaultCommand(new RunCommand(() -> hood.setSpeed(gamepadRightY), hood));
     // hood.setDefaultCommand(new RunCommand(() -> hood.goToSetPosition(), hood));
@@ -143,7 +146,7 @@ public class RobotContainer {
 
     indexer.setDefaultCommand(new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer));
 
-    articulator.setDefaultCommand(new RunCommand(() -> articulator.setSpeed(gamepadLeftY), articulator));
+    articulator.setDefaultCommand(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
     // articulator.setDefaultCommand(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
 
     /**
@@ -170,7 +173,7 @@ public class RobotContainer {
       new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker)
     ));
 
-    gamepadLT.onTrue(new ParallelCommandGroup(
+    gamepadB.onTrue(new ParallelCommandGroup(
       new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer),
       new RunCommand(() -> kicker.setSpeed(KickerSpeed.STOP), kicker)
     ));
@@ -179,17 +182,18 @@ public class RobotContainer {
     // gamepadB.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(720.0), shooter));
     gamepadA.onTrue(new InstantCommand(() -> shooter.increaseRPM(), shooter));
     gamepadB.onTrue(new InstantCommand(() -> shooter.decreaseRPM(), shooter));
+    // gamepadRightStickButton.onTrue(new InstantCommand(() -> shooter.setVelocityRPM(3000), shooter));
 
     // gamepadY.whileTrue(new RunCommand(() -> hood.setPosition(ArticulatorPosition.OUT), hood)); put back later
-    gamepadX.onTrue(new InstantCommand(() -> hood.plusOneDegree(), hood));
-    gamepadY.onTrue(new InstantCommand(() -> hood.minusOneDegree(), hood));
+    // gamepadX.onTrue(new InstantCommand(() -> hood.plusOneDegree(), hood));
+    // gamepadY.onTrue(new InstantCommand(() -> hood.minusOneDegree(), hood));
 
-    gamepadRB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
-    gamepadLB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
+    gamepadLB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
+    gamepadRB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
 
     // right1.onTrue(new InstantCommand(() -> leds.toggleAutoShoot(), leds));
 
-    gamepadLeftStickButton.whileTrue(RobotCommands.agitateIntake(articulator));
+    // gamepadLeftStickButton.whileTrue(RobotCommands.agitateIntake(articulator));
 
     // right1.whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
 
@@ -198,7 +202,7 @@ public class RobotContainer {
      */
     // left3.whileTrue(DriveCommands.shootOnTheMove(drivetrain));
     
-    left2.onTrue(DriveCommands.safelyDriveOverBump(leftJoystickY, leftJoystickX, drivetrain));
+    // left2.onTrue(DriveCommands.safelyDriveOverBump(leftJoystickY, leftJoystickX, drivetrain));
 
     right8.onTrue(DriveCommands.lockToHub(leftJoystickY, leftJoystickX, drivetrain));
 
@@ -206,9 +210,9 @@ public class RobotContainer {
      * INTAKE COMMANDS
      */
     // left1.whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
-    Trigger fuelInRange = new Trigger(() -> drivetrain.drivetrainSeesFuel() && DriverStation.isTeleop());
+    // Trigger fuelInRange = new Trigger(() -> drivetrain.drivetrainSeesFuel() && DriverStation.isTeleop());
     
-    left1.and(right1.negate()).and(fuelInRange).whileTrue(DriveCommands.autoPickUp(leftJoystickX, leftJoystickY, drivetrain));
+    // left1.and(right1.negate()).and(fuelInRange).whileTrue(DriveCommands.autoPickUp(leftJoystickX, leftJoystickY, drivetrain));
     left1.whileTrue(RobotCommands.intake(intake, articulator));
 
     /**
@@ -223,19 +227,37 @@ public class RobotContainer {
     // Trigger startFiring = new Trigger(() -> leds.isAutoShootEnabled()); // Don't think this is necessary as you will shoot/stop frequently
     // right1.whileTrue(RobotCommands.fire(shooter, kicker, hood, indexer, drivetrain));
 
-    right1.whileTrue(DriveCommands.shootOnTheMove(drivetrain))
-      .onFalse(new InstantCommand(() -> leds.disableAutoShoot(), leds));
+    // right1.whileTrue(DriveCommands.shootOnTheMove(drivetrain))
+    //   .onFalse(new InstantCommand(() -> leds.disableAutoShoot(), leds));
 
-    Trigger canPass = new Trigger(() -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && !drivetrain.isDrivetrainInAllianceZone() && DriverStation.isTeleop());
-    Trigger canShoot = new Trigger(() -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && drivetrain.isDrivetrainInAllianceZone() && drivetrain.getShift().isOurHubActive() && DriverStation.isTeleop());
-    canPass.or(canShoot).onTrue(new InstantCommand(() -> leds.enableAutoShoot(), leds));
+    // Trigger canPass = new Trigger(() -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && !drivetrain.isDrivetrainInAllianceZone() && DriverStation.isTeleop());
+    // Trigger canShoot = new Trigger(() -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && drivetrain.isDrivetrainInAllianceZone() && drivetrain.getShift().isOurHubActive() && DriverStation.isTeleop());
+    // canPass.or(canShoot).onTrue(new InstantCommand(() -> leds.enableAutoShoot(), leds));
 
-    Trigger autoShooting = new Trigger(() -> leds.isAutoShootEnabled() && DriverStation.isTeleop());
-    autoShooting.whileTrue(
-      new ParallelCommandGroup(
-        RobotCommands.feedShooter(indexer, kicker),
-        RobotCommands.intake(intake, articulator)
-      ));
+    // Trigger autoShooting = new Trigger(() -> leds.isAutoShootEnabled() && DriverStation.isTeleop());
+    // autoShooting.whileTrue(
+    //   new ParallelCommandGroup(
+    //     RobotCommands.feedShooter(indexer, kicker),
+    //     RobotCommands.intake(intake, articulator)
+    //   ));
+
+    right1.whileTrue(
+      new SequentialCommandGroup(
+        new ParallelCommandGroup(
+          // new RunCommand(() -> hood.setPosition(0.0), hood),
+          DriveCommands.lockToHub(leftJoystickY, leftJoystickX, drivetrain),
+          new RunCommand(() -> shooter.setVelocityRPM(2600.0), shooter)
+        ).until(() -> /*hood.isInPosition() && */shooter.isShooterAtManualShotRPM()),
+        new ParallelCommandGroup(
+          // new RunCommand(() -> hood.setPosition(0.0), hood),
+          DriveCommands.lockToHub(leftJoystickY, leftJoystickX, drivetrain),
+          new RunCommand(() -> shooter.setVelocityRPM(2600.0), shooter),
+          new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer),
+          new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker)
+        )
+      )
+    );
+    
   }
 
   public Drivetrain getDrivetrain() {

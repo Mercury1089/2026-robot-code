@@ -31,7 +31,7 @@ public class Kicker extends SubsystemBase {
     }
 
     public enum KickerSpeed {
-        INDEX(1.0),
+        INDEX(0.5),
         STOP(0.0);
 
         public final double speed;

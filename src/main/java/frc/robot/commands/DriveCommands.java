@@ -143,12 +143,12 @@ public class DriveCommands {
         return targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain);
     }
 
-    public static Command autoPickUp(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Drivetrain drivetrain) {
-        Supplier<Double> headingSupplier = () -> drivetrain.getAverageFuelPose().getRotation().getDegrees();
+    // public static Command autoPickUp(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Drivetrain drivetrain) {
+    //     Supplier<Double> headingSupplier = () -> drivetrain.getAverageFuelPose().getRotation().getDegrees();
 
-        return new ParallelCommandGroup(
-            targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain));
-    }
+    //     return new ParallelCommandGroup(
+    //         targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain));
+    // }
 
     public static Command shootOnTheMove(Drivetrain drivetrain){
         return new ParallelCommandGroup(

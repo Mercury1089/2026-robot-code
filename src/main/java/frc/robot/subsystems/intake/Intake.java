@@ -19,7 +19,7 @@ public class Intake extends SubsystemBase {
     SparkFlexConfig intakeConfig = new SparkFlexConfig();
 
     intakeConfig.idleMode(IdleMode.kBrake)
-        .inverted(true);
+        .inverted(false);
 
     intake.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }

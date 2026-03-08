@@ -48,8 +48,8 @@ public final class Constants {
     // public static final double WHEEL_LENGTH = 28.5; // distance between left/right wheels (in inches)
 
     // wheel distances
-    public static final double WHEEL_WIDTH = 23.5; // distance between front/back wheels (in inches)
-    public static final double WHEEL_LENGTH = 28.5; // distance between left/right wheels (in inches)
+    public static final double WHEEL_WIDTH = 27-2*(2+5/8); // distance between front/back wheels (in inches)
+    public static final double WHEEL_LENGTH = 27-2*(2+5/8); // distance between left/right wheels (in inches)
 
     // Distance from center to farthest wheel
     public static final double WHEEL_RADIUS = (new Translation2d(Units.inchesToMeters(WHEEL_WIDTH / 2),Units.inchesToMeters(WHEEL_WIDTH / 2))).getNorm();
@@ -134,7 +134,7 @@ public final class Constants {
     public static final int LASER_CAN_KICKER = 24;
 
     public static final int INDEXER = 25;
-    public static final int HOPPER = 26;
+    // public static final int HOPPER = 26;
     public static final int KICKER = 27;
     public static final int INTAKE = 28;
     public static final int ARTICULATOR = 29;
