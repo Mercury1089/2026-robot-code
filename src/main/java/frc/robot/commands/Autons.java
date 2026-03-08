@@ -32,6 +32,11 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 // import frc.robot.sensors.DistanceSensors;
 import frc.robot.subsystems.drivetrain.Drivetrain;
+import frc.robot.subsystems.hopper.Indexer;
+import frc.robot.subsystems.hopper.Indexer.IndexerSpeed;
+import frc.robot.subsystems.outtake.Kicker;
+import frc.robot.subsystems.outtake.Kicker.KickerSpeed;
+import frc.robot.subsystems.outtake.Shooter;
 import frc.robot.util.KnownLocations;
 import frc.robot.util.PathUtils;
 import frc.robot.util.TargetUtils;
@@ -55,10 +60,16 @@ public class Autons {
     private Drivetrain drivetrain;
     // private DistanceSensors proximitySensor;
     private RobotConfig config;
+    private Shooter shooter;
+    private Indexer indexer;
+    private Kicker kicker;
 
-    public Autons(Drivetrain drivetrain) {
+    public Autons(Drivetrain drivetrain, Shooter shooter, Indexer indexer, Kicker kicker) {
         // TODO: Put correct settings into PathPlanner GUI for the new robot
         this.drivetrain = drivetrain;
+        this.shooter = shooter;
+        this.indexer = indexer;
+        this.kicker = kicker;
 
         KnownLocations knownLocations = KnownLocations.getKnownLocations();
         this.alliance = knownLocations.alliance;
@@ -118,34 +129,75 @@ public class Autons {
     public Command buildAutonCommand(KnownLocations knownLocations) {
         // TODO: Add this logic in KnownLocations, and make sure to update based on alliance changes
         // drivetrain.resetPose(startingPose);
-        // drivetrain.setStartingPosition(startingPose);
-        String autoName = "";
+        // drivetrain.setStartingPosition(startingPose); Do we need this?
+        SequentialCommandGroup autonCommand = new SequentialCommandGroup();
 
         switch (autoType) {
             case LEFT:
-                autoName = "left";
+                try {
+                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToFarLeftNeutralZoneToLeftShoot")));
+                } catch (Exception e) {
+                    
+                }
                 break;
             case MIDDLE:
-                autoName = "middle";
                 break;
             case RIGHT:
-                autoName = "right";
+                try {
+                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("rightStartToFarRightNeutralZoneToRightShoot")));
+                } catch (Exception e) {
+                
+                }
                 break;
             case SIMPLE_AUTO:
-                autoName = "simple_auto";
                 break;
             default:
-                autoName = "left";
                 break;
         }
 
+        List<PathPlannerPath> paths = new ArrayList<>();
+
+        if (autoType == AutonType.RIGHT) {
+            try {
+                paths.add(PathPlannerPath.fromPathFile("rightStartToFarRightNeutralZoneToRightShoot"));
+            } catch (Exception e) {
+            
+            }
+        } else if (autoType == AutonType.LEFT) {
+             try {
+                paths.add(PathPlannerPath.fromPathFile("leftStartToFarLeftNeutralZoneToLeftShoot"));
+            } catch (Exception e) {
+                
+            }
+        }
+
         try {
-            displayPaths(PathPlannerAuto.getPathGroupFromAutoFile(autoName));
+            displayPaths(paths);
         } catch (Exception e) {
             // TODO: handle exception
         }
 
-        return new PathPlannerAuto(autoName);
+        SequentialCommandGroup shootCommand =
+            new SequentialCommandGroup(
+                new ParallelCommandGroup(
+                // new RunCommand(() -> hood.setPosition(0.0), hood),
+                DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain),
+                new RunCommand(() -> shooter.setVelocityRPM(2600.0), shooter)
+                ).until(() -> /*hood.isInPosition() && */shooter.isShooterAtManualShotRPM()),
+                new ParallelCommandGroup(
+                // new RunCommand(() -> hood.setPosition(0.0), hood),
+                DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain),
+                new RunCommand(() -> shooter.setVelocityRPM(2600.0), shooter),
+                new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer),
+                new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker)
+                )
+            );
+
+        autonCommand.addCommands(
+            shootCommand
+        );
+
+        return autonCommand;
     }
 
     public PathPlannerPath getBasePath() {

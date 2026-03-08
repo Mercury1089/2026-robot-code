@@ -80,12 +80,12 @@
     },
     {
       "anchor": {
-        "x": 3.221,
-        "y": 2.51
+        "x": 1.0797720848,
+        "y": 2.5
       },
       "prevControl": {
-        "x": 5.968223186449224,
-        "y": 2.6743865957680772
+        "x": 3.628686501597259,
+        "y": 2.732911378742517
       },
       "nextControl": null,
       "isLocked": false,
@@ -94,8 +94,16 @@
   ],
   "rotationTargets": [
     {
+      "waypointRelativePos": 1.4285714285714257,
+      "rotationDegrees": 45.0
+    },
+    {
       "waypointRelativePos": 3.0326678765879906,
       "rotationDegrees": 90.0
+    },
+    {
+      "waypointRelativePos": 4.072494669509531,
+      "rotationDegrees": -135.0
     },
     {
       "waypointRelativePos": 4.346642468239531,
@@ -106,9 +114,43 @@
       "rotationDegrees": -138.0
     }
   ],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 4.105334233625928,
+      "maxWaypointRelativePos": 5.0,
+      "constraints": {
+        "maxVelocity": 2.0,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    },
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.0,
+      "maxWaypointRelativePos": 0.7022282241728562,
+      "constraints": {
+        "maxVelocity": 2.0,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "intake",
+      "waypointRelativePos": 1.7825793382849295,
+      "endWaypointRelativePos": 3.7812288993922434,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -119,7 +161,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -138.0
+    "rotation": -149.65675111576056
   },
   "reversed": false,
   "folder": null,

@@ -114,7 +114,7 @@ public class KnownLocations {
             
             // need right values for these, just placeholders for now
             TOWER_LEFT = PathPointInch(42.510712, 200.0, 180.0);
-            TOWER_RIGHT = PathPointInch(42.510712, 159.0, 180.0);
+            TOWER_RIGHT = PathPointInch(42.510712, 98.4252, 180.0);
         } else {
             // Assumes we start with the robot facing away
             zeroGyroRotation = Rotation2d.fromDegrees(180);

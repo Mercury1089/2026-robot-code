@@ -9,12 +9,6 @@
           "data": {
             "pathName": "leftStartToFarLeftNeutralZoneToLeftShoot"
           }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "leftShootToMiddleLeftNeutralZoneToLeftShoot"
-          }
         }
       ]
     }
