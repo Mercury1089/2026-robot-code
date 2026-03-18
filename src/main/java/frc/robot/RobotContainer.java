@@ -98,9 +98,8 @@ public class RobotContainer {
 
     shooter = new Shooter(drivetrain);
     drivetrain.setShooter(shooter);
-    // In the final code, the default should always be s 
-    
-    // etting shooter speed to getStaticShootingRPM()
+    // In the final code, the default should always be  
+    // setting shooter speed to getStaticShootingRPM()
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM()), shooter));
 
@@ -138,6 +137,7 @@ public class RobotContainer {
     intake.setDefaultCommand(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
     
     shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(1000.0), shooter));
+    // shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
     
     hood.setDefaultCommand(new RunCommand(() -> hood.setSpeed(() -> 0.0), hood));
     // hood.setDefaultCommand(new RunCommand(() -> hood.setSpeed(gamepadRightY), hood));
@@ -148,7 +148,6 @@ public class RobotContainer {
     indexer.setDefaultCommand(new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer));
 
     articulator.setDefaultCommand(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
-    // articulator.setDefaultCommand(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
 
     /**
      * MANUAL CONTROL
@@ -160,7 +159,7 @@ public class RobotContainer {
     gamepadPOVLeft.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
     gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
     gamepadPOVRight.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
-    
+      
     // gamepadA.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
     //   new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")) 
     // );
@@ -169,15 +168,15 @@ public class RobotContainer {
     //   new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")) 
     // );
 
-    gamepadRT.onTrue(new ParallelCommandGroup(
-      new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer),
-      new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker)
-    ));
+    // gamepadRT.onTrue(new ParallelCommandGroup(
+    //   new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer),
+    //   new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker)
+    // ));
 
-    gamepadB.onTrue(new ParallelCommandGroup(
-      new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer),
-      new RunCommand(() -> kicker.setSpeed(KickerSpeed.STOP), kicker)
-    ));
+    // gamepadB.onTrue(new ParallelCommandGroup(
+    //   new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer),
+    //   new RunCommand(() -> kicker.setSpeed(KickerSpeed.STOP), kicker)
+    // ));
 
     // gamepadA.whileTrue(new RunCommand(() -> shooter.setSpeed(0.25), shooter));
     // gamepadB.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(720.0), shooter));
@@ -193,6 +192,12 @@ public class RobotContainer {
     gamepadLB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
     gamepadRB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
 
+    gamepadY.whileTrue(new RunCommand(() -> hood.setSpeed(gamepadLeftY), hood));
+
+    gamepadA.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(2800), shooter));
+    gamepadB.whileTrue(new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer));
+    gamepadX.whileTrue(new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker));
+
     // right1.onTrue(new InstantCommand(() -> leds.toggleAutoShoot(), leds));
 
     // gamepadLeftStickButton.whileTrue(RobotCommands.agitateIntake(articulator));
@@ -202,7 +207,7 @@ public class RobotContainer {
     /**
      * DRIVETRAIN AUTOMATION
      */
-    // left3.whileTrue(DriveCommands.shootOnTheMove(drivetrain));
+    left3.whileTrue(DriveCommands.shootOnTheMove(leftJoystickY, leftJoystickX, drivetrain));
     
     // left2.onTrue(DriveCommands.safelyDriveOverBump(leftJoystickY, leftJoystickX, drivetrain));
 
@@ -221,10 +226,7 @@ public class RobotContainer {
      * SHOOTING/PASSING COMMANDS
      */
 
-    // Trigger startFiring = new Trigger(() -> leds.isAutoShootEnabled()); // Don't think this is necessary as you will shoot/stop frequently
-    // right1.whileTrue(RobotCommands.fire(shooter, kicker, hood, indexer, drivetrain));
-
-    // right1.whileTrue(DriveCommands.shootOnTheMove(drivetrain))
+    // right1.whileTrue(DriveCommands.shootOnTheMove(leftJoystickY, leftJoystickX, drivetrain))
     //   .onFalse(new InstantCommand(() -> leds.disableAutoShoot(), leds));
 
     // Trigger canPass = new Trigger(() -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && !drivetrain.isDrivetrainInAllianceZone() && DriverStation.isTeleop());

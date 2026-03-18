@@ -24,7 +24,8 @@ public class Kicker extends SubsystemBase {
 
     lc = new LaserCan(Constants.CAN.LASER_CAN_KICKER);
 
-        kickerConfig.idleMode(IdleMode.kCoast)
+        kickerConfig.idleMode(IdleMode.kBrake
+        )
                 .inverted(true);
 
         kicker.configure(kickerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);

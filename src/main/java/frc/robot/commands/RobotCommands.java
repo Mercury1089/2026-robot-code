@@ -90,8 +90,8 @@ public class RobotCommands {
         return new ParallelCommandGroup(
             prepareHood(hood),
             setShooterToHubRPM(shooter),
-            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator),
-            DriveCommands.shootOnTheMove(drivetrain)
+            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator)
+            // DriveCommands.shootOnTheMove(drivetrain)
         );
     }
 
@@ -127,7 +127,7 @@ public class RobotCommands {
                     setUpToShootAuton(shooter, hood, articulator), // You want to keep setting up while firing
                     feedShooter(indexer, kicker)
                     // agitateIntake(articulator)
-                ).withTimeout(3),//always shoot for 3 seconds, TODO: adjust later as needed
+                ).withTimeout(3),//always shoot for 3 seconds, TODO: adjust later as needed  Why??
                 stopFire(shooter, kicker, articulator, indexer)
             )
         );

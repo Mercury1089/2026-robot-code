@@ -1,5 +1,6 @@
 package frc.robot.subsystems.outtake;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -19,7 +20,10 @@ import com.revrobotics.spark.FeedbackSensor;
 
 import frc.robot.Constants;
 import frc.robot.subsystems.drivetrain.Drivetrain;
+import frc.robot.subsystems.drivetrain.Drivetrain.Zone;
+import frc.robot.util.KnownLocations;
 import frc.robot.util.MercMath;
+import frc.robot.util.TargetUtils;
 
 /** Shooter subsystem with two NEO motors controlled by SPARK MAX closed-loop velocity control. */
 public class Shooter extends SubsystemBase {
@@ -32,7 +36,7 @@ public class Shooter extends SubsystemBase {
     private Drivetrain drivetrain;
     private double THRESHOLD_RPM = 250.0; // TODO: tune this threshold
 
-    private double setRPM = 0.0;
+    private double setRPM = 0.0, desiredFireRPM = 0.0;
 
     public Shooter(Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
@@ -131,11 +135,27 @@ public class Shooter extends SubsystemBase {
     // Make sure to return RPM, as in the Drivetrain periodic we convert this to m/s using MercMath.RPMToMetersPerSecond()
     // Write an if-statement to see if you are passing or shooting, and return the appropriate RPM for each case
     public double getStaticShootingRPM() {
+        Translation2d point = new Translation2d();
+
+        if(drivetrain.isDrivetrainInAllianceZone() || drivetrain.getCurrentZone() == Zone.BETWEEN) {
+            point = KnownLocations.getKnownLocations().HUB.getTranslation();
+        } else if(drivetrain.getCurrentZone() == Zone.NEUTRAL_LEFT) {
+            point = KnownLocations.getKnownLocations().PASSING_TARGET_LEFT.getTranslation();
+        } else if(drivetrain.getCurrentZone() == Zone.NEUTRAL_RIGHT) {
+            point = KnownLocations.getKnownLocations().PASSING_TARGET_RIGHT.getTranslation();
+        }
+
+        double distance = TargetUtils.getDistanceToPoint(drivetrain.getPose(), point);
+
         if(drivetrain.isDrivetrainInAllianceZone()) {//TODO: tweak values as necessary
             return 4000.0;
         } else { 
             return 4000.0; // Enter the passing function (this is the only spot to enter any passing information)
         }
+    }
+
+    public void setFireVelocity() {
+        setVelocityRPM(MercMath.metersPerSecondToRPM(drivetrain.getCompensatedVector().getNorm(), 2.0));
     }
 
     public boolean isShooterAtManualShotRPM() {

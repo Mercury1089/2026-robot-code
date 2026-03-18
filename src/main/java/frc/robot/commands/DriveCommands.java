@@ -166,14 +166,14 @@ public class DriveCommands {
     //         targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain));
     // }
 
-    public static Command shootOnTheMove(Drivetrain drivetrain){
+    public static Command shootOnTheMove(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Drivetrain drivetrain){
         return new ParallelCommandGroup(
-            // targetDrive(xSupplier, ySupplier, () -> drivetrain.getCompensatedVector().getAngle().getDegrees(), drivetrain)
-            new SequentialCommandGroup(
-                new InstantCommand(() -> drivetrain.setXDirStraight(), drivetrain),
-                new InstantCommand(() -> drivetrain.setYDirStraight(), drivetrain),
-                DriveCommands.driveStraightAtAngle(() -> drivetrain.getCompensatedVector().getAngle().getDegrees(), drivetrain)
-            )
+            targetDrive(xSupplier, ySupplier, () -> drivetrain.getCompensatedVector().getAngle().getDegrees(), drivetrain)
+            // new SequentialCommandGroup(
+            //     new InstantCommand(() -> drivetrain.setXDirStraight(), drivetrain),
+            //     new InstantCommand(() -> drivetrain.setYDirStraight(), drivetrain),
+            //     DriveCommands.driveStraightAtAngle(() -> drivetrain.getCompensatedVector().getAngle().getDegrees(), drivetrain)
+            // )
         );
     }
 }

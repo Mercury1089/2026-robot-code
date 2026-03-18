@@ -30,7 +30,7 @@ public class Hood extends SubsystemBase {
     private SparkMax hood;
     private SparkClosedLoopController hoodClosedLoopController;
     private AbsoluteEncoder absoluteEncoder;
-    private double setPosition;
+    private double setPosition, desiredSetPosition;
     
     private Drivetrain drivetrain;
     
@@ -56,9 +56,9 @@ public class Hood extends SubsystemBase {
                 .zeroCentered(true); // -180 to 180
         hoodConfig.softLimit//TODO: tweak rotation values as necessary, potentially disable zeroCentered
                 .forwardSoftLimitEnabled(true)
-                .forwardSoftLimit(150.0)
+                .forwardSoftLimit(75.0)
                 .reverseSoftLimitEnabled(true)
-                .reverseSoftLimit(-114.0);
+                .reverseSoftLimit(-127.0);
 
         hood.configure(hoodConfig, ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
@@ -67,6 +67,7 @@ public class Hood extends SubsystemBase {
 
         absoluteEncoder = hood.getAbsoluteEncoder();
         setPosition = getPosition();
+        desiredSetPosition = getPosition();
     }
 
     public double getSetPosition() {
@@ -107,7 +108,7 @@ public class Hood extends SubsystemBase {
     public double getHoodToFirePosition() {
         Translation2d point = new Translation2d();
 
-        if(drivetrain.isDrivetrainInAllianceZone()) {
+        if(drivetrain.isDrivetrainInAllianceZone() || drivetrain.getCurrentZone() == Zone.BETWEEN) {
             point = KnownLocations.getKnownLocations().HUB.getTranslation();
         } else if(drivetrain.getCurrentZone() == Zone.NEUTRAL_LEFT) {
             point = KnownLocations.getKnownLocations().PASSING_TARGET_LEFT.getTranslation();
@@ -116,17 +117,15 @@ public class Hood extends SubsystemBase {
         }
 
         double distance = TargetUtils.getDistanceToPoint(drivetrain.getPose(), point);
-        // double var = 4.9 * (distance*distance) / (velocity*velocity);
-        // double discriminant = (distance*distance) + (4*var*-50) - (4*var*var);//50 is eyeballed lol fix it later
-        // //TODO: test the hell out of this, especially RADIANSTOHOODANGLE. also does not account for shooting while moving
-        // if (discriminant > 0)
-        //     return Math.atan((distance-Math.sqrt(discriminant)) / (2*var)) * RADIANSTOHOODANGLE;
-        // return 0.0;
         if(drivetrain.isDrivetrainInAllianceZone()) {
             return 0.0; // shooting function
         } else {
             return 0.0; // passing function
         }
+    }
+
+    public void setHoodToFirePosition() {
+        setPosition(desiredSetPosition);
     }
 
     public boolean isAtPosition(double pos) {
@@ -143,6 +142,8 @@ public class Hood extends SubsystemBase {
 
     @Override
     public void periodic() {
+        desiredSetPosition = getHoodToFirePosition();
+        
         // This method will be called once per scheduler run
         SmartDashboard.putNumber("Hood/Position", getPosition());
         SmartDashboard.putBoolean("Hood/hoodIsInPosition", isInPosition());

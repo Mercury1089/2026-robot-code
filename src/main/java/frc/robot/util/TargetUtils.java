@@ -60,7 +60,8 @@ public class TargetUtils {
     public static double getDistanceToPoint(Pose2d pose, Translation2d point) {
         return pose.getTranslation().getDistance(point);
     }
-     public static Rotation2d getTargetHeadingToFuel(Pose2d robotPose, PhotonTrackedTarget target) {
+
+    public static Rotation2d getTargetHeadingToFuel(Pose2d robotPose, PhotonTrackedTarget target) {
         Rotation2d targetRotation = Rotation2d.fromDegrees(-target.getYaw());
         return target.getYaw() != 0.0 ?
             robotPose.rotateBy(targetRotation).getRotation() :
@@ -70,8 +71,6 @@ public class TargetUtils {
    public static Translation2d getFuelTranslation(PhotonTrackedTarget target, Pose2d robotPose, double distance) {
         return new Translation2d(distance + Units.inchesToMeters(5.0), getTargetHeadingToFuel(robotPose, target)).plus(robotPose.getTranslation());
    }
-
-   
 }
 
 
