@@ -692,12 +692,11 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putString("Drivetrain/gameMessage", DriverStation.getGameSpecificMessage());
     SmartDashboard.putNumber("Drivetrain/gyroReading", gyro.getRotation2d().getDegrees());
     SmartDashboard.putBoolean("Drivetrain/gyroIsCalibrating", gyro.isCalibrating());
-    SmartDashboard.putNumber("Drivetrain/pointOfHighestFuelConcentrationRelativeToTheRobotXCoordinatePosition", fuelConcentrationTranslation.getX());
-    SmartDashboard.putNumber("Drivetrain/pointOfHighestFuelConcentrationRelativeToTheRobotYCoordinatePosition", fuelConcentrationTranslation.getY());
+    // SmartDashboard.putNumber("Drivetrain/pointOfHighestFuelConcentrationRelativeToTheRobotXCoordinatePosition", fuelConcentrationTranslation.getX());
+    // SmartDashboard.putNumber("Drivetrain/pointOfHighestFuelConcentrationRelativeToTheRobotYCoordinatePosition", fuelConcentrationTranslation.getY());
     // SmartDashboard.putNumber("Drivetrain/fuelCamCount", objCam.getTargetCount());
     SmartDashboard.putNumber("Drivetrain/getCompVectorMag", MercMath.metersPerSecondToRPM(getCompensatedVector().getNorm(), 2.0));
     SmartDashboard.putNumber("Drivetrain/getCompVectorDir", getCompensatedVector().getAngle().getDegrees());
-
     SmartDashboard.putBoolean("Drivetrain/isPointingAtVector", isPointingAtVector());
     SmartDashboard.putNumber("Drivetrain/distanceToHub", getPose().getTranslation().getDistance(KnownLocations.getKnownLocations().HUB.getTranslation()));
   }

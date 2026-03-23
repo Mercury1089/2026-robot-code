@@ -137,6 +137,7 @@ public class RobotContainer {
     intake.setDefaultCommand(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
     
     shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(1000.0), shooter));
+    // shooter.setDefaultCommand(new RunCommand(() -> shooter.goToSetRPM(), shooter));
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
     
     hood.setDefaultCommand(new RunCommand(() -> hood.setSpeed(() -> 0.0), hood));
@@ -180,8 +181,8 @@ public class RobotContainer {
 
     // gamepadA.whileTrue(new RunCommand(() -> shooter.setSpeed(0.25), shooter));
     // gamepadB.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(720.0), shooter));
-    // gamepadA.onTrue(new InstantCommand(() -> shooter.increaseRPM(), shooter));
-    // gamepadB.onTrue(new InstantCommand(() -> shooter.decreaseRPM(), shooter));
+    gamepadA.onTrue(new InstantCommand(() -> shooter.increaseRPM(), shooter));
+    gamepadB.onTrue(new InstantCommand(() -> shooter.decreaseRPM(), shooter));
     // gamepadPOVDown.whileTrue(new RunCommand(() -> hood.setSpeed(gamepadRightY), hood));
     // gamepadRightStickButton.onTrue(new InstantCommand(() -> shooter.setVelocityRPM(3000), shooter));
 
@@ -194,9 +195,9 @@ public class RobotContainer {
 
     gamepadY.whileTrue(new RunCommand(() -> hood.setSpeed(gamepadLeftY), hood));
 
-    gamepadA.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(2800), shooter));
-    gamepadB.whileTrue(new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer));
-    gamepadX.whileTrue(new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker));
+    // gamepadA.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(2800), shooter));
+    // gamepadB.whileTrue(new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer));
+    // gamepadX.whileTrue(new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker));
 
     // right1.onTrue(new InstantCommand(() -> leds.toggleAutoShoot(), leds));
 
