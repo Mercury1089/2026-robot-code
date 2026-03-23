@@ -90,12 +90,12 @@ public class Drivetrain extends SubsystemBase {
   private Rotation2d rotationDirStraight = new Rotation2d();
 
   private Transform3d rightCamTransform3d = new Transform3d(
-      new Translation3d(Units.inchesToMeters(-3.625), Units.inchesToMeters(9.75), Units.inchesToMeters(26+2.5)),
-      new Rotation3d(0.0, Rotation2d.fromDegrees(-15).getRadians(), Rotation2d.fromDegrees(180+35).getRadians()));
+      new Translation3d(Units.inchesToMeters(-3), Units.inchesToMeters(11.5), Units.inchesToMeters(25.5+2.5)),
+      new Rotation3d(0.0, Rotation2d.fromDegrees(-15).getRadians(), Rotation2d.fromDegrees(180).getRadians()));
 
   private Transform3d leftCamTransform3d = new Transform3d(
-      new Translation3d(Units.inchesToMeters(-3.625), Units.inchesToMeters(-9.75), Units.inchesToMeters(26+2.5)),
-      new Rotation3d(0.0, Rotation2d.fromDegrees(-15).getRadians(), Rotation2d.fromDegrees(180-35).getRadians()));
+      new Translation3d(Units.inchesToMeters(-3), Units.inchesToMeters(-11.5), Units.inchesToMeters(25.5+2.5)),
+      new Rotation3d(0.0, Rotation2d.fromDegrees(-15).getRadians(), Rotation2d.fromDegrees(180).getRadians()));
 
   // // distance between wheels
   private final double WHEEL_WIDTH = 27-2*(2+5/8); // distance between front/back wheels (in inches)
