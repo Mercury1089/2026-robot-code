@@ -145,7 +145,7 @@ public class Hood extends SubsystemBase {
         desiredSetPosition = getHoodToFirePosition();
         
         // This method will be called once per scheduler run
-        SmartDashboard.putNumber("Hood/Position", getPosition());
+        SmartDashboard.putNumber("Hood/hoodPosition", getPosition());
         SmartDashboard.putBoolean("Hood/hoodIsInPosition", isInPosition());
 
     }

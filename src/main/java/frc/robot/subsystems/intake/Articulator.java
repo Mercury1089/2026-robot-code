@@ -54,9 +54,9 @@ public class Articulator extends SubsystemBase {
       .zeroCentered(true); // -180 to 180 
     articulatorConfig.softLimit
       .forwardSoftLimitEnabled(true)
-      .forwardSoftLimit(54.0)
+      .forwardSoftLimit(50.0)
       .reverseSoftLimitEnabled(true)
-      .reverseSoftLimit(-50.0);
+      .reverseSoftLimit(-32.0);
     
     articulator.configure(articulatorConfig, ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
@@ -107,15 +107,15 @@ public class Articulator extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("Articulator/Position", getPosition());
+    SmartDashboard.putNumber("Articulator/articulatorPosition", getPosition());
     SmartDashboard.putBoolean("Articulator/isInPosition", isInPosition());
 
   }
   
   public enum ArticulatorPosition {//TODO: tweak rotation values as necessary, potentially disable zeroCentered
-    IN(30.0),
-    SAFE(-17.0),
-    OUT(-50.0);
+    IN(47.0),
+    SAFE(0.0),
+    OUT(-32.0);
     
     public final double degreePos;
       ArticulatorPosition(double degreePos) {

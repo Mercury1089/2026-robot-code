@@ -149,6 +149,7 @@ public class RobotContainer {
     indexer.setDefaultCommand(new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer));
 
     articulator.setDefaultCommand(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
+    // articulator.setDefaultCommand(new RunCommand(() -> articulator.setSpeed(gamepadRightY), articulator));
 
     /**
      * MANUAL CONTROL
@@ -247,12 +248,12 @@ public class RobotContainer {
         new ParallelCommandGroup(
           // new RunCommand(() -> hood.setPosition(0.0), hood),
           DriveCommands.lockToNearestDrivingAction(leftJoystickY, leftJoystickX, drivetrain),
-          new RunCommand(() -> shooter.setVelocityRPM(2700.0), shooter)
+          new RunCommand(() -> shooter.setVelocityRPM(2600.0), shooter)
         ).until(() -> /*hood.isInPosition() && */shooter.isShooterAtManualShotRPM()),
         new ParallelCommandGroup(
           // new RunCommand(() -> hood.setPosition(0.0), hood),
           DriveCommands.lockToNearestDrivingAction(leftJoystickY, leftJoystickX, drivetrain),
-          new RunCommand(() -> shooter.setVelocityRPM(2700.0), shooter),
+          new RunCommand(() -> shooter.setVelocityRPM(2600.0), shooter),
           new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer),
           new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker)
         )
