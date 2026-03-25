@@ -26,7 +26,7 @@ public class Indexer extends SubsystemBase {
   }
 
   public enum IndexerSpeed {
-    INDEX(.5),
+    INDEX(1.0),
     STOP(0.0);
 
     public final double speed;

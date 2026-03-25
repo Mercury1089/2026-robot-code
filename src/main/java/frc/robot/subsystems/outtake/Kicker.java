@@ -24,15 +24,15 @@ public class Kicker extends SubsystemBase {
 
     lc = new LaserCan(Constants.CAN.LASER_CAN_KICKER);
 
-        kickerConfig.idleMode(IdleMode.kBrake
-        )
-                .inverted(true);
+        kickerConfig.idleMode(IdleMode.kBrake)
+                .inverted(true)
+                .openLoopRampRate(.2);
 
         kicker.configure(kickerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     public enum KickerSpeed {
-        INDEX(1),
+        INDEX(1.0),
         STOP(0.0);
 
         public final double speed;

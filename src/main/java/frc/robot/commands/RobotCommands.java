@@ -57,9 +57,9 @@ public class RobotCommands {
 
     public static Command agitateIntake(Articulator articulator) {
         return new SequentialCommandGroup(
-            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator).until(() -> articulator.isAtPosition(ArticulatorPosition.IN)),
-            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator).until(() -> articulator.isAtPosition(ArticulatorPosition.SAFE))
-        ).repeatedly();
+            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator).withTimeout(2.0),
+            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator).until(() -> articulator.isAtPosition(ArticulatorPosition.IN))
+        );
     }
 
     public static Command runIndex(Indexer index) {
