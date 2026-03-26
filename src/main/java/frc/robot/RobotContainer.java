@@ -140,8 +140,12 @@ public class RobotContainer {
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getSmartDashRPM()), shooter));
     shooter.setDefaultCommand(new RunCommand(() -> shooter.goToSetRPM(), shooter));
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
+    // Uncomment below for final robot
+    // shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM()), shooter));
     
     hood.setDefaultCommand(new RunCommand(() -> hood.setSpeed(() -> 0.0), hood));
+    // Uncomment below for final robot
+    // hood.setDefaultCommand(new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition()), hood));
     // hood.setDefaultCommand(new RunCommand(() -> hood.setSpeed(gamepadRightY), hood));
     // hood.setDefaultCommand(new RunCommand(() -> hood.goToSetPosition(), hood));
     
@@ -244,7 +248,7 @@ public class RobotContainer {
     // autoShooting.whileTrue(
     //   new ParallelCommandGroup(
     //     RobotCommands.feedShooter(indexer, kicker),
-    //     RobotCommands.intake(intake, articulator)
+    //     RobotCommands.agitateIntake(articulator)
     //   ));
 
     // remove lockToHub if nearestShootingLock works as it will be a double drivetrain requirement

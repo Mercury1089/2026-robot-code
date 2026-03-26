@@ -125,7 +125,7 @@ public class Hood extends SubsystemBase {
     }
 
     public void setHoodToFirePosition() {
-        setPosition(desiredSetPosition);
+        setPosition(getHoodToFirePosition());
     }
 
     public boolean isAtPosition(double pos) {

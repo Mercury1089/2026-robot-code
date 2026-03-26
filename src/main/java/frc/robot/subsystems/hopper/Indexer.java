@@ -20,6 +20,7 @@ public class Indexer extends SubsystemBase {
     SparkMaxConfig indexerConfig = new SparkMaxConfig();
 
     indexerConfig.idleMode(IdleMode.kBrake)
+        .openLoopRampRate(.2)
         .inverted(false);
 
     indexer.configure(indexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);

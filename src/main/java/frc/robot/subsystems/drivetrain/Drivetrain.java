@@ -586,7 +586,7 @@ public class Drivetrain extends SubsystemBase {
 
   public boolean isDrivetrainInAllianceZone() {
     Zone currentZone = getCurrentZone();
-    return currentZone == Zone.ALLIANCE_LEFT || currentZone == Zone.ALLIANCE_RIGHT;
+    return currentZone == Zone.ALLIANCE_LEFT || currentZone == Zone.ALLIANCE_RIGHT || currentZone == Zone.BETWEEN;
   }
 
   // public ObjectDetectionCamera getObjCam() {

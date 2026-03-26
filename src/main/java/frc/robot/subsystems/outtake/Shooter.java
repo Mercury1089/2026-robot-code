@@ -166,7 +166,8 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setFireVelocity() {
-        setVelocityRPM(MercMath.metersPerSecondToRPM(drivetrain.getCompensatedVector().getNorm(), 2.0));
+        setVelocityRPM(getStaticShootingRPM());
+        // setVelocityRPM(MercMath.metersPerSecondToRPM(drivetrain.getCompensatedVector().getNorm(), 2.0));
     }
 
     public boolean isShooterAtManualShotRPM() {
