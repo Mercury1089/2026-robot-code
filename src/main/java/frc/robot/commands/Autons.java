@@ -132,10 +132,26 @@ public class Autons {
         // drivetrain.setStartingPosition(startingPose); Do we need this?
         SequentialCommandGroup autonCommand = new SequentialCommandGroup();
 
+        ArrayList<PathPlannerPath> paths = new ArrayList<>();
+
+        SequentialCommandGroup shootCommand = new SequentialCommandGroup(
+                new ParallelCommandGroup(
+                        // new RunCommand(() -> hood.setPosition(0.0), hood),
+                        DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain),
+                        new RunCommand(() -> shooter.setVelocityRPM(2600.0), shooter))
+                        .until(() -> /* hood.isInPosition() && */shooter.isShooterAtManualShotRPM()),
+                new ParallelCommandGroup(
+                        // new RunCommand(() -> hood.setPosition(0.0), hood),
+                        DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain),
+                        new RunCommand(() -> shooter.setVelocityRPM(2600.0), shooter),
+                        new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer),
+                        new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker)));
+
         switch (autoType) {
             case LEFT:
                 try {
-                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToFarLeftNeutralZoneToLeftShoot")));
+                    paths.add(PathPlannerPath.fromPathFile("leftStartToFarLeftNeutralZoneToLeftShoot"));
+                    autonCommand.addCommands(AutoBuilder.followPath(paths.get(0)));
                 } catch (Exception e) {
                     
                 }
@@ -144,55 +160,58 @@ public class Autons {
                 break;
             case RIGHT:
                 try {
-                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("rightStartToFarRightNeutralZoneToRightShoot")));
+                    paths.add(PathPlannerPath.fromPathFile("rightStartToFarRightNeutralZoneToRightShoot"));
+                    autonCommand.addCommands(AutoBuilder.followPath(paths.get(0)));
                 } catch (Exception e) {
                 
                 }
                 break;
             case SIMPLE_AUTO_LEFT:
                 try {
-                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToShoot")));
+                    paths.add(PathPlannerPath.fromPathFile("leftStartToShoot"));
+                    autonCommand.addCommands(AutoBuilder.followPath(paths.get(0)));
                 } catch (Exception e) {
                 
                 }
                 break;
             case SIMPLE_AUTO_RIGHT:
                 try {
-                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("rightStartToShoot")));
+                    paths.add(PathPlannerPath.fromPathFile("rightStartToShoot"));
+                    autonCommand.addCommands(AutoBuilder.followPath(paths.get(0)));
                 } catch (Exception e) {
                 
                 }
                 break;
+            case DOUBLE_SWEEP_LEFT:
+                try {
+                    paths.add(PathPlannerPath.fromPathFile("leftStartToOutsideSweepToLeftShoot"));
+                    paths.add(PathPlannerPath.fromPathFile("leftStartToInsideSweepToLeftShoot"));
+                    autonCommand.addCommands(
+                        AutoBuilder.followPath(paths.get(0)),
+                        shootCommand.withTimeout(3.0),
+                        AutoBuilder.followPath(paths.get(1)),
+                        shootCommand
+                    );
+                } catch (Exception e) {
+                    
+                }
+                break;
+            case DOUBLE_SWEEP_RIGHT:
+                try {
+                    paths.add(PathPlannerPath.fromPathFile("rightStartToOutsideSweepToRightShoot"));
+                    paths.add(PathPlannerPath.fromPathFile("rightStartToInsideSweepToRightShoot"));
+                    autonCommand.addCommands(
+                        AutoBuilder.followPath(paths.get(0)),
+                        shootCommand.withTimeout(3.0),
+                        AutoBuilder.followPath(paths.get(1)),
+                        shootCommand
+                    );
+                } catch (Exception e) {
+                    
+                }
+                break;
             default:
                 break;
-        }
-
-        List<PathPlannerPath> paths = new ArrayList<>();
-
-        if (autoType == AutonType.RIGHT) {
-            try {
-                paths.add(PathPlannerPath.fromPathFile("rightStartToFarRightNeutralZoneToRightShoot"));
-            } catch (Exception e) {
-            
-            }
-        } else if (autoType == AutonType.LEFT) {
-             try {
-                paths.add(PathPlannerPath.fromPathFile("leftStartToFarLeftNeutralZoneToLeftShoot"));
-            } catch (Exception e) {
-                
-            }
-        } else if (autoType == AutonType.SIMPLE_AUTO_LEFT) {
-            try {
-                paths.add(PathPlannerPath.fromPathFile("leftStartToShoot"));
-            } catch (Exception e) {
-            
-            }
-        } else if (autoType == AutonType.SIMPLE_AUTO_RIGHT) {
-            try {
-                paths.add(PathPlannerPath.fromPathFile("rightStartToShoot"));
-            } catch (Exception e) {
-            
-            }
         }
 
         try {
@@ -200,26 +219,6 @@ public class Autons {
         } catch (Exception e) {
             // TODO: handle exception
         }
-
-        SequentialCommandGroup shootCommand =
-            new SequentialCommandGroup(
-                new ParallelCommandGroup(
-                // new RunCommand(() -> hood.setPosition(0.0), hood),
-                DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain),
-                new RunCommand(() -> shooter.setVelocityRPM(2600.0), shooter)
-                ).until(() -> /*hood.isInPosition() && */shooter.isShooterAtManualShotRPM()),
-                new ParallelCommandGroup(
-                // new RunCommand(() -> hood.setPosition(0.0), hood),
-                DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain),
-                new RunCommand(() -> shooter.setVelocityRPM(2600.0), shooter),
-                new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer),
-                new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker)
-                )
-            );
-
-        autonCommand.addCommands(
-            shootCommand
-        );
 
         return autonCommand;
     }
@@ -274,6 +273,8 @@ public class Autons {
         autonTypeChooser.addOption("LEFT", AutonType.LEFT);
         autonTypeChooser.addOption("SIMPLE_LEFT", AutonType.SIMPLE_AUTO_LEFT);
         autonTypeChooser.addOption("SIMPLE_RIGHT", AutonType.SIMPLE_AUTO_RIGHT);
+        autonTypeChooser.addOption("DOUBLE_SWEEP_LEFT", AutonType.DOUBLE_SWEEP_LEFT);
+        autonTypeChooser.addOption("DOUBLE_SWEEP_RIGHT", AutonType.DOUBLE_SWEEP_RIGHT);
 
 
         SmartDashboard.putData("Auton Type Chooser", autonTypeChooser);
@@ -288,6 +289,8 @@ public class Autons {
         SIMPLE_AUTO_RIGHT,
         LEFT,
         MIDDLE,
-        RIGHT;
+        RIGHT,
+        DOUBLE_SWEEP_LEFT,
+        DOUBLE_SWEEP_RIGHT
     }
 }
