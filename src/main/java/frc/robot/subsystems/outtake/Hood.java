@@ -116,11 +116,10 @@ public class Hood extends SubsystemBase {
             point = KnownLocations.getKnownLocations().PASSING_TARGET_RIGHT.getTranslation();
         }
 
-        double distance = TargetUtils.getDistanceToPoint(drivetrain.getPose(), point);
         if(drivetrain.isDrivetrainInAllianceZone()) {
-            return 0.0; // shooting function
+            return HoodPosition.SHOOT.pos; // shooting function
         } else {
-            return 0.0; // passing function
+            return HoodPosition.FERRY.pos; // passing function
         }
     }
 
@@ -150,4 +149,14 @@ public class Hood extends SubsystemBase {
 
     }
     
+    public enum HoodPosition {
+        FERRY(-22.0),
+        SHOOT(-127.0);//the one we used for our equations for
+
+        public final double pos;
+
+        HoodPosition(double pos) {
+            this.pos = pos;
+        }
+    }
 }

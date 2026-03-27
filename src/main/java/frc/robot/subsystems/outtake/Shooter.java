@@ -41,7 +41,7 @@ public class Shooter extends SubsystemBase {
     private double setRPM = 0.0, desiredFireRPM = 0.0;
     private double smartdashRPM = 0.0;
 
-    double kP = 0.0001, kS = 0.2, freeRPMs = 5400.0;
+    double kP = 0.000025, kS = 0.2, freeRPMs = 5400.0;
 
     public Shooter(Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
@@ -156,12 +156,13 @@ public class Shooter extends SubsystemBase {
             point = KnownLocations.getKnownLocations().PASSING_TARGET_RIGHT.getTranslation();
         }
 
-        double distance = TargetUtils.getDistanceToPoint(drivetrain.getPose(), point);
+        double d = TargetUtils.getDistanceToPoint(drivetrain.getPose(), point);
 
-        if(drivetrain.isDrivetrainInAllianceZone()) {//TODO: tweak values as necessary
-            return 4000.0;
+        if(drivetrain.isDrivetrainInAllianceZone()) {
+            return 1152 + (873 * d) + (-309 * Math.pow(d, 2)) + (65.4 * Math.pow(d, 3)) + (-5.11 * Math.pow(d, 4));
         } else { 
-            return 4000.0; // Enter the passing function (this is the only spot to enter any passing information)
+            double final_rpm = (159 * d) + 1553;
+            return Math.min(3500.0, final_rpm); // Enter the passing function (this is the only spot to enter any passing information)
         }
     }
 

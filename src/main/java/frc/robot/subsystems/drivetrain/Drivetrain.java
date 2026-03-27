@@ -698,7 +698,10 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Drivetrain/getCompVectorMag", MercMath.metersPerSecondToRPM(getCompensatedVector().getNorm(), 2.0));
     SmartDashboard.putNumber("Drivetrain/getCompVectorDir", getCompensatedVector().getAngle().getDegrees());
     SmartDashboard.putBoolean("Drivetrain/isPointingAtVector", isPointingAtVector());
-    SmartDashboard.putNumber("Drivetrain/distanceToHub", getPose().getTranslation().getDistance(KnownLocations.getKnownLocations().HUB.getTranslation()));
+    SmartDashboard.putNumber("Drivetrain/distanceToLeftPos", getPose().getTranslation().getDistance(KnownLocations.getKnownLocations().PASSING_TARGET_LEFT.getTranslation()));
+    SmartDashboard.putNumber("Drivetrain/distanceToRightPos", getPose().getTranslation().getDistance(KnownLocations.getKnownLocations().PASSING_TARGET_RIGHT.getTranslation()));SmartDashboard.putNumber("Drivetrain/distanceToHub", getPose().getTranslation().getDistance(KnownLocations.getKnownLocations().HUB.getTranslation()));
+
+
   }
 
   public enum Zone {
