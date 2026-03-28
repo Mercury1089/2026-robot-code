@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.util.KnownLocations;
 import com.reduxrobotics.canand.CanandEventLoop;
+import com.revrobotics.util.StatusLogger;
 
 import au.grapplerobotics.CanBridge;
 
@@ -38,7 +39,7 @@ public class Robot extends TimedRobot {
     // CanBridge.runTCP();
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    
+    StatusLogger.disableAutoLogging();
     m_robotContainer = new RobotContainer();
     // CanandEventLoop.getInstance();
     m_alliance = KnownLocations.getKnownLocations().alliance;

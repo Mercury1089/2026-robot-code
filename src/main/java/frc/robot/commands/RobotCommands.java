@@ -74,9 +74,9 @@ public class RobotCommands {
         return new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition()), hood);
     }
 
-    public static Command setShooterToHubRPM(Shooter shooter) {
-        return new RunCommand(() -> shooter.setSpeed(shooter.getStaticShootingRPM()), shooter);
-    }
+    // public static Command setShooterToHubRPM(Shooter shooter) {
+    //     return new RunCommand(() -> shooter.setSpeed(shooter.getStaticShootingRPM(false)), shooter);
+    // }
 
     public static Command feedShooter(Indexer indexer, Kicker kicker) {
         return new ParallelCommandGroup(
@@ -86,22 +86,22 @@ public class RobotCommands {
         );
     }
 
-    public static Command setUpToShoot(Shooter shooter, Hood hood, Drivetrain drivetrain, Articulator articulator) {
-        return new ParallelCommandGroup(
-            prepareHood(hood),
-            setShooterToHubRPM(shooter),
-            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator)
-            // DriveCommands.shootOnTheMove(drivetrain)
-        );
-    }
+    // public static Command setUpToShoot(Shooter shooter, Hood hood, Drivetrain drivetrain, Articulator articulator) {
+    //     return new ParallelCommandGroup(
+    //         prepareHood(hood),
+    //         setShooterToHubRPM(shooter),
+    //         new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator)
+    //         // DriveCommands.shootOnTheMove(drivetrain)
+    //     );
+    // }
 
-    public static Command setUpToShootAuton(Shooter shooter, Hood hood, Articulator articulator) {
-        return new ParallelCommandGroup(
-            prepareHood(hood),
-            setShooterToHubRPM(shooter),
-            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator)
-        );
-    }
+    // public static Command setUpToShootAuton(Shooter shooter, Hood hood, Articulator articulator) {
+    //     return new ParallelCommandGroup(
+    //         prepareHood(hood),
+    //         setShooterToHubRPM(shooter),
+    //         new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator)
+    //     );
+    // }
 
     //auton
     public static Command stopFire(Shooter shooter, Kicker kicker, Articulator articulator, Indexer indexer) {
@@ -114,24 +114,24 @@ public class RobotCommands {
     }
 
 
-    //calls shootOnTheMove so it'll lock driving in a certain direction
-    public static Command fireAuton(Shooter shooter, Kicker kicker, Hood hood, Indexer indexer, Articulator articulator, Hopper hopper) {
-        BooleanSupplier canFire = 
-            () -> shooter.isAtShootingRPM() && 
-                    hood.isInPosition();
+    // //calls shootOnTheMove so it'll lock driving in a certain direction
+    // public static Command fireAuton(Shooter shooter, Kicker kicker, Hood hood, Indexer indexer, Articulator articulator, Hopper hopper) {
+    //     BooleanSupplier canFire = 
+    //         () -> shooter.isAtShootingRPM() && 
+    //                 hood.isInPosition();
         
-        return new SequentialCommandGroup(
-            new SequentialCommandGroup(
-                setUpToShootAuton(shooter, hood, articulator).until(canFire),
-                new ParallelCommandGroup(
-                    setUpToShootAuton(shooter, hood, articulator), // You want to keep setting up while firing
-                    feedShooter(indexer, kicker)
-                    // agitateIntake(articulator)
-                ).withTimeout(3),//always shoot for 3 seconds, TODO: adjust later as needed  Why??
-                stopFire(shooter, kicker, articulator, indexer)
-            )
-        );
-    }
+    //     return new SequentialCommandGroup(
+    //         new SequentialCommandGroup(
+    //             setUpToShootAuton(shooter, hood, articulator).until(canFire),
+    //             new ParallelCommandGroup(
+    //                 setUpToShootAuton(shooter, hood, articulator), // You want to keep setting up while firing
+    //                 feedShooter(indexer, kicker)
+    //                 // agitateIntake(articulator)
+    //             ).withTimeout(3),//always shoot for 3 seconds, TODO: adjust later as needed  Why??
+    //             stopFire(shooter, kicker, articulator, indexer)
+    //         )
+    //     );
+    // }
 
     // calls shootOnTheMove so it'll lock driving in a certain direction
     // we don't use this actually

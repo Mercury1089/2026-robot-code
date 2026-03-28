@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shift {
     private Alliance shift;
+    private String whoWonAuto = "";
 
     private boolean isHubActive = true;
     private double timeUntilTransition = 0;
@@ -51,11 +52,15 @@ public class Shift {
         this.manualAutonWinner = manualAutonWinner;
     }
 
+    public String getWhoWOnAuto() {
+        return whoWonAuto;
+    }
+
     public void updateStatesForTeleop() {
         if (!DriverStation.isTeleopEnabled())
             return;
 
-        String whoWonAuto = DriverStation.getGameSpecificMessage();
+        whoWonAuto = DriverStation.getGameSpecificMessage();
         boolean redIsWinner;
         switch (whoWonAuto) {
             case "R":

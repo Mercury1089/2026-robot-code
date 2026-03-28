@@ -143,11 +143,11 @@
     },
     {
       "waypointRelativePos": 6.0,
-      "rotationDegrees": 0.0
+      "rotationDegrees": 178.55851308944457
     },
     {
       "waypointRelativePos": 6.880597014925349,
-      "rotationDegrees": 0.0
+      "rotationDegrees": -177.14291696112858
     }
   ],
   "constraintZones": [
@@ -183,11 +183,22 @@
     {
       "name": "intake",
       "waypointRelativePos": 1.5395003376097307,
-      "endWaypointRelativePos": 6.125590817015506,
+      "endWaypointRelativePos": null,
       "command": {
         "type": "named",
         "data": {
           "name": "intake"
+        }
+      }
+    },
+    {
+      "name": "stopIntake",
+      "waypointRelativePos": 5.501688048615773,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "stopIntake"
         }
       }
     }

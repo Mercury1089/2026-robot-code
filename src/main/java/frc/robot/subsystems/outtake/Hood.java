@@ -24,7 +24,7 @@ import frc.robot.util.KnownLocations;
 import frc.robot.util.TargetUtils;
 
 public class Hood extends SubsystemBase {
-    public final double THRESHOLD_DEGREES = 0.5;
+    public final double THRESHOLD_DEGREES = 10.0;
     private final double RADIANSTOHOODANGLE = 100;
 
     private SparkMax hood;
@@ -46,7 +46,7 @@ public class Hood extends SubsystemBase {
                 .inverted(true);
         hoodConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-                .pid(1.0 / 10.0, 0, 0)
+                .pid(1.0 / 40.0, 0, 0)
                 // .positionWrappingEnabled(true) we don't actually want this
                 // .positionWrappingInputRange(0.0, 360.0)
                 .positionWrappingEnabled(false)

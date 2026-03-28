@@ -145,7 +145,7 @@ public class Shooter extends SubsystemBase {
     
     // Make sure to return RPM, as in the Drivetrain periodic we convert this to m/s using MercMath.RPMToMetersPerSecond()
     // Write an if-statement to see if you are passing or shooting, and return the appropriate RPM for each case
-    public double getStaticShootingRPM() {
+    public double getStaticShootingRPM(boolean passing) {
         Translation2d point = new Translation2d();
 
         if(drivetrain.isDrivetrainInAllianceZone() || drivetrain.getCurrentZone() == Zone.BETWEEN) {
@@ -160,16 +160,19 @@ public class Shooter extends SubsystemBase {
 
         if(drivetrain.isDrivetrainInAllianceZone()) {
             return 1152 + (873 * d) + (-309 * Math.pow(d, 2)) + (65.4 * Math.pow(d, 3)) + (-5.11 * Math.pow(d, 4));
-        } else { 
+        } else {
+            if (!passing) {
+                return 1000.0;
+            }
             double final_rpm = (159 * d) + 1553;
             return Math.min(3500.0, final_rpm); // Enter the passing function (this is the only spot to enter any passing information)
         }
     }
 
-    public void setFireVelocity() {
-        setVelocityRPM(getStaticShootingRPM());
-        // setVelocityRPM(MercMath.metersPerSecondToRPM(drivetrain.getCompensatedVector().getNorm(), 2.0));
-    }
+    // public void setFireVelocity() {
+    //     setVelocityRPM(getStaticShootingRPM());
+    //     // setVelocityRPM(MercMath.metersPerSecondToRPM(drivetrain.getCompensatedVector().getNorm(), 2.0));
+    // }
 
     public boolean isShooterAtManualShotRPM() {
         return Math.abs(getVelocityRPM()) > 2500;
@@ -195,31 +198,31 @@ public class Shooter extends SubsystemBase {
 
     public void periodic() {
         SmartDashboard.putNumber("Shooter/RPM", getVelocityRPM());
-        SmartDashboard.putNumber("Shooter/setRPM", setRPM);
+        // SmartDashboard.putNumber("Shooter/setRPM", setRPM);
 
         SmartDashboard.putBoolean("Shooter/isAtRPM", isAtShootingRPM());
-        // SmartDashboard.putBoolean("Shooter/isFuelInShooter", fuelInShooter());
+        // // SmartDashboard.putBoolean("Shooter/isFuelInShooter", fuelInShooter());
 
-        kP = SmartDashboard.getNumber("Shooter/kP", kP);
-        kS = SmartDashboard.getNumber("Shooter/kS", kS);
-        double ff = (MAX_VOLTAGE-kS) / SmartDashboard.getNumber("Shooter/freeRpms", freeRPMs);
-        smartdashRPM = SmartDashboard.getNumber("Shooter/smartDashRPM", 0.0);
+        // kP = SmartDashboard.getNumber("Shooter/kP", kP);
+        // kS = SmartDashboard.getNumber("Shooter/kS", kS);
+        // double ff = (MAX_VOLTAGE-kS) / SmartDashboard.getNumber("Shooter/freeRpms", freeRPMs);
+        // smartdashRPM = SmartDashboard.getNumber("Shooter/smartDashRPM", 0.0);
 
-        if (DriverStation.isDisabled()) {
-            setRPM = smartdashRPM;
-            SparkFlexConfig leader_config = new SparkFlexConfig();
+        // if (DriverStation.isDisabled()) {
+        //     setRPM = smartdashRPM;
+        //     SparkFlexConfig leader_config = new SparkFlexConfig();
 
-            double kI = 0.0;
-            double kD = 0.0;
-            // double nominalVoltage = 12.0;
-            leader_config.closedLoop
-                    .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                    .pid(kP, kI, kD)
-                    .outputRange(-1.0, 1.0).feedForward.kV(ff).kS(kS);
+        //     double kI = 0.0;
+        //     double kD = 0.0;
+        //     // double nominalVoltage = 12.0;
+        //     leader_config.closedLoop
+        //             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        //             .pid(kP, kI, kD)
+        //             .outputRange(-1.0, 1.0).feedForward.kV(ff).kS(kS);
             
-            leader.configure(leader_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        } 
+        //     leader.configure(leader_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        // } 
         
-        SmartDashboard.putNumber("Shooter/currentkS", leader.configAccessor.closedLoop.feedForward.getkS());
+        // SmartDashboard.putNumber("Shooter/currentkS", leader.configAccessor.closedLoop.feedForward.getkS());
     }
 }

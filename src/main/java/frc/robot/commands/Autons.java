@@ -3,6 +3,7 @@ package frc.robot.commands;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -30,10 +31,12 @@ import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 // import frc.robot.sensors.DistanceSensors;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.hopper.Indexer;
 import frc.robot.subsystems.hopper.Indexer.IndexerSpeed;
+import frc.robot.subsystems.outtake.Hood;
 import frc.robot.subsystems.outtake.Kicker;
 import frc.robot.subsystems.outtake.Kicker.KickerSpeed;
 import frc.robot.subsystems.outtake.Shooter;
@@ -63,13 +66,15 @@ public class Autons {
     private Shooter shooter;
     private Indexer indexer;
     private Kicker kicker;
+    private Hood hood;
 
-    public Autons(Drivetrain drivetrain, Shooter shooter, Indexer indexer, Kicker kicker) {
+    public Autons(Drivetrain drivetrain, Hood hood, Shooter shooter, Indexer indexer, Kicker kicker) {
         // TODO: Put correct settings into PathPlanner GUI for the new robot
         this.drivetrain = drivetrain;
         this.shooter = shooter;
         this.indexer = indexer;
         this.kicker = kicker;
+        this.hood = hood;
 
         KnownLocations knownLocations = KnownLocations.getKnownLocations();
         this.alliance = knownLocations.alliance;
@@ -133,25 +138,27 @@ public class Autons {
         SequentialCommandGroup autonCommand = new SequentialCommandGroup();
 
         ArrayList<PathPlannerPath> paths = new ArrayList<>();
+        
+        BooleanSupplier shooting = () -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && drivetrain.isDrivetrainInAllianceZone();
 
         SequentialCommandGroup shootCommand = new SequentialCommandGroup(
+                DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain).until(shooting),
                 new ParallelCommandGroup(
                         // new RunCommand(() -> hood.setPosition(0.0), hood),
                         DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain),
-                        new RunCommand(() -> shooter.setVelocityRPM(2600.0), shooter))
-                        .until(() -> /* hood.isInPosition() && */shooter.isShooterAtManualShotRPM()),
+                        RobotCommands.feedShooter(indexer, kicker)));
+        SequentialCommandGroup shootCommand2 = new SequentialCommandGroup(
+                DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain).until(shooting),
                 new ParallelCommandGroup(
                         // new RunCommand(() -> hood.setPosition(0.0), hood),
                         DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain),
-                        new RunCommand(() -> shooter.setVelocityRPM(2600.0), shooter),
-                        new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer),
-                        new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker)));
+                        RobotCommands.feedShooter(indexer, kicker)));
 
         switch (autoType) {
             case LEFT:
                 try {
                     paths.add(PathPlannerPath.fromPathFile("leftStartToFarLeftNeutralZoneToLeftShoot"));
-                    autonCommand.addCommands(AutoBuilder.followPath(paths.get(0)));
+                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToFarLeftNeutralZoneToLeftShoot")));
                 } catch (Exception e) {
                     
                 }
@@ -162,6 +169,7 @@ public class Autons {
                 try {
                     paths.add(PathPlannerPath.fromPathFile("rightStartToFarRightNeutralZoneToRightShoot"));
                     autonCommand.addCommands(AutoBuilder.followPath(paths.get(0)));
+                    autonCommand.addCommands(shootCommand);
                 } catch (Exception e) {
                 
                 }
@@ -170,6 +178,7 @@ public class Autons {
                 try {
                     paths.add(PathPlannerPath.fromPathFile("leftStartToShoot"));
                     autonCommand.addCommands(AutoBuilder.followPath(paths.get(0)));
+                    autonCommand.addCommands(shootCommand);
                 } catch (Exception e) {
                 
                 }
@@ -177,7 +186,8 @@ public class Autons {
             case SIMPLE_AUTO_RIGHT:
                 try {
                     paths.add(PathPlannerPath.fromPathFile("rightStartToShoot"));
-                    autonCommand.addCommands(AutoBuilder.followPath(paths.get(0)));
+                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("rightStartToShoot")));
+                    autonCommand.addCommands(shootCommand);
                 } catch (Exception e) {
                 
                 }
@@ -186,14 +196,12 @@ public class Autons {
                 try {
                     paths.add(PathPlannerPath.fromPathFile("leftStartToOutsideSweepToLeftShoot"));
                     paths.add(PathPlannerPath.fromPathFile("leftStartToInsideSweepToLeftShoot"));
-                    autonCommand.addCommands(
-                        AutoBuilder.followPath(paths.get(0)),
-                        shootCommand.withTimeout(3.0),
-                        AutoBuilder.followPath(paths.get(1)),
-                        shootCommand
-                    );
+                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToOutsideSweepToLeftShoot")));
+                    autonCommand.addCommands(shootCommand.withTimeout(3.0));
+                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToInsideSweepToLeftShoot")));
+                    autonCommand.addCommands(shootCommand2);
                 } catch (Exception e) {
-                    
+                    System.out.println(e.getMessage());
                 }
                 break;
             case DOUBLE_SWEEP_RIGHT:
@@ -201,10 +209,10 @@ public class Autons {
                     paths.add(PathPlannerPath.fromPathFile("rightStartToOutsideSweepToRightShoot"));
                     paths.add(PathPlannerPath.fromPathFile("rightStartToInsideSweepToRightShoot"));
                     autonCommand.addCommands(
-                        AutoBuilder.followPath(paths.get(0)),
+                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("rightStartToOutsideSweepToRightShoot")),
                         shootCommand.withTimeout(3.0),
-                        AutoBuilder.followPath(paths.get(1)),
-                        shootCommand
+                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("rightStartToInsideSweepToRightShoot")),
+                        shootCommand2
                     );
                 } catch (Exception e) {
                     

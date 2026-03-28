@@ -634,8 +634,10 @@ public class Drivetrain extends SubsystemBase {
     }
 
     smartdashField.setRobotPose(getPose());
-
-    shift.updateStatesForTeleop();
+    
+    if (shift.getWhoWOnAuto().equals("")) {
+      shift.updateStatesForTeleop();
+    }
 
     // Check if you are passing or shooting in hub
     if (getCurrentZone() == Zone.NEUTRAL_LEFT) {
@@ -652,7 +654,7 @@ public class Drivetrain extends SubsystemBase {
     // robotVelocityVector = new Translation2d(getXSpeeds(), getYSpeeds());
     robotVelocityVector = getVelocityVector(); // it might have to be this, needs to be tested, fix zeroGyro if it breaks
     
-    Translation2d exitVelocityVector = new Translation2d(MercMath.RPMToMetersPerSecond(shooter.getStaticShootingRPM(), 2.0),
+    Translation2d exitVelocityVector = new Translation2d(MercMath.RPMToMetersPerSecond(shooter.getStaticShootingRPM(false), 2.0),
         Rotation2d.fromDegrees(finalHeading));
     compensatedShotVector = exitVelocityVector.minus(robotVelocityVector);
 
@@ -668,38 +670,39 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Drivetrain/CurrentPose X", getPose().getX());
     SmartDashboard.putNumber("Drivetrain/CurrentPose Y", getPose().getY());
     SmartDashboard.putNumber("Drivetrain/getRotation", getRotation().getDegrees());
-    SmartDashboard.putBoolean("Drivetrain/isNotMoving", isNotMoving());
+    // SmartDashboard.putBoolean("Drivetrain/isNotMoving", isNotMoving());
     SmartDashboard.putNumber("Drivetrain/CurrentPose Rotation", getPose().getRotation().getDegrees());
     SmartDashboard.putNumber("Drivetrain/Drive Angle", getRotation().getDegrees());
-    SmartDashboard.putNumber("Drivetrain/gyroOffset", gyroOffset.getDegrees());
+    // SmartDashboard.putNumber("Drivetrain/gyroOffset", gyroOffset.getDegrees());
     SmartDashboard.putBoolean("Drivetrain/isLeftCamUpdating",
         leftResult.isPresent() && !leftCam.rejectUpdate(leftResult.get()));
     SmartDashboard.putBoolean("Drivetrain/isRightCamUpdating",
         rightResult.isPresent() && !rightCam.rejectUpdate(rightResult.get()));
-    SmartDashboard.putNumber("Drivetrain/safeBumpingAngle", getSafeBumpingAngle());
-    SmartDashboard.putNumber("Drivetrain/xVelocity", getVelocityVector().getX());
-    SmartDashboard.putNumber("Drivetrain/yVelocity", getVelocityVector().getY());
-    SmartDashboard.putNumber("Drivetrain/xSpeedCappedStraight", getXSpeedCappedStraightDrive());
-    SmartDashboard.putNumber("Drivetrain/ySpeedCappedStraight", getYSpeedCappedStraightDrive());
+    // SmartDashboard.putNumber("Drivetrain/safeBumpingAngle", getSafeBumpingAngle());
+    // SmartDashboard.putNumber("Drivetrain/xVelocity", getVelocityVector().getX());
+    // SmartDashboard.putNumber("Drivetrain/yVelocity", getVelocityVector().getY());
+    // SmartDashboard.putNumber("Drivetrain/xSpeedCappedStraight", getXSpeedCappedStraightDrive());
+    // SmartDashboard.putNumber("Drivetrain/ySpeedCappedStraight", getYSpeedCappedStraightDrive());
     SmartDashboard.putData(smartdashField);
     SmartDashboard.putNumber("Drivetrain/shootHereAngle", compensatedShotVector.getAngle().getDegrees());
     SmartDashboard.putNumber("Drivetrain/headingToHub", finalHeading);
-    SmartDashboard.putNumber("Drivetrain/headingThingIDK",
-        this.getPose().getRotation().plus(KnownLocations.getKnownLocations().zeroGyroRotation).getDegrees());
+    // SmartDashboard.putNumber("Drivetrain/headingThingIDK",
+        // this.getPose().getRotation().plus(KnownLocations.getKnownLocations().zeroGyroRotation).getDegrees());
     SmartDashboard.putString("Drivetrain/currentZone", getCurrentZone().getString());
     SmartDashboard.putBoolean("Drivetrain/isInAllianceZone", isDrivetrainInAllianceZone());
     SmartDashboard.putBoolean("Shift/isOurHubActive", shift.isOurHubActive());
     SmartDashboard.putString("Drivetrain/gameMessage", DriverStation.getGameSpecificMessage());
-    SmartDashboard.putNumber("Drivetrain/gyroReading", gyro.getRotation2d().getDegrees());
-    SmartDashboard.putBoolean("Drivetrain/gyroIsCalibrating", gyro.isCalibrating());
+    // SmartDashboard.putNumber("Drivetrain/gyroReading", gyro.getRotation2d().getDegrees());
+    // SmartDashboard.putBoolean("Drivetrain/gyroIsCalibrating", gyro.isCalibrating());
     // SmartDashboard.putNumber("Drivetrain/pointOfHighestFuelConcentrationRelativeToTheRobotXCoordinatePosition", fuelConcentrationTranslation.getX());
     // SmartDashboard.putNumber("Drivetrain/pointOfHighestFuelConcentrationRelativeToTheRobotYCoordinatePosition", fuelConcentrationTranslation.getY());
     // SmartDashboard.putNumber("Drivetrain/fuelCamCount", objCam.getTargetCount());
-    SmartDashboard.putNumber("Drivetrain/getCompVectorMag", MercMath.metersPerSecondToRPM(getCompensatedVector().getNorm(), 2.0));
-    SmartDashboard.putNumber("Drivetrain/getCompVectorDir", getCompensatedVector().getAngle().getDegrees());
+    // SmartDashboard.putNumber("Drivetrain/getCompVectorMag", MercMath.metersPerSecondToRPM(getCompensatedVector().getNorm(), 2.0));
+    // SmartDashboard.putNumber("Drivetrain/getCompVectorDir", getCompensatedVector().getAngle().getDegrees());
     SmartDashboard.putBoolean("Drivetrain/isPointingAtVector", isPointingAtVector());
-    SmartDashboard.putNumber("Drivetrain/distanceToLeftPos", getPose().getTranslation().getDistance(KnownLocations.getKnownLocations().PASSING_TARGET_LEFT.getTranslation()));
-    SmartDashboard.putNumber("Drivetrain/distanceToRightPos", getPose().getTranslation().getDistance(KnownLocations.getKnownLocations().PASSING_TARGET_RIGHT.getTranslation()));SmartDashboard.putNumber("Drivetrain/distanceToHub", getPose().getTranslation().getDistance(KnownLocations.getKnownLocations().HUB.getTranslation()));
+    // SmartDashboard.putNumber("Drivetrain/distanceToLeftPos", getPose().getTranslation().getDistance(KnownLocations.getKnownLocations().PASSING_TARGET_LEFT.getTranslation()));
+    // SmartDashboard.putNumber("Drivetrain/distanceToRightPos", getPose().getTranslation().getDistance(KnownLocations.getKnownLocations().PASSING_TARGET_RIGHT.getTranslation()));
+    // SmartDashboard.putNumber("Drivetrain/distanceToHub", getPose().getTranslation().getDistance(KnownLocations.getKnownLocations().HUB.getTranslation()));
 
 
   }

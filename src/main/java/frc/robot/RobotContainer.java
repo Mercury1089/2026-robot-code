@@ -118,13 +118,13 @@ public class RobotContainer {
 
     leds = new RobotModeLEDs(drivetrain);
     
-    auton = new Autons(drivetrain, shooter, indexer, kicker);
+    auton = new Autons(drivetrain, hood, shooter, indexer, kicker);
 
     Map<String, Command> commands = new HashMap<String, Command>();
 
     commands.put("intake", RobotCommands.intake(intake, articulator));
     commands.put("stopIntake", RobotCommands.stopIntake(intake, articulator));
-    commands.put("shoot", RobotCommands.fireAuton(shooter, kicker, hood, indexer, articulator, hopper));
+    // commands.put("shoot", RobotCommands.fireAuton(shooter, kicker, hood, indexer, articulator, hopper));
     //should stop shooting after 3 seconds
     // commands.put("stopShooting", RobotCommands.stopFire(shooter, kicker, articulator, indexer));
     
@@ -142,7 +142,7 @@ public class RobotContainer {
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.goToSetRPM(), shooter));
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
     // Uncomment below for final robot
-    shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM()), shooter));
+    shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(false)), shooter));
     
     // hood.setDefaultCommand(new RunCommand(() -> hood.setSpeed(() -> 0.0), hood));
     // Uncomment below for final robot
@@ -168,15 +168,11 @@ public class RobotContainer {
     gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
     gamepadPOVRight.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
       
-    // gamepadA.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
-    //   new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")) 
-    // );
+    gamepadA.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")));
+    gamepadB.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")));
 
-    // gamepadB.and(() -> DriverStation.getGameSpecificMessage().isBlank()).onTrue(
-    //   new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")) 
-    // );
 
-    Trigger shooting = new Trigger(() -> shooter.isAtShootingRPM());
+    // Trigger shooting = new Trigger(() -> shooter.isAtShootingRPM());
     gamepadRT.whileTrue(new ParallelCommandGroup(
       new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer),
       new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker)
@@ -192,8 +188,8 @@ public class RobotContainer {
 
     // gamepadA.whileTrue(new RunCommand(() -> shooter.setSpeed(0.25), shooter));
     // gamepadB.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(720.0), shooter));
-    gamepadA.onTrue(new InstantCommand(() -> shooter.increaseRPM(), shooter));
-    gamepadB.onTrue(new InstantCommand(() -> shooter.decreaseRPM(), shooter));
+    // gamepadA.onTrue(new InstantCommand(() -> shooter.increaseRPM(), shooter));
+    // gamepadB.onTrue(new InstantCommand(() -> shooter.decreaseRPM(), shooter));
     // gamepadPOVDown.whileTrue(new RunCommand(() -> hood.setSpeed(gamepadRightY), hood));
     // gamepadRightStickButton.onTrue(new InstantCommand(() -> shooter.setVelocityRPM(3000), shooter));
 
@@ -238,19 +234,19 @@ public class RobotContainer {
      * SHOOTING/PASSING COMMANDS
      */
 
-    right1.whileTrue(DriveCommands.shootOnTheMove(leftJoystickY, leftJoystickX, drivetrain))
-      .onFalse(new InstantCommand(() -> leds.disableAutoShoot(), leds));
+    right1.whileTrue(DriveCommands.shootOnTheMove(leftJoystickY, leftJoystickX, drivetrain));
+    right1.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(true)), shooter));
+    
     // Trigger cannotFire = new Trigger(() -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && DriverStation.isTeleop());
     Trigger canPass = new Trigger(() -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && !drivetrain.isDrivetrainInAllianceZone() && DriverStation.isTeleop());
-    Trigger canShoot = new Trigger(() -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && drivetrain.isDrivetrainInAllianceZone() && /* drivetrain.getShift().isOurHubActive() && */  DriverStation.isTeleop());
-    canPass.or(canShoot).onTrue(new InstantCommand(() -> leds.enableAutoShoot(), leds));
+    Trigger canShoot = new Trigger(() -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && drivetrain.isDrivetrainInAllianceZone() && drivetrain.getShift().isOurHubActive() &&  DriverStation.isTeleop());
 
-    Trigger autoShooting = new Trigger(() -> leds.isAutoShootEnabled() && DriverStation.isTeleop());
-    autoShooting.whileTrue(
+    Trigger firing = canShoot.or(canPass);
+
+    right1.and(firing).whileTrue(
       new ParallelCommandGroup(
-        RobotCommands.feedShooter(indexer, kicker),
-        RobotCommands.agitateIntake(articulator)
-      ));
+        RobotCommands.feedShooter(indexer, kicker)
+    ));
 
     // remove lockToHub if nearestShootingLock works as it will be a double drivetrain requirement
     // right1.whileTrue(
