@@ -228,7 +228,9 @@ public class RobotContainer {
     // Trigger fuelInRange = new Trigger(() -> drivetrain.drivetrainSeesFuel() && DriverStation.isTeleop());
     
     // left1.and(right1.negate()).and(fuelInRange).whileTrue(DriveCommands.autoPickUp(leftJoystickX, leftJoystickY, drivetrain));
-    left1.whileTrue(RobotCommands.intake(intake, articulator));
+    // left1.whileTrue(RobotCommands.intake(intake, articulator));
+    left1.and(right1.negate()).whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
+    left1.whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
 
     /**
      * SHOOTING/PASSING COMMANDS

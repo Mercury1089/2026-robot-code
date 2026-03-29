@@ -198,7 +198,7 @@ public class Shooter extends SubsystemBase {
 
     public void periodic() {
         SmartDashboard.putNumber("Shooter/RPM", getVelocityRPM());
-        // SmartDashboard.putNumber("Shooter/setRPM", setRPM);
+        SmartDashboard.putNumber("Shooter/setRPM", setRPM);
 
         SmartDashboard.putBoolean("Shooter/isAtRPM", isAtShootingRPM());
         // // SmartDashboard.putBoolean("Shooter/isFuelInShooter", fuelInShooter());

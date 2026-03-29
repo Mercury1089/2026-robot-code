@@ -112,12 +112,12 @@
     },
     {
       "anchor": {
-        "x": 3.0169044222539223,
-        "y": 2.51
+        "x": 2.1370756062767473,
+        "y": 2.3465049928673327
       },
       "prevControl": {
-        "x": 5.5658188390511825,
-        "y": 2.742911378742517
+        "x": 4.685990023074007,
+        "y": 2.5794163716098497
       },
       "nextControl": null,
       "isLocked": false,
@@ -151,7 +151,7 @@
     },
     {
       "waypointRelativePos": 6.957356076759053,
-      "rotationDegrees": -179.39042337788393
+      "rotationDegrees": -167.71032228338086
     }
   ],
   "constraintZones": [
@@ -186,7 +186,7 @@
   "eventMarkers": [
     {
       "name": "intake",
-      "waypointRelativePos": 1.323430114787301,
+      "waypointRelativePos": 0.7751519243754208,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",
