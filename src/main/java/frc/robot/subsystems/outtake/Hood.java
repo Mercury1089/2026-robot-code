@@ -30,7 +30,7 @@ public class Hood extends SubsystemBase {
     private SparkMax hood;
     private SparkClosedLoopController hoodClosedLoopController;
     private AbsoluteEncoder absoluteEncoder;
-    private double setPosition, desiredSetPosition;
+    private double setPosition;
     
     private Drivetrain drivetrain;
     
@@ -46,7 +46,7 @@ public class Hood extends SubsystemBase {
                 .inverted(true);
         hoodConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-                .pid(1.0 / 40.0, 0, 0)
+                .pid(1.0 / 20.0, 0, 0)
                 // .positionWrappingEnabled(true) we don't actually want this
                 // .positionWrappingInputRange(0.0, 360.0)
                 .positionWrappingEnabled(false)
@@ -58,7 +58,7 @@ public class Hood extends SubsystemBase {
                 .forwardSoftLimitEnabled(true)
                 .forwardSoftLimit(75.0)
                 .reverseSoftLimitEnabled(true)
-                .reverseSoftLimit(-127.0);
+                .reverseSoftLimit(-160.0);//consider making this a little less
 
         hood.configure(hoodConfig, ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
@@ -67,7 +67,7 @@ public class Hood extends SubsystemBase {
 
         absoluteEncoder = hood.getAbsoluteEncoder();
         setPosition = getPosition();
-        desiredSetPosition = getPosition();
+        // desiredSetPosition = getPosition();
     }
 
     public double getSetPosition() {
@@ -141,7 +141,7 @@ public class Hood extends SubsystemBase {
 
     @Override
     public void periodic() {
-        desiredSetPosition = getHoodToFirePosition();
+        // desiredSetPosition = getHoodToFirePosition();
         
         // This method will be called once per scheduler run
         SmartDashboard.putNumber("Hood/hoodPosition", getPosition());
@@ -151,7 +151,7 @@ public class Hood extends SubsystemBase {
     
     public enum HoodPosition {
         FERRY(-22.0),
-        SHOOT(-127.0);//the one we used for our equations for
+        SHOOT(-160.0);//the one we used for our equations for
 
         public final double pos;
 

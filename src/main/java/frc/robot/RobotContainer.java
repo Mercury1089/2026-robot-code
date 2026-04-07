@@ -168,8 +168,8 @@ public class RobotContainer {
     gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
     gamepadPOVRight.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
       
-    gamepadA.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")));
-    gamepadB.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")));
+    // gamepadA.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")));
+    // gamepadB.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")));
 
 
     // Trigger shooting = new Trigger(() -> shooter.isAtShootingRPM());
@@ -188,8 +188,8 @@ public class RobotContainer {
 
     // gamepadA.whileTrue(new RunCommand(() -> shooter.setSpeed(0.25), shooter));
     // gamepadB.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(720.0), shooter));
-    // gamepadA.onTrue(new InstantCommand(() -> shooter.increaseRPM(), shooter));
-    // gamepadB.onTrue(new InstantCommand(() -> shooter.decreaseRPM(), shooter));
+    gamepadA.onTrue(new InstantCommand(() -> shooter.increaseRPM(), shooter));
+    gamepadB.onTrue(new InstantCommand(() -> shooter.decreaseRPM(), shooter));
     // gamepadPOVDown.whileTrue(new RunCommand(() -> hood.setSpeed(gamepadRightY), hood));
     // gamepadRightStickButton.onTrue(new InstantCommand(() -> shooter.setVelocityRPM(3000), shooter));
 
@@ -232,6 +232,8 @@ public class RobotContainer {
     left1.and(right1.negate()).whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
     left1.whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
 
+    right2.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
+
     /**
      * SHOOTING/PASSING COMMANDS
      */
@@ -244,6 +246,10 @@ public class RobotContainer {
     Trigger canShoot = new Trigger(() -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && drivetrain.isDrivetrainInAllianceZone() && drivetrain.getShift().isOurHubActive() &&  DriverStation.isTeleop());
 
     Trigger firing = canShoot.or(canPass);
+
+    right1.and(canShoot).whileTrue(
+      new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator)
+    );
 
     right1.and(firing).whileTrue(
       new ParallelCommandGroup(

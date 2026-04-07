@@ -159,7 +159,7 @@ public class Shooter extends SubsystemBase {
         double d = TargetUtils.getDistanceToPoint(drivetrain.getPose(), point);
 
         if(drivetrain.isDrivetrainInAllianceZone()) {
-            return 1152 + (873 * d) + (-309 * Math.pow(d, 2)) + (65.4 * Math.pow(d, 3)) + (-5.11 * Math.pow(d, 4));
+            return 1599 + (148 * d) + (60.3 * Math.pow(d, 2)) + (-6.94 * Math.pow(d, 3));
         } else {
             if (!passing) {
                 return 1000.0;
@@ -206,22 +206,22 @@ public class Shooter extends SubsystemBase {
         // kP = SmartDashboard.getNumber("Shooter/kP", kP);
         // kS = SmartDashboard.getNumber("Shooter/kS", kS);
         // double ff = (MAX_VOLTAGE-kS) / SmartDashboard.getNumber("Shooter/freeRpms", freeRPMs);
-        // smartdashRPM = SmartDashboard.getNumber("Shooter/smartDashRPM", 0.0);
+        smartdashRPM = SmartDashboard.getNumber("Shooter/smartDashRPM", 0.0);
 
-        // if (DriverStation.isDisabled()) {
-        //     setRPM = smartdashRPM;
-        //     SparkFlexConfig leader_config = new SparkFlexConfig();
+        if (DriverStation.isDisabled()) {
+            setRPM = smartdashRPM;
+            // SparkFlexConfig leader_config = new SparkFlexConfig();
 
-        //     double kI = 0.0;
-        //     double kD = 0.0;
-        //     // double nominalVoltage = 12.0;
-        //     leader_config.closedLoop
-        //             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        //             .pid(kP, kI, kD)
-        //             .outputRange(-1.0, 1.0).feedForward.kV(ff).kS(kS);
+            // double kI = 0.0;
+            // double kD = 0.0;
+            // // double nominalVoltage = 12.0;
+            // leader_config.closedLoop
+            //         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            //         .pid(kP, kI, kD)
+            //         .outputRange(-1.0, 1.0).feedForward.kV(ff).kS(kS);
             
-        //     leader.configure(leader_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        // } 
+            // leader.configure(leader_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        } 
         
         // SmartDashboard.putNumber("Shooter/currentkS", leader.configAccessor.closedLoop.feedForward.getkS());
     }

@@ -702,7 +702,7 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putBoolean("Drivetrain/isPointingAtVector", isPointingAtVector());
     // SmartDashboard.putNumber("Drivetrain/distanceToLeftPos", getPose().getTranslation().getDistance(KnownLocations.getKnownLocations().PASSING_TARGET_LEFT.getTranslation()));
     // SmartDashboard.putNumber("Drivetrain/distanceToRightPos", getPose().getTranslation().getDistance(KnownLocations.getKnownLocations().PASSING_TARGET_RIGHT.getTranslation()));
-    // SmartDashboard.putNumber("Drivetrain/distanceToHub", getPose().getTranslation().getDistance(KnownLocations.getKnownLocations().HUB.getTranslation()));
+    SmartDashboard.putNumber("Drivetrain/distanceToHub", getPose().getTranslation().getDistance(KnownLocations.getKnownLocations().HUB.getTranslation()));
 
 
   }
