@@ -27,7 +27,7 @@ public class Articulator extends SubsystemBase {
 
   /** Creates a new AlgaeArticulator. */
 
-  public final double THRESHOLD_DEGREES = 0.5;
+  public final double THRESHOLD_DEGREES = 5.0;
 
   private SparkMax articulator;
   private SparkClosedLoopController articulatorClosedLoopController;
@@ -44,7 +44,7 @@ public class Articulator extends SubsystemBase {
       .inverted(false);
     articulatorConfig.closedLoop
       .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-      .pid(1.0 / 20.0,0,0)
+      .pid(1.0 / 20.0, 0, 0)
       // .positionWrappingEnabled(true) we don't actually want this 
       // .positionWrappingInputRange(0.0, 360.0)
       .positionWrappingEnabled(false)

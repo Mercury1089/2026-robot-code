@@ -2,6 +2,7 @@ package frc.robot.subsystems.outtake;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -36,16 +37,18 @@ public class Shooter extends SubsystemBase {
     private LaserCan lc;
     private Drivetrain drivetrain;
     private double THRESHOLD_RPM = 100.0; // TODO: tune this threshold
-    private final double MAX_VOLTAGE = 10.5;
+    private final double MAX_VOLTAGE = 12.0;
 
     private double setRPM = 0.0, desiredFireRPM = 0.0;
     private double smartdashRPM = 0.0;
 
-    double kP = 0.000025, kS = 0.2, freeRPMs = 5400.0;
+    private boolean isAtRPM = false;
+
+    private double kP = 0.0006, kS = 0.2, freeRPMs = 6500.0;
 
     public Shooter(Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
-
+        
         leader = new SparkFlex(Constants.CAN.SHOOTER, MotorType.kBrushless); // all the way to the right
         follower_first_right = new SparkFlex(Constants.CAN.SHOOTER_FOLLOWER_FIRST, MotorType.kBrushless); // one in
         follower_second_left = new SparkFlex(Constants.CAN.SHOOTER_FOLLOWER_SECOND, MotorType.kBrushless);
@@ -57,7 +60,10 @@ public class Shooter extends SubsystemBase {
         SparkFlexConfig leader_config = new SparkFlexConfig();
         leader_config.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
         // use RPM units for encoder velocity here (1.0 = pass-through)
-        leader_config.encoder.velocityConversionFactor(1.0);
+        leader_config.encoder.velocityConversionFactor(1.0)
+                    .uvwMeasurementPeriod(8)
+                    .quadratureAverageDepth(2)
+                    .quadratureMeasurementPeriod(8);
 
         double kI = 0.0;
         double kD = 0.0;
@@ -71,18 +77,20 @@ public class Shooter extends SubsystemBase {
             .outputRange(-1.0, 1.0)
             .feedForward.kV(velocityFF).kS(kS);
 
-        leader_config.inverted(false)
-            .voltageCompensation(MAX_VOLTAGE);
+        leader_config.inverted(false);
+            // .voltageCompensation(MAX_VOLTAGE);
 
         // Build the shooter SparkMaxConfig inline (previously in ShooterConfigs)
         SparkFlexConfig follower_config_left = new SparkFlexConfig();
-        follower_config_left.idleMode(IdleMode.kCoast).smartCurrentLimit(40).voltageCompensation(MAX_VOLTAGE);
+        follower_config_left.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
+            // .voltageCompensation(MAX_VOLTAGE);
         // use RPM units for encoder velocity here (1.0 = pass-through)
         follower_config_left.encoder.velocityConversionFactor(1.0);
         follower_config_left.follow(Constants.CAN.SHOOTER, true);//assumes invert of leader affects followers. which is true
 
         SparkFlexConfig follower_config_right = new SparkFlexConfig();
-        follower_config_right.idleMode(IdleMode.kCoast).smartCurrentLimit(40).voltageCompensation(MAX_VOLTAGE);
+        follower_config_right.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
+            // .voltageCompensation(MAX_VOLTAGE);
         follower_config_right.encoder.velocityConversionFactor(1.0);
         follower_config_right.follow(Constants.CAN.SHOOTER, false);
 
@@ -96,9 +104,9 @@ public class Shooter extends SubsystemBase {
         encoder = leader.getEncoder();
         leaderClosedLoop = leader.getClosedLoopController();
 
-        SmartDashboard.putNumber("Shooter/kP", kP);
-        SmartDashboard.putNumber("Shooter/freeRpms", 5400.0);
-        SmartDashboard.putNumber("Shooter/kS", kS);
+        // SmartDashboard.putNumber("Shooter/kP", kP);
+        // SmartDashboard.putNumber("Shooter/freeRpms", 5400.0);
+        // SmartDashboard.putNumber("Shooter/kS", kS);
         SmartDashboard.putNumber("Shooter/smartDashRPM", 0.0);
     }
 
@@ -159,7 +167,7 @@ public class Shooter extends SubsystemBase {
         double d = TargetUtils.getDistanceToPoint(drivetrain.getPose(), point);
 
         if(drivetrain.isDrivetrainInAllianceZone()) {
-            return 1599 + (148 * d) + (60.3 * Math.pow(d, 2)) + (-6.94 * Math.pow(d, 3));
+            return (1599 + 200.0) + (148 * d) + (60.3 * Math.pow(d, 2)) + (-6.94 * Math.pow(d, 3));
         } else {
             if (!passing) {
                 return 1000.0;
@@ -178,9 +186,22 @@ public class Shooter extends SubsystemBase {
         return Math.abs(getVelocityRPM()) > 2500;
     }
 
-    public boolean isAtShootingRPM() {
-        return Math.abs(getSetRPM() - getVelocityRPM()) < THRESHOLD_RPM;
+    public void isAtShootingRPM() {
+        isAtRPM = Math.abs(getSetRPM() - getVelocityRPM()) < THRESHOLD_RPM;
     }
+
+    // public void isAtShootingRPM() {
+    //     if (Math.abs(getSetRPM() - getVelocityRPM()) < THRESHOLD_RPM) {
+    //         isAtRPM = true;
+    //     } else if (Math.abs(getSetRPM() - getVelocityRPM()) > 1000.0) {
+    //         isAtRPM = false;
+    //     }
+    // }
+
+    public boolean getShootingTrigger() {
+        return isAtRPM;
+    }
+
     public boolean fuelInShooter(){
         LaserCan.Measurement measurement;
         measurement = lc.getMeasurement();
@@ -197,10 +218,13 @@ public class Shooter extends SubsystemBase {
     }
 
     public void periodic() {
+        isAtShootingRPM();
         SmartDashboard.putNumber("Shooter/RPM", getVelocityRPM());
         SmartDashboard.putNumber("Shooter/setRPM", setRPM);
+        SmartDashboard.putNumber("batteryVoltage", RobotController.getBatteryVoltage());
 
-        SmartDashboard.putBoolean("Shooter/isAtRPM", isAtShootingRPM());
+
+        SmartDashboard.putBoolean("Shooter/isAtRPM", getShootingTrigger());
         // // SmartDashboard.putBoolean("Shooter/isFuelInShooter", fuelInShooter());
 
         // kP = SmartDashboard.getNumber("Shooter/kP", kP);

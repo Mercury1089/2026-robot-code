@@ -14,6 +14,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
@@ -105,7 +106,7 @@ public class Hood extends SubsystemBase {
         setPosition = setPosition + 1.0;
     }
 
-    public double getHoodToFirePosition() {
+    public double getHoodToFirePosition(boolean passing) {
         Translation2d point = new Translation2d();
 
         if(drivetrain.isDrivetrainInAllianceZone() || drivetrain.getCurrentZone() == Zone.BETWEEN) {
@@ -119,13 +120,16 @@ public class Hood extends SubsystemBase {
         if(drivetrain.isDrivetrainInAllianceZone()) {
             return HoodPosition.SHOOT.pos; // shooting function
         } else {
-            return HoodPosition.FERRY.pos; // passing function
+            if (passing) {
+                return HoodPosition.FERRY.pos;
+            }
+            return HoodPosition.SHOOT.pos; // passing function
         }
     }
 
-    public void setHoodToFirePosition() {
-        setPosition(getHoodToFirePosition());
-    }
+    // public void setHoodToFirePosition() {
+    //     setPosition(getHoodToFirePosition(false));
+    // }
 
     public boolean isAtPosition(double pos) {
         return Math.abs(getPosition() - pos) < THRESHOLD_DEGREES;

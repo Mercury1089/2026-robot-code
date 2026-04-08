@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.drivetrain.Drivetrain;
-import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.hopper.Indexer;
 import frc.robot.subsystems.hopper.Indexer.IndexerSpeed;
 import frc.robot.subsystems.intake.Articulator;
@@ -57,8 +56,9 @@ public class RobotCommands {
 
     public static Command agitateIntake(Articulator articulator) {
         return new SequentialCommandGroup(
-            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator).withTimeout(2.0),
-            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator).until(() -> articulator.isAtPosition(ArticulatorPosition.IN))
+            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator).until(() -> articulator.isInPosition()).withTimeout(0.75),
+            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator).until(() -> articulator.isInPosition()).withTimeout(0.75),
+            new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator).until(() -> articulator.isInPosition())
         );
     }
 
@@ -70,9 +70,9 @@ public class RobotCommands {
         return new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker);
     }
 
-    public static Command prepareHood(Hood hood) {
-        return new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition()), hood);
-    }
+    // public static Command prepareHood(Hood hood) {
+    //     return new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition()), hood);
+    // }
 
     // public static Command setShooterToHubRPM(Shooter shooter) {
     //     return new RunCommand(() -> shooter.setSpeed(shooter.getStaticShootingRPM(false)), shooter);

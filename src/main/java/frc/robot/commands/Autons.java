@@ -139,7 +139,7 @@ public class Autons {
 
         ArrayList<PathPlannerPath> paths = new ArrayList<>();
         
-        BooleanSupplier shooting = () -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && drivetrain.isDrivetrainInAllianceZone();
+        BooleanSupplier shooting = () -> shooter.getShootingTrigger() && hood.isInPosition() && drivetrain.isPointingAtVector() && drivetrain.isDrivetrainInAllianceZone();
 
         SequentialCommandGroup shootCommand = new SequentialCommandGroup(
                 DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain).until(shooting),
