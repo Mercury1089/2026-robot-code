@@ -44,7 +44,7 @@ public class Shooter extends SubsystemBase {
 
     private boolean isAtRPM = false;
 
-    private double kP = 0.0006, kS = 0.2, freeRPMs = 6500.0;
+    private double kP = 0.0015, kS = 0.2, freeRPMs = 6500.0;
 
     public Shooter(Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
@@ -61,15 +61,14 @@ public class Shooter extends SubsystemBase {
         leader_config.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
         // use RPM units for encoder velocity here (1.0 = pass-through)
         leader_config.encoder.velocityConversionFactor(1.0)
-                    .uvwMeasurementPeriod(8)
                     .quadratureAverageDepth(2)
-                    .quadratureMeasurementPeriod(8);
+                    .quadratureMeasurementPeriod(4);
 
         double kI = 0.0;
         double kD = 0.0;
         // double nominalVoltage = 12.0;
         // double velocityFF = MAX_VOLTAGE / Constants.NEO_MOTOR_CONSTANTS.VORTEX_FREE_SPEED_RPMS;
-        double velocityFF = (MAX_VOLTAGE-kS) / freeRPMs;
+        double velocityFF = (MAX_VOLTAGE) / freeRPMs;
 
         leader_config.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
@@ -167,13 +166,13 @@ public class Shooter extends SubsystemBase {
         double d = TargetUtils.getDistanceToPoint(drivetrain.getPose(), point);
 
         if(drivetrain.isDrivetrainInAllianceZone()) {
-            return (1599 + 200.0) + (148 * d) + (60.3 * Math.pow(d, 2)) + (-6.94 * Math.pow(d, 3));
+            return Math.max(2200, Math.min(2900.0, (15417) + (-19433 * d) + (10468 * Math.pow(d, 2)) + (-2432 * Math.pow(d, 3)) + (208 * Math.pow(d, 4))));
         } else {
             if (!passing) {
                 return 1000.0;
             }
             double final_rpm = (159 * d) + 1553;
-            return Math.min(3500.0, final_rpm); // Enter the passing function (this is the only spot to enter any passing information)
+            return Math.min(2900.0, final_rpm); // Enter the passing function (this is the only spot to enter any passing information)
         }
     }
 

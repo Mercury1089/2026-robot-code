@@ -134,8 +134,8 @@ public class RobotContainer {
     intake.setDefaultCommand(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
     
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(1000.0), shooter));
-    // shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getSmartDashRPM()), shooter));
-    shooter.setDefaultCommand(new RunCommand(() -> shooter.goToSetRPM(), shooter));
+    shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getSmartDashRPM()), shooter)); //tis one
+    // shooter.setDefaultCommand(new RunCommand(() -> shooter.goToSetRPM(), shooter));
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
     // Uncomment below for final robot
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(false)), shooter));

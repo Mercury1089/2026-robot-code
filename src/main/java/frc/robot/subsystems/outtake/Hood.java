@@ -118,12 +118,12 @@ public class Hood extends SubsystemBase {
         }
 
         if(drivetrain.isDrivetrainInAllianceZone()) {
-            return HoodPosition.SHOOT.pos; // shooting function
+            return HoodPosition.TEMP.pos; // shooting function
         } else {
             if (passing) {
                 return HoodPosition.FERRY.pos;
             }
-            return HoodPosition.SHOOT.pos; // passing function
+            return HoodPosition.TEMP.pos; // passing function
         }
     }
 
@@ -155,6 +155,7 @@ public class Hood extends SubsystemBase {
     
     public enum HoodPosition {
         FERRY(-22.0),
+        TEMP(-110.0),
         SHOOT(-160.0);//the one we used for our equations for
 
         public final double pos;

@@ -74,7 +74,7 @@ public class Drivetrain extends SubsystemBase {
   // private ObjectDetectionCamera objCam;
   private Hood hood;
 
-  private static final double ROTATION_P = 1.0 / 90.0, DIRECTION_P = 1 / 1.25, I = 0.0, D = 0.0;
+  private static final double ROTATION_P = 1.0 / 30.0, DIRECTION_P = 1 / 1.25, I = 0.0, D = 0.0;
   private final double THRESHOLD_DEGREES = 3.0;
   private final double THRESHOLD_SPEED = 0.5;
   private Translation2d robotVelocityVector;
