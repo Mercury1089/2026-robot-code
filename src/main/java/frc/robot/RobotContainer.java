@@ -114,7 +114,7 @@ public class RobotContainer {
 
     leds = new RobotModeLEDs(drivetrain);
     
-    auton = new Autons(drivetrain, hood, shooter, indexer, kicker);
+    auton = new Autons(drivetrain, hood, shooter, indexer, kicker, articulator);
 
     Map<String, Command> commands = new HashMap<String, Command>();
 

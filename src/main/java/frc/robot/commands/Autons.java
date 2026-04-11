@@ -36,6 +36,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.hopper.Indexer;
 import frc.robot.subsystems.hopper.Indexer.IndexerSpeed;
+import frc.robot.subsystems.intake.Articulator;
+import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.outtake.Hood;
 import frc.robot.subsystems.outtake.Kicker;
 import frc.robot.subsystems.outtake.Kicker.KickerSpeed;
@@ -67,14 +69,16 @@ public class Autons {
     private Indexer indexer;
     private Kicker kicker;
     private Hood hood;
+    private Articulator articulator;
 
-    public Autons(Drivetrain drivetrain, Hood hood, Shooter shooter, Indexer indexer, Kicker kicker) {
+    public Autons(Drivetrain drivetrain, Hood hood, Shooter shooter, Indexer indexer, Kicker kicker, Articulator articulator) {
         // TODO: Put correct settings into PathPlanner GUI for the new robot
         this.drivetrain = drivetrain;
         this.shooter = shooter;
         this.indexer = indexer;
         this.kicker = kicker;
         this.hood = hood;
+        this.articulator = articulator;
 
         KnownLocations knownLocations = KnownLocations.getKnownLocations();
         this.alliance = knownLocations.alliance;
@@ -146,7 +150,10 @@ public class Autons {
                 new ParallelCommandGroup(
                         // new RunCommand(() -> hood.setPosition(0.0), hood),
                         DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain),
-                        RobotCommands.feedShooter(indexer, kicker)));
+                        RobotCommands.feedShooter(indexer, kicker)),
+                        RobotCommands.agitateIntake(articulator)
+                    );
+        
         SequentialCommandGroup shootCommand2 = new SequentialCommandGroup(
                 DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain).until(shooting),
                 new ParallelCommandGroup(
@@ -195,11 +202,14 @@ public class Autons {
             case DOUBLE_SWEEP_LEFT:
                 try {
                     paths.add(PathPlannerPath.fromPathFile("leftStartToOutsideSweepToLeftShoot"));
-                    paths.add(PathPlannerPath.fromPathFile("leftStartToInsideSweepToLeftShoot"));
-                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToOutsideSweepToLeftShoot")));
-                    autonCommand.addCommands(shootCommand.withTimeout(3.0));
-                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToInsideSweepToLeftShoot")));
-                    autonCommand.addCommands(shootCommand2);
+                    //paths.add(PathPlannerPath.fromPathFile("leftStartToInsideSweepToLeftShoot"));
+                    autonCommand.addCommands(
+                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToOutsideSweepToLeftShoot")),
+                        shootCommand.withTimeout(3.0)
+                    );
+                    
+                   // autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToInsideSweepToLeftShoot")));
+                   // autonCommand.addCommands(shootCommand2);
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
