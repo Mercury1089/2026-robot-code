@@ -128,17 +128,17 @@ public class RobotContainer {
     /**
      * DEFAULT COMMANDS - NEED TO BE CREATED AFTER NAMED COMMANDS AS PER PATHPLANNERDOCS
      */
-    // drivetrain.setDefaultCommand(DriveCommands.joyStickDrive(leftJoystickY, leftJoystickX, rightJoystickX, drivetrain));
-    drivetrain.setDefaultCommand(DriveCommands.targetDrive(leftJoystickY, leftJoystickX,  () -> drivetrain.getFinalHeading(), drivetrain));
+     drivetrain.setDefaultCommand(DriveCommands.joyStickDrive(leftJoystickY, leftJoystickX, rightJoystickX, drivetrain));
+    //drivetrain.setDefaultCommand(DriveCommands.targetDrive(leftJoystickY, leftJoystickX,  () -> drivetrain.getFinalHeading(), drivetrain));
     
     intake.setDefaultCommand(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
     
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(1000.0), shooter));
-    shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getSmartDashRPM()), shooter)); //tis one
+    //shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getSmartDashRPM()), shooter)); //tis one
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.goToSetRPM(), shooter));
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
     // Uncomment below for final robot
-    // shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(false)), shooter));
+    shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(false)), shooter));
     
     // hood.setDefaultCommand(new RunCommand(() -> hood.setSpeed(() -> 0.0), hood));
     // Uncomment below for final robot
