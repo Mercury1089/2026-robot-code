@@ -166,9 +166,14 @@ public class Shooter extends SubsystemBase {
         double d = TargetUtils.getDistanceToPoint(drivetrain.getPose(), point);
 
         if(drivetrain.isDrivetrainInAllianceZone()) {
-            return Math.max(2200, Math.min(
-                2900.0, (15417) + (-19433 * d) + (10468 * Math.pow(d, 2)) + (-2432 * Math.pow(d, 3)) + (208 * Math.pow(d, 4))
+            if (d < 4.0) {
+                return Math.max(2200, Math.min(
+                2900.0, (692) + (1559 * d) + (-506 * Math.pow(d, 2)) + (62.5 * Math.pow(d, 3))
                 ));
+            } else {
+                return (333 * d) + 1358;
+            }
+            
         } else {
             if (!passing) {
                 return 1000.0;

@@ -25,7 +25,7 @@ import frc.robot.util.KnownLocations;
 import frc.robot.util.TargetUtils;
 
 public class Hood extends SubsystemBase {
-    public final double THRESHOLD_DEGREES = 10.0;
+    public final double THRESHOLD_DEGREES = 20.0;
     private final double RADIANSTOHOODANGLE = 100;
 
     private SparkMax hood;
@@ -118,7 +118,12 @@ public class Hood extends SubsystemBase {
         }
 
         if(drivetrain.isDrivetrainInAllianceZone()) {
-            return HoodPosition.SHOOT.pos; // shooting function
+            double distance = TargetUtils.getDistanceToPoint(drivetrain.getPose(), point);
+            if(distance < 4.0){
+                return HoodPosition.SHOOT.pos;
+            } else {
+                return HoodPosition.FAR_SHOOT.pos;
+            }
         } else {
             if (passing) {
                 return HoodPosition.FERRY.pos;
@@ -155,8 +160,8 @@ public class Hood extends SubsystemBase {
     
     public enum HoodPosition {
         FERRY(-22.0),
-        FAR_SHOOT_1(-110.0),
-        FAR_SHOOT_2(-130.0),
+        FAR_SHOOT(-110.0),
+        // FAR_SHOOT_2(-130.0),
         SHOOT(-160.0);//the one we used for our equations for
 
         public final double pos;

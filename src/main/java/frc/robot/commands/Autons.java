@@ -159,7 +159,9 @@ public class Autons {
                 new ParallelCommandGroup(
                         // new RunCommand(() -> hood.setPosition(0.0), hood),
                         DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain),
-                        RobotCommands.feedShooter(indexer, kicker)));
+                        RobotCommands.feedShooter(indexer, kicker)),
+                        RobotCommands.agitateIntake(articulator)
+        );
 
         switch (autoType) {
             case LEFT:
@@ -202,10 +204,12 @@ public class Autons {
             case DOUBLE_SWEEP_LEFT:
                 try {
                     paths.add(PathPlannerPath.fromPathFile("leftStartToOutsideSweepToLeftShoot"));
-                    //paths.add(PathPlannerPath.fromPathFile("leftStartToInsideSweepToLeftShoot"));
+                    paths.add(PathPlannerPath.fromPathFile("leftShootToInsideSweepToLeftShoot"));
                     autonCommand.addCommands(
                         AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToOutsideSweepToLeftShoot")),
-                        shootCommand.withTimeout(3.0)
+                        shootCommand.withTimeout(3.0),
+                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftShootToInsideSweepToLeftShoot")),
+                        shootCommand2.withTimeout(3.0)
                     );
                     
                    // autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToInsideSweepToLeftShoot")));
@@ -217,12 +221,12 @@ public class Autons {
             case DOUBLE_SWEEP_RIGHT:
                 try {
                     paths.add(PathPlannerPath.fromPathFile("rightStartToOutsideSweepToRightShoot"));
-                    paths.add(PathPlannerPath.fromPathFile("rightStartToInsideSweepToRightShoot"));
+                    paths.add(PathPlannerPath.fromPathFile("rightShootToInsideSweepToRightShoot"));
                     autonCommand.addCommands(
                         AutoBuilder.followPath(PathPlannerPath.fromPathFile("rightStartToOutsideSweepToRightShoot")),
                         shootCommand.withTimeout(3.0),
-                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("rightStartToInsideSweepToRightShoot")),
-                        shootCommand2
+                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("rightShootToInsideSweepToRightShoot")),
+                        shootCommand2.withTimeout(3.0)
                     );
                 } catch (Exception e) {
                     
