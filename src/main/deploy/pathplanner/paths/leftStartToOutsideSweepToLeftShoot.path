@@ -88,8 +88,8 @@
         "y": 4.089638554216867
       },
       "nextControl": {
-        "x": 6.329412073520955,
-        "y": 4.314570293933863
+        "x": 6.329412073520953,
+        "y": 4.314570293933864
       },
       "isLocked": false,
       "linkedName": null
@@ -152,7 +152,7 @@
       "minWaypointRelativePos": 3.0817015530047254,
       "maxWaypointRelativePos": 5.523573200992503,
       "constraints": {
-        "maxVelocity": 1.0,
+        "maxVelocity": 1.5,
         "maxAcceleration": 3.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -165,7 +165,7 @@
   "eventMarkers": [
     {
       "name": "intake",
-      "waypointRelativePos": 1.5771712158809046,
+      "waypointRelativePos": 1.2,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",

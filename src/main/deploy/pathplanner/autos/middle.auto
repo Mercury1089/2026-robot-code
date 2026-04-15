@@ -7,19 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "middleStartToDepot"
+            "pathName": null
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "depotToOutpost"
+            "pathName": null
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "outpostToMiddleShoot"
+            "pathName": "outpostToShoot"
           }
         }
       ]

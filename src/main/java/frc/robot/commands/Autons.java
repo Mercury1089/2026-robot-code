@@ -52,7 +52,7 @@ public class Autons {
     // private SendableChooser<Pose2d> startingPoseChooser;
 
 
-    private AutonType autoType = AutonType.RIGHT;
+    private AutonType autoType = AutonType.PRE_LOAD_RIGHT;
 
     private Command autonCommand;
 
@@ -164,35 +164,57 @@ public class Autons {
         );
 
         switch (autoType) {
-            case LEFT:
+            case SINGLE_SWIPE_LEFT: // DONE
                 try {
-                    paths.add(PathPlannerPath.fromPathFile("leftStartToFarLeftNeutralZoneToLeftShoot"));
-                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToFarLeftNeutralZoneToLeftShoot")));
+                    paths.add(PathPlannerPath.fromPathFile("leftStartToOutsideSweepToLeftShoot"));
+                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToOutsideSweepToLeftShoot")));
                 } catch (Exception e) {
                     
                 }
                 break;
-            case MIDDLE:
-                break;
-            case RIGHT:
+            case PRE_LOAD_MIDDLE:
                 try {
-                    paths.add(PathPlannerPath.fromPathFile("rightStartToFarRightNeutralZoneToRightShoot"));
-                    autonCommand.addCommands(AutoBuilder.followPath(paths.get(0)));
+                    paths.add(PathPlannerPath.fromPathFile("middleStartToMiddleShoot"));
+                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("middleStartToMiddleShoot")));
                     autonCommand.addCommands(shootCommand);
                 } catch (Exception e) {
                 
                 }
                 break;
-            case SIMPLE_AUTO_LEFT:
+            case OUTPOST_MIDDLE:
+                try {
+                    paths.add(PathPlannerPath.fromPathFile("middleStartToOutpost"));
+                    paths.add(PathPlannerPath.fromPathFile("outpostToShoot"));
+                    autonCommand.addCommands(
+                        new WaitCommand(0.0),
+                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("middleStartToOutpost")),
+                        new WaitCommand(5.0),
+                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("outpostToShoot")),
+                        shootCommand
+                    );
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                }
+                break;
+            case SINGLE_SWIPE_RIGHT: // DONE
+                try {
+                    paths.add(PathPlannerPath.fromPathFile("rightStartToOutsideSweepToRightShoot"));
+                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("rightStartToOutsideSweepToRightShoot")));
+                    autonCommand.addCommands(shootCommand);
+                } catch (Exception e) {
+                
+                }
+                break;
+            case PRE_LOAD_LEFT: // DONE
                 try {
                     paths.add(PathPlannerPath.fromPathFile("leftStartToShoot"));
-                    autonCommand.addCommands(AutoBuilder.followPath(paths.get(0)));
+                    autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToShoot")));
                     autonCommand.addCommands(shootCommand);
                 } catch (Exception e) {
                 
                 }
                 break;
-            case SIMPLE_AUTO_RIGHT:
+            case PRE_LOAD_RIGHT: // DONE 
                 try {
                     paths.add(PathPlannerPath.fromPathFile("rightStartToShoot"));
                     autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("rightStartToShoot")));
@@ -201,7 +223,7 @@ public class Autons {
                 
                 }
                 break;
-            case DOUBLE_SWEEP_LEFT:
+            case DOUBLE_SWEEP_LEFT: // DONE
                 try {
                     paths.add(PathPlannerPath.fromPathFile("leftStartToOutsideSweepToLeftShoot"));
                     paths.add(PathPlannerPath.fromPathFile("leftShootToInsideSweepToLeftShoot"));
@@ -218,18 +240,38 @@ public class Autons {
                     System.out.println(e.getMessage());
                 }
                 break;
-            case DOUBLE_SWEEP_RIGHT:
+            case DOUBLE_SWEEP_RIGHT: // DONE
                 try {
-                    paths.add(PathPlannerPath.fromPathFile("rightStartToOutsideSweepToRightShoot"));
-                    paths.add(PathPlannerPath.fromPathFile("rightShootToInsideSweepToRightShoot"));
+                    paths.add(PathPlannerPath.fromPathFile("leftStartToOutsideSweepToLeftShoot").mirrorPath());
+                    paths.add(PathPlannerPath.fromPathFile("leftShootToInsideSweepToLeftShoot").mirrorPath());
                     autonCommand.addCommands(
-                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("rightStartToOutsideSweepToRightShoot")),
+                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToOutsideSweepToLeftShoot").mirrorPath()),
                         shootCommand.withTimeout(3.0),
-                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("rightShootToInsideSweepToRightShoot")),
+                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftShootToInsideSweepToLeftShoot").mirrorPath()),
                         shootCommand2.withTimeout(3.0)
                     );
-                } catch (Exception e) {
                     
+                   // autonCommand.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToInsideSweepToLeftShoot")));
+                   // autonCommand.addCommands(shootCommand2);
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                }
+                break;
+            case SINGLE_SWIPE_RIGHT_AND_OUTPOST: // DONE
+                try {
+                    paths.add(PathPlannerPath.fromPathFile("leftStartToOutsideSweepToLeftShoot").mirrorPath());
+                    paths.add(PathPlannerPath.fromPathFile("rightShootToOutpost"));
+                    paths.add(PathPlannerPath.fromPathFile("outpostToShoot"));
+                    autonCommand.addCommands(
+                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToOutsideSweepToLeftShoot").mirrorPath()),
+                        shootCommand.withTimeout(3.0),
+                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("rightShootToOutpost")),
+                        new WaitCommand(3.0),
+                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("outpostToShoot")),
+                        shootCommand2
+                    );
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
                 }
                 break;
             default:
@@ -290,13 +332,16 @@ public class Autons {
 
     public void setChoosers(KnownLocations knownLocations) {
         autonTypeChooser = new SendableChooser<AutonType>();
-        autonTypeChooser.setDefaultOption("RIGHT", AutonType.RIGHT);
+        autonTypeChooser.setDefaultOption("PRE LOAD RIGHT", AutonType.PRE_LOAD_RIGHT);
         // autonTypeChooser.addOption("MIDDLE", AutonType.MIDDLE);
-        autonTypeChooser.addOption("LEFT", AutonType.LEFT);
-        autonTypeChooser.addOption("SIMPLE_LEFT", AutonType.SIMPLE_AUTO_LEFT);
-        autonTypeChooser.addOption("SIMPLE_RIGHT", AutonType.SIMPLE_AUTO_RIGHT);
-        autonTypeChooser.addOption("DOUBLE_SWEEP_LEFT", AutonType.DOUBLE_SWEEP_LEFT);
-        autonTypeChooser.addOption("DOUBLE_SWEEP_RIGHT", AutonType.DOUBLE_SWEEP_RIGHT);
+        autonTypeChooser.addOption("PRE LOAD LEFT", AutonType.PRE_LOAD_LEFT);
+        autonTypeChooser.addOption("SINGLE SWIPE LEFT", AutonType.SINGLE_SWIPE_LEFT);
+        autonTypeChooser.addOption("SINGLE SWIPE RIGHT", AutonType.SINGLE_SWIPE_RIGHT);
+        autonTypeChooser.addOption("PRE LOAD MIDDLE", AutonType.PRE_LOAD_MIDDLE);
+        autonTypeChooser.addOption("OUTPOST MIDDLE", AutonType.OUTPOST_MIDDLE);
+        autonTypeChooser.addOption("DOUBLE SWIPE LEFT", AutonType.DOUBLE_SWEEP_LEFT);
+        autonTypeChooser.addOption("DOUBLE SWIPE RIGHT", AutonType.DOUBLE_SWEEP_RIGHT);
+        autonTypeChooser.addOption("RIGHT SWIPE + OUTPOST", AutonType.SINGLE_SWIPE_RIGHT_AND_OUTPOST);
 
 
         SmartDashboard.putData("Auton Type Chooser", autonTypeChooser);
@@ -307,12 +352,14 @@ public class Autons {
     }
 
     public enum AutonType {
-        SIMPLE_AUTO_LEFT,
-        SIMPLE_AUTO_RIGHT,
-        LEFT,
-        MIDDLE,
-        RIGHT,
-        DOUBLE_SWEEP_LEFT,
-        DOUBLE_SWEEP_RIGHT
+        SINGLE_SWIPE_LEFT, // DONE
+        SINGLE_SWIPE_RIGHT, // DONE
+        PRE_LOAD_LEFT, // DONE
+        PRE_LOAD_MIDDLE,
+        OUTPOST_MIDDLE,
+        PRE_LOAD_RIGHT, // DONE
+        DOUBLE_SWEEP_LEFT, // DONE
+        DOUBLE_SWEEP_RIGHT, // DONE
+        SINGLE_SWIPE_RIGHT_AND_OUTPOST
     }
 }
