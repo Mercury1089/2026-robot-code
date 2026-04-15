@@ -119,11 +119,7 @@ public class Hood extends SubsystemBase {
 
         if(drivetrain.isDrivetrainInAllianceZone()) {
             double distance = TargetUtils.getDistanceToPoint(drivetrain.getPose(), point);
-            if(distance < 4.0){
-                return HoodPosition.SHOOT.pos;
-            } else {
-                return HoodPosition.FAR_SHOOT.pos;
-            }
+            return HoodPosition.SHOOT.pos;
         } else {
             if (passing) {
                 return HoodPosition.FERRY.pos;
