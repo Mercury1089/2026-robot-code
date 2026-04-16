@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -143,25 +144,25 @@ public class Autons {
 
         ArrayList<PathPlannerPath> paths = new ArrayList<>();
         
-        BooleanSupplier shooting = () -> shooter.getShootingTrigger() && hood.isInPosition() && drivetrain.isPointingAtVector() && drivetrain.isDrivetrainInAllianceZone();
+        BooleanSupplier shooting = () -> shooter.getShootingTrigger() && hood.isInPosition() /* && drivetrain.isPointingAtVector() */ && drivetrain.isDrivetrainInAllianceZone();
 
         SequentialCommandGroup shootCommand = new SequentialCommandGroup(
                 DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain).until(shooting),
                 new ParallelCommandGroup(
                         // new RunCommand(() -> hood.setPosition(0.0), hood),
                         DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain),
-                        RobotCommands.feedShooter(indexer, kicker)),
+                        RobotCommands.feedShooter(indexer, kicker),
                         RobotCommands.agitateIntake(articulator)
-                    );
+                    ));
         
         SequentialCommandGroup shootCommand2 = new SequentialCommandGroup(
                 DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain).until(shooting),
                 new ParallelCommandGroup(
                         // new RunCommand(() -> hood.setPosition(0.0), hood),
                         DriveCommands.lockToHub(() -> 0.0, () -> 0.0, drivetrain),
-                        RobotCommands.feedShooter(indexer, kicker)),
+                        RobotCommands.feedShooter(indexer, kicker),
                         RobotCommands.agitateIntake(articulator)
-        );
+        ));
 
         switch (autoType) {
             case SINGLE_SWIPE_LEFT: // DONE
@@ -229,8 +230,12 @@ public class Autons {
                     paths.add(PathPlannerPath.fromPathFile("leftShootToInsideSweepToLeftShoot"));
                     autonCommand.addCommands(
                         AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToOutsideSweepToLeftShoot")),
-                        shootCommand.withTimeout(3.0),
-                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftShootToInsideSweepToLeftShoot")),
+                        shootCommand.withTimeout(4.0),
+                        new ParallelRaceGroup(
+                            AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftShootToInsideSweepToLeftShoot")),
+                            new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer),
+                            new RunCommand(() -> kicker.setSpeed(KickerSpeed.STOP), kicker)
+                        ),
                         shootCommand2.withTimeout(3.0)
                     );
                     
@@ -246,8 +251,12 @@ public class Autons {
                     paths.add(PathPlannerPath.fromPathFile("leftShootToInsideSweepToLeftShoot").mirrorPath());
                     autonCommand.addCommands(
                         AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftStartToOutsideSweepToLeftShoot").mirrorPath()),
-                        shootCommand.withTimeout(3.0),
-                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftShootToInsideSweepToLeftShoot").mirrorPath()),
+                        shootCommand.withTimeout(4.0),
+                        new ParallelRaceGroup(
+                            AutoBuilder.followPath(PathPlannerPath.fromPathFile("leftShootToInsideSweepToLeftShoot").mirrorPath()),
+                            new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer),
+                            new RunCommand(() -> kicker.setSpeed(KickerSpeed.STOP), kicker)
+                        ),
                         shootCommand2.withTimeout(3.0)
                     );
                     
