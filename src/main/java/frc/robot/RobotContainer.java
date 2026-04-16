@@ -158,7 +158,7 @@ public class RobotContainer {
      */
     left10.onTrue(new InstantCommand(() -> drivetrain.resetGyro(), drivetrain).ignoringDisable(true));
     left11.onTrue(new InstantCommand(() -> drivetrain.recalibrateGyro(), drivetrain).ignoringDisable(true));
-    right2.onTrue(drivetrain.getDefaultCommand());
+    left2.onTrue(drivetrain.getDefaultCommand());
     
     gamepadPOVLeft.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
     gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
