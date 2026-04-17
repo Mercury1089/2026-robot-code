@@ -88,6 +88,10 @@ public class Articulator extends SubsystemBase {
     setPosition(pos.degreePos);
   }
 
+  public boolean canIntake() {
+    return getPosition() < (ArticulatorPosition.CAN_INTAKE.degreePos);
+  }
+
   public boolean isAtPosition(double pos) {
     return Math.abs(getPosition() - pos) < THRESHOLD_DEGREES;
   }
@@ -115,6 +119,7 @@ public class Articulator extends SubsystemBase {
   public enum ArticulatorPosition {//TODO: tweak rotation values as necessary, potentially disable zeroCentered
     IN(47.0),
     SAFE(0.0),
+    CAN_INTAKE(-20.0),
     OUT(-32.0);
     
     public final double degreePos;
