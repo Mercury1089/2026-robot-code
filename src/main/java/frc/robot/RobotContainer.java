@@ -133,12 +133,12 @@ public class RobotContainer {
     
     intake.setDefaultCommand(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
     
-    // shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(1000.0), shooter));
+     //shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(0), shooter));
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getSmartDashRPM()), shooter)); //tis one
-    // shooter.setDefaultCommand(new RunCommand(() -> shooter.goToSetRPM(), shooter));
-    // shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
+    shooter.setDefaultCommand(new RunCommand(() -> shooter.goToSetRPM(), shooter));
+    //shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
     // Uncomment below for final robot
-   shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(false)), shooter));
+   //shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(false)), shooter));
     
     // hood.setDefaultCommand(new RunCommand(() -> hood.setSpeed(() -> 0.0), hood));
     // Uncomment below for final robot
@@ -217,16 +217,19 @@ public class RobotContainer {
     
     // left1.and(right1.negate()).and(fuelInRange).whileTrue(DriveCommands.autoPickUp(leftJoystickX, leftJoystickY, drivetrain));
     // left1.whileTrue(RobotCommands.intake(intake, articulator));
-    left1.and(right1.negate()).and(() -> articulator.canIntake()).whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
-    left1.whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
+   // left1.and(right1.negate()).and(() -> articulator.canIntake()).whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
+    //left1.whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
+    left1.onTrue(new RunCommand(() -> shooter.stop(), shooter));
 
     /**
      * SHOOTING/PASSING COMMANDS
      */
 
-    right1.whileTrue(DriveCommands.shootOnTheMove(leftJoystickY, leftJoystickX, drivetrain));
+    //right1.whileTrue(DriveCommands.shootOnTheMove(leftJoystickY, leftJoystickX, drivetrain));
     right1.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(true)), shooter));
-    right1.whileTrue(new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition(true)), hood));
+    right1.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(3000), shooter));
+    
+    //right1.whileTrue(new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition(true)), hood));
     
     // Trigger cannotFire = new Trigger(() -> shooter.isAtShootingRPM() && hood.isInPosition() && drivetrain.isPointingAtVector() && DriverStation.isTeleop());
     Trigger canPass = new Trigger(() -> shooter.getShootingTrigger() && hood.isInPosition() && drivetrain.isPointingAtVector() && !drivetrain.isDrivetrainInAllianceZone() && DriverStation.isTeleop());
@@ -241,7 +244,7 @@ public class RobotContainer {
 
     right2.whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
 
-    right1.and(firing).whileTrue(
+    right1.whileTrue(
       new ParallelCommandGroup(
         RobotCommands.feedShooter(indexer, kicker)
     ));
