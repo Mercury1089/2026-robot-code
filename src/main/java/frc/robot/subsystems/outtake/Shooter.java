@@ -44,7 +44,7 @@ public class Shooter extends SubsystemBase {
 
     private boolean isAtRPM = false;
 
-    private double kP = 0.0015, kS = 0.2, freeRPMs = 6500.0;
+    private double kP = 0.0015, kS = 0.0, freeRPMs = 6500.0;
 
     public Shooter(Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
