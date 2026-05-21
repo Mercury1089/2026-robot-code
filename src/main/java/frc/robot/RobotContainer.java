@@ -185,8 +185,10 @@ public class RobotContainer {
     // gamepadX.onTrue(new InstantCommand(() -> hood.plusOneDegree(), hood));
     // gamepadY.onTrue(new InstantCommand(() -> hood.minusOneDegree(), hood));
 
-    gamepadLB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
-    gamepadRB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
+    // gamepadLB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
+    // gamepadRB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
+
+    gamepadRB.whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), intake));
 
     gamepadY.whileTrue(new RunCommand(() -> hood.setSpeed(gamepadLeftY), hood));
 
@@ -217,8 +219,8 @@ public class RobotContainer {
     
     // left1.and(right1.negate()).and(fuelInRange).whileTrue(DriveCommands.autoPickUp(leftJoystickX, leftJoystickY, drivetrain));
     // left1.whileTrue(RobotCommands.intake(intake, articulator));
-    left1.and(right1.negate()).and(() -> articulator.canIntake()).whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
-    left1.whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
+    // left1.and(right1.negate()).and(() -> articulator.canIntake()).whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
+    // left1.whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
 
     /**
      * SHOOTING/PASSING COMMANDS
@@ -274,8 +276,8 @@ public class RobotContainer {
     //   )
     // ); 
 
-    gamepadPOVLeft.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
-    gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
+    // gamepadPOVLeft.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
+    // gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
 
     gamepadRT.whileTrue(
         new SequentialCommandGroup(

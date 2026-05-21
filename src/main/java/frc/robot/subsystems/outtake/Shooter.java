@@ -184,7 +184,7 @@ public class Shooter extends SubsystemBase {
     // }
 
     public boolean isShooterAtManualShotRPM() {
-        return Math.abs(getVelocityRPM()) > 2500;
+        return Math.abs(getVelocityRPM()) > 1900;
     }
 
     public void isAtShootingRPM() {
