@@ -128,17 +128,18 @@ public class RobotContainer {
     /**
      * DEFAULT COMMANDS - NEED TO BE CREATED AFTER NAMED COMMANDS AS PER PATHPLANNERDOCS
      */
-    drivetrain.setDefaultCommand(DriveCommands.joyStickDrive(leftJoystickY, leftJoystickX, rightJoystickX, drivetrain));
+    // drivetrain.setDefaultCommand(DriveCommands.joyStickDrive(leftJoystickY, leftJoystickX, rightJoystickX, drivetrain));
+    drivetrain.setDefaultCommand(DriveCommands.joyStickDrive(() -> gamepad.getLeftY(), gamepadLeftX, gamepadRightX, drivetrain));
     // drivetrain.setDefaultCommand(DriveCommands.targetDrive(leftJoystickY, leftJoystickX,  () -> drivetrain.getFinalHeading(), drivetrain));
     
     intake.setDefaultCommand(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
     
      //shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(0), shooter));
     // shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getSmartDashRPM()), shooter)); //tis one
-    shooter.setDefaultCommand(new RunCommand(() -> shooter.goToSetRPM(), shooter));
+    // shooter.setDefaultCommand(new RunCommand(() -> shooter.goToSetRPM(), shooter));
     //shooter.setDefaultCommand(new RunCommand(() -> shooter.stop(), shooter));
     // Uncomment below for final robot
-   //shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(false)), shooter));
+    shooter.setDefaultCommand(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(false)), shooter));
     
     // hood.setDefaultCommand(new RunCommand(() -> hood.setSpeed(() -> 0.0), hood));
     // Uncomment below for final robot
@@ -159,6 +160,7 @@ public class RobotContainer {
     left10.onTrue(new InstantCommand(() -> drivetrain.resetGyro(), drivetrain).ignoringDisable(true));
     left11.onTrue(new InstantCommand(() -> drivetrain.recalibrateGyro(), drivetrain).ignoringDisable(true));
     left2.onTrue(drivetrain.getDefaultCommand());
+    gamepadStart.onTrue(new InstantCommand(() -> drivetrain.resetGyro(), drivetrain).ignoringDisable(true));
     
     gamepadPOVLeft.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
     gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
@@ -185,10 +187,10 @@ public class RobotContainer {
     // gamepadX.onTrue(new InstantCommand(() -> hood.plusOneDegree(), hood));
     // gamepadY.onTrue(new InstantCommand(() -> hood.minusOneDegree(), hood));
 
-    gamepadLB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
-    gamepadRB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
+    // gamepadLB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
+    // gamepadRB.onTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
 
-    gamepadY.whileTrue(new RunCommand(() -> hood.setSpeed(gamepadLeftY), hood));
+    // gamepadY.whileTrue(new RunCommand(() -> hood.setSpeed(gamepadLeftY), hood));
 
     // gamepadA.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(2800), shooter));
     // gamepadB.whileTrue(new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer));
@@ -237,6 +239,14 @@ public class RobotContainer {
 
     Trigger firing = canShoot.or(canPass);
 
+    gamepadRT.whileTrue(DriveCommands.shootOnTheMove(() -> gamepad.getLeftY(), gamepadLeftX, drivetrain));
+    gamepadRT.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(true)), shooter));
+    gamepadRT.whileTrue(new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition(true)), hood));
+    gamepadRT.and(firing).whileTrue(RobotCommands.feedShooter(indexer, kicker));
+    gamepadRT.and(canShoot).and(gamepadLT.negate()).whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
+
+    gamepadLT.whileTrue(RobotCommands.intake(intake, articulator));
+
     right1.and(right2.negate()).and(canShoot).whileTrue(
       // RobotCommands.agitateIntake(articulator)
       new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator)
@@ -249,15 +259,15 @@ public class RobotContainer {
         RobotCommands.feedShooter(indexer, kicker)
     ));
 
-    gamepadRT.and(canShoot).whileTrue(new ParallelCommandGroup(
-      new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer),
-      new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker)
-    ));
+    // gamepadRT.and(canShoot).whileTrue(new ParallelCommandGroup(
+    //   new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer),
+    //   new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker)
+    // ));
 
-    gamepadLT.onTrue(new ParallelCommandGroup(
-      new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer),
-      new RunCommand(() -> kicker.setSpeed(KickerSpeed.STOP), kicker)
-    ));
+    // gamepadLT.onTrue(new ParallelCommandGroup(
+    //   new RunCommand(() -> indexer.setSpeed(IndexerSpeed.STOP), indexer),
+    //   new RunCommand(() -> kicker.setSpeed(KickerSpeed.STOP), kicker)
+    // ));
 
     // remove lockToHub if nearestShootingLock works as it will be a double drivetrain requirement
     // right1.whileTrue(
