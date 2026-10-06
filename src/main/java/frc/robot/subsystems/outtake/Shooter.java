@@ -162,7 +162,8 @@ public class Shooter extends SubsystemBase {
         } else if(drivetrain.getCurrentZone() == Zone.NEUTRAL_RIGHT) {
             point = KnownLocations.getKnownLocations().PASSING_TARGET_RIGHT.getTranslation();
         }
-
+        
+        point = point.minus(drivetrain.getShotOffset());
         double d = TargetUtils.getDistanceToPoint(drivetrain.getPose(), point);
 
         if(drivetrain.isDrivetrainInAllianceZone()) {     

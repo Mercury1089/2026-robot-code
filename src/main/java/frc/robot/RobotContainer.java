@@ -63,6 +63,7 @@ public class RobotContainer {
   private GenericHID gamepadHID;
   private Supplier<Double> gamepadLeftX, gamepadLeftY, gamepadRightX, gamepadRightY;
   private Supplier<Double> rightJoystickX, rightJoystickY, leftJoystickX, leftJoystickY;
+  private Supplier<Double> driveX, driveY, driveRotation;
 
   private Autons auton;
   private Drivetrain drivetrain;
@@ -76,6 +77,7 @@ public class RobotContainer {
   private Hood hood;
 
   private double manualThreshold = 0.2;
+  private double intakeInDelay = 2.0; // seconds
   
 
 
@@ -129,7 +131,8 @@ public class RobotContainer {
      * DEFAULT COMMANDS - NEED TO BE CREATED AFTER NAMED COMMANDS AS PER PATHPLANNERDOCS
      */
     // drivetrain.setDefaultCommand(DriveCommands.joyStickDrive(leftJoystickY, leftJoystickX, rightJoystickX, drivetrain));
-    drivetrain.setDefaultCommand(DriveCommands.joyStickDrive(() -> gamepad.getLeftY(), gamepadLeftX, gamepadRightX, drivetrain));
+    // drivetrain.setDefaultCommand(DriveCommands.joyStickDrive(() -> gamepad.getLeftY(), gamepadLeftX, gamepadRightX, drivetrain));
+    drivetrain.setDefaultCommand(DriveCommands.joyStickDrive(driveX, driveY, driveRotation, drivetrain));
     // drivetrain.setDefaultCommand(DriveCommands.targetDrive(leftJoystickY, leftJoystickX,  () -> drivetrain.getFinalHeading(), drivetrain));
     
     intake.setDefaultCommand(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
@@ -221,15 +224,15 @@ public class RobotContainer {
     //left1.whileTrue(RobotCommands.intake(intake, articulator));
     //left1.and(right1.negate()).and(() -> articulator.canIntake()).whileTrue(new RunCommand(() -> intake.setSpeed(IntakeSpeed.INTAKE), intake));
     //left1.whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
-   left1.onTrue(new RunCommand(() -> shooter.stop(), shooter));
+   // left1.onTrue(new RunCommand(() -> shooter.stop(), shooter));
 
     /**
      * SHOOTING/PASSING COMMANDS
      */
 
     //right1.whileTrue(DriveCommands.shootOnTheMove(leftJoystickY, leftJoystickX, drivetrain));
-    right1.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(true)), shooter));
-    right1.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(3000), shooter));
+    // right1.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(true)), shooter));
+    // right1.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(3000), shooter));
     
     //right1.whileTrue(new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition(true)), hood));
     
@@ -239,25 +242,39 @@ public class RobotContainer {
 
     Trigger firing = canShoot.or(canPass);
 
-    gamepadRT.whileTrue(DriveCommands.shootOnTheMove(() -> gamepad.getLeftY(), gamepadLeftX, drivetrain));
-    gamepadRT.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(true)), shooter));
-    gamepadRT.whileTrue(new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition(true)), hood));
-    gamepadRT.and(firing).whileTrue(RobotCommands.feedShooter(indexer, kicker));
-    gamepadRT.and(canShoot).and(gamepadLT.negate()).whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
+    // gamepadRT.whileTrue(DriveCommands.shootOnTheMove(() -> gamepad.getLeftY(), gamepadLeftX, drivetrain));
+    // gamepadRT.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(true)), shooter));
+    // gamepadRT.whileTrue(new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition(true)), hood));
+    // gamepadRT.and(firing).whileTrue(RobotCommands.feedShooter(indexer, kicker));
+    // gamepadRT.and(canShoot).and(gamepadLT.negate()).whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
 
-    gamepadLT.whileTrue(RobotCommands.intake(intake, articulator));
+    // gamepadLT.whileTrue(RobotCommands.intake(intake, articulator));
 
-    right1.and(right2.negate()).and(canShoot).whileTrue(
-      // RobotCommands.agitateIntake(articulator)
-      new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator)
-    );
+    // right1.and(right2.negate()).and(canShoot).whileTrue(
+    //   // RobotCommands.agitateIntake(articulator)
+    //   new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator)
+    // );
 
     right2.whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
 
-    right1.whileTrue(
-      new ParallelCommandGroup(
-        RobotCommands.feedShooter(indexer, kicker)
+    // right1.whileTrue(
+    //   new ParallelCommandGroup(
+    //     RobotCommands.feedShooter(indexer, kicker)
+    // ));
+
+    Trigger shooting = gamepadRT.or(right1);
+    Trigger intaking = gamepadLT.or(left1);
+
+    shooting.whileTrue(DriveCommands.shootOnTheMove(driveX, driveY, drivetrain));
+    shooting.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(true)), shooter));
+    shooting.whileTrue(new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition(true)), hood));
+    shooting.and(firing).whileTrue(RobotCommands.feedShooter(indexer, kicker));
+    shooting.and(intaking.negate()).and(right2.negate()).whileTrue(new SequentialCommandGroup(
+      new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator).withTimeout(intakeInDelay),
+      new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator)
     ));
+
+    intaking.whileTrue(RobotCommands.intake(intake, articulator));
 
     // gamepadRT.and(canShoot).whileTrue(new ParallelCommandGroup(
     //   new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer),
@@ -359,6 +376,10 @@ public class RobotContainer {
         leftJoystickY = () -> leftJoystick.getY();
         rightJoystickX = () -> rightJoystick.getX();
         rightJoystickY = () -> rightJoystick.getY();
+
+        driveX = () -> Math.abs(gamepad.getLeftY()) > Math.abs(leftJoystick.getY()) ? gamepad.getLeftY() : leftJoystick.getY();
+        driveY = () -> Math.abs(gamepad.getLeftX()) > Math.abs(leftJoystick.getX()) ? gamepad.getLeftX() : leftJoystick.getX();
+        driveRotation = () -> Math.abs(gamepad.getRightX()) > Math.abs(rightJoystick.getX()) ? gamepad.getRightX() : rightJoystick.getX();
 
 
   }

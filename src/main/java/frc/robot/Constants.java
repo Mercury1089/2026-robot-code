@@ -63,6 +63,7 @@ public final class Constants {
     public static final double DIRECTION_SLEW_RATE = 1.2; // radians per second
     public static final double MAGNITUDE_SLEW_RATE = 1.8; // percent per second (1 = 100%)
     public static final double ROTATIONAL_SLEW_RATE = 2.0; // percent per second (1 = 100%)
+    public static final double SHOOTING_MAX_SPEED = 0.35; // percent of max speed while shooting (1 = 100%)
 
     public static final double WHEEL_DIAMETER = 0.0762; // meters
     // changes drive speed (more pinions = zoom robot)

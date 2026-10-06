@@ -23,6 +23,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -81,6 +82,8 @@ public class Drivetrain extends SubsystemBase {
   private Translation2d targetHubVector;
   private Translation2d targetHubVelocityVector;
   private Translation2d compensatedShotVector;
+  private Translation2d shotOffset = new Translation2d();
+  private InterpolatingDoubleTreeMap timeOfFlightMap = new InterpolatingDoubleTreeMap();
   private Pose2d averageFuelPose;
 
   private double finalHeading = 0.0;
@@ -191,6 +194,11 @@ public class Drivetrain extends SubsystemBase {
     shift = new Shift();
 
     compensatedShotVector = new Translation2d();
+
+    // distance from center of robot to center of hub (inches), time of flight (seconds)
+    timeOfFlightMap.put(Units.inchesToMeters(70.0), 1.01);
+    timeOfFlightMap.put(Units.inchesToMeters(87.0), 1.09);
+    timeOfFlightMap.put(Units.inchesToMeters(127.0), 1.35);
   }
 
   public PIDController getRotationalController() {
@@ -494,7 +502,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public boolean isPointingAtVector() {
-    return Math.abs(getCompensatedVector().getAngle().getDegrees( ) - getPose().getRotation().getDegrees()) < THRESHOLD_DEGREES;
+    return Math.abs(getCompensatedVector().getAngle().minus(getPose().getRotation()).getDegrees()) < THRESHOLD_DEGREES;
   }
 
   public void setXDirStraight() {
@@ -541,6 +549,10 @@ public class Drivetrain extends SubsystemBase {
 
   public Shift getShift() {
     return shift;
+  }
+
+  public Translation2d getShotOffset() {
+    return shotOffset;
   }
 
   public Translation2d getCompensatedVector() {
@@ -639,23 +651,26 @@ public class Drivetrain extends SubsystemBase {
     }
 
     // Check if you are passing or shooting in hub
+    Translation2d target;
     if (getCurrentZone() == Zone.NEUTRAL_LEFT) {
-      finalHeading = TargetUtils
-        .getTargetHeadingToPoint(getPose(), KnownLocations.getKnownLocations().PASSING_TARGET_LEFT.getTranslation()).getDegrees();
+      target = KnownLocations.getKnownLocations().PASSING_TARGET_LEFT.getTranslation();
     } else if ((getCurrentZone() == Zone.NEUTRAL_RIGHT)) {
-      finalHeading = TargetUtils
-        .getTargetHeadingToPoint(getPose(), KnownLocations.getKnownLocations().PASSING_TARGET_RIGHT.getTranslation()).getDegrees();
+      target = KnownLocations.getKnownLocations().PASSING_TARGET_RIGHT.getTranslation();
     } else {
-      finalHeading = TargetUtils 
-        .getTargetHeadingToPoint(getPose(), KnownLocations.getKnownLocations().HUB.getTranslation()).getDegrees();
+      target = KnownLocations.getKnownLocations().HUB.getTranslation();
     }
+    finalHeading = TargetUtils.getTargetHeadingToPoint(getPose(), target).getDegrees();
+
+    double timeOfFlight = timeOfFlightMap.get(getPose().getTranslation().getDistance(target));
+    shotOffset = new Translation2d(getXSpeeds(), getYSpeeds()).rotateBy(getPose().getRotation()).times(timeOfFlight);
+    compensatedShotVector = new Translation2d(1.0, TargetUtils.getTargetHeadingToPoint(getPose(), target.minus(shotOffset)));
 
     // robotVelocityVector = new Translation2d(getXSpeeds(), getYSpeeds());
-    robotVelocityVector = getVelocityVector(); // it might have to be this, needs to be tested, fix zeroGyro if it breaks
+    // robotVelocityVector = getVelocityVector(); // it might have to be this, needs to be tested, fix zeroGyro if it breaks
     
-    Translation2d exitVelocityVector = new Translation2d(MercMath.RPMToMetersPerSecond(shooter.getStaticShootingRPM(false), 2.0),
-        Rotation2d.fromDegrees(finalHeading));
-    compensatedShotVector = exitVelocityVector.minus(robotVelocityVector);
+    // Translation2d exitVelocityVector = new Translation2d(MercMath.RPMToMetersPerSecond(shooter.getStaticShootingRPM(false), 2.0),
+    //     Rotation2d.fromDegrees(finalHeading));
+    // compensatedShotVector = exitVelocityVector.minus(robotVelocityVector);
 
     //we only use this one for rendering, consider removing if time is an issue
     // fuelConcentrationTranslation = objCam.getTranslationOfHighestConcentration(this);
