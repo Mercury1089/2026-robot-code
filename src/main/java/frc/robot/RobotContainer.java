@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -64,6 +65,7 @@ public class RobotContainer {
   private Supplier<Double> gamepadLeftX, gamepadLeftY, gamepadRightX, gamepadRightY;
   private Supplier<Double> rightJoystickX, rightJoystickY, leftJoystickX, leftJoystickY;
   private Supplier<Double> driveX, driveY, driveRotation;
+  private Supplier<Double> slowDriveX, slowDriveY;
 
   private Autons auton;
   private Drivetrain drivetrain;
@@ -77,7 +79,9 @@ public class RobotContainer {
   private Hood hood;
 
   private double manualThreshold = 0.2;
-  private double intakeInDelay = 2.0; // seconds
+  private double intakeInDelay = 2.0;
+  private double slowIntakeMaxSpeed = 0.65;
+  private boolean slowIntakeMode = false;
   
 
 
@@ -127,6 +131,7 @@ public class RobotContainer {
     // commands.put("stopShooting", RobotCommands.stopFire(shooter, kicker, articulator, indexer));
     
     NamedCommands.registerCommands(commands);
+    SmartDashboard.putBoolean("Intake/Slow Intake Mode", slowIntakeMode);
     /**
      * DEFAULT COMMANDS - NEED TO BE CREATED AFTER NAMED COMMANDS AS PER PATHPLANNERDOCS
      */
@@ -170,7 +175,9 @@ public class RobotContainer {
     gamepadPOVRight.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
       
     gamepadA.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")));
-    gamepadB.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")));
+    // gamepadB.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")));
+    gamepadX.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")));
+    gamepadB.onTrue(new InstantCommand(() -> toggleSlowIntake()).ignoringDisable(true));
 
 
     // Trigger shooting = new Trigger(() -> shooter.isAtShootingRPM());
@@ -268,13 +275,15 @@ public class RobotContainer {
     shooting.whileTrue(DriveCommands.shootOnTheMove(driveX, driveY, drivetrain));
     shooting.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(true)), shooter));
     shooting.whileTrue(new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition(true)), hood));
-    shooting.and(firing).whileTrue(RobotCommands.feedShooter(indexer, kicker));
+    // shooting.and(firing).whileTrue(RobotCommands.feedShooter(indexer, kicker));
+    shooting.and(firing).onTrue(RobotCommands.feedShooter(indexer, kicker).until(shooting.negate()));
     shooting.and(intaking.negate()).and(right2.negate()).whileTrue(new SequentialCommandGroup(
       new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator).withTimeout(intakeInDelay),
       new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator)
     ));
 
     intaking.whileTrue(RobotCommands.intake(intake, articulator));
+    intaking.and(() -> slowIntakeMode).whileTrue(DriveCommands.joyStickDrive(slowDriveX, slowDriveY, driveRotation, drivetrain));
 
     // gamepadRT.and(canShoot).whileTrue(new ParallelCommandGroup(
     //   new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer),
@@ -303,6 +312,11 @@ public class RobotContainer {
     //     )
     //   )
     // ); 
+  }
+
+  public void toggleSlowIntake() {
+    slowIntakeMode = !slowIntakeMode;
+    SmartDashboard.putBoolean("Intake/Slow Intake Mode", slowIntakeMode);
   }
 
   public Drivetrain getDrivetrain() {
@@ -377,9 +391,11 @@ public class RobotContainer {
         rightJoystickX = () -> rightJoystick.getX();
         rightJoystickY = () -> rightJoystick.getY();
 
-        driveX = () -> Math.abs(gamepad.getLeftY()) > Math.abs(leftJoystick.getY()) ? gamepad.getLeftY() : leftJoystick.getY();
-        driveY = () -> Math.abs(gamepad.getLeftX()) > Math.abs(leftJoystick.getX()) ? gamepad.getLeftX() : leftJoystick.getX();
-        driveRotation = () -> Math.abs(gamepad.getRightX()) > Math.abs(rightJoystick.getX()) ? gamepad.getRightX() : rightJoystick.getX();
+        driveX = () -> gamepad.getLeftY() + leftJoystick.getY();
+        driveY = () -> gamepad.getLeftX() + leftJoystick.getX();
+        driveRotation = () -> gamepad.getRightX() + rightJoystick.getX();
+        slowDriveX = () -> driveX.get() * Math.sqrt(slowIntakeMaxSpeed);
+        slowDriveY = () -> driveY.get() * Math.sqrt(slowIntakeMaxSpeed);
 
 
   }
