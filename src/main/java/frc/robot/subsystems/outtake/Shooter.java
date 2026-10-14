@@ -1,5 +1,6 @@
 package frc.robot.subsystems.outtake;
 
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
@@ -36,7 +37,7 @@ public class Shooter extends SubsystemBase {
     private final SparkClosedLoopController leaderClosedLoop;
     private LaserCan lc;
     private Drivetrain drivetrain;
-    private double THRESHOLD_RPM = 100.0; // TODO: tune this threshold
+    private double THRESHOLD_RPM = 150.0; // TODO: tune this threshold
     private final double MAX_VOLTAGE = 12.0;
 
     private double setRPM = 0.0, desiredFireRPM = 0.0;
@@ -44,7 +45,9 @@ public class Shooter extends SubsystemBase {
 
     private boolean isAtRPM = false;
 
-    private double kP = 0.0015, kS = 0.2, freeRPMs = 6500.0;
+    // private double kP = 0.0015, kS = 0.2, freeRPMs = 6500.0;
+    private double kP = 0.0007, kS = 0.2, freeRPMs = 6500.0;
+    private LinearFilter setRPMFilter = LinearFilter.singlePoleIIR(0.2, 0.02);
 
     public Shooter(Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
@@ -114,8 +117,8 @@ public class Shooter extends SubsystemBase {
      * @param rpm target velocity in rotations per minute
      */
     public void setVelocityRPM(double rpm) {
-        setRPM = rpm;
-        leaderClosedLoop.setSetpoint(rpm, ControlType.kVelocity);
+        setRPM = setRPMFilter.calculate(rpm);
+        leaderClosedLoop.setSetpoint(setRPM, ControlType.kVelocity);
     }
 
     public void setSpeed(double speed) {

@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -82,6 +83,7 @@ public class RobotContainer {
   private double intakeInDelay = 2.0;
   private double slowIntakeMaxSpeed = 0.65;
   private boolean slowIntakeMode = false;
+  private boolean cubedDrive = true;
   
 
 
@@ -132,12 +134,15 @@ public class RobotContainer {
     
     NamedCommands.registerCommands(commands);
     SmartDashboard.putBoolean("Intake/Slow Intake Mode", slowIntakeMode);
+    SmartDashboard.putBoolean("Drivetrain/Cubed Drive", cubedDrive);
+    SmartDashboard.putString("Drivetrain/Drive Curve", cubedDrive ? "Cubed" : "Squared");
     /**
      * DEFAULT COMMANDS - NEED TO BE CREATED AFTER NAMED COMMANDS AS PER PATHPLANNERDOCS
      */
     // drivetrain.setDefaultCommand(DriveCommands.joyStickDrive(leftJoystickY, leftJoystickX, rightJoystickX, drivetrain));
     // drivetrain.setDefaultCommand(DriveCommands.joyStickDrive(() -> gamepad.getLeftY(), gamepadLeftX, gamepadRightX, drivetrain));
-    drivetrain.setDefaultCommand(DriveCommands.joyStickDrive(driveX, driveY, driveRotation, drivetrain));
+    // drivetrain.setDefaultCommand(DriveCommands.joyStickDrive(driveX, driveY, driveRotation, drivetrain));
+    drivetrain.setDefaultCommand(DriveCommands.joyStickDrive(driveX, driveY, driveRotation, () -> cubedDrive, drivetrain));
     // drivetrain.setDefaultCommand(DriveCommands.targetDrive(leftJoystickY, leftJoystickX,  () -> drivetrain.getFinalHeading(), drivetrain));
     
     intake.setDefaultCommand(new RunCommand(() -> intake.setSpeed(IntakeSpeed.STOP), intake));
@@ -178,6 +183,7 @@ public class RobotContainer {
     // gamepadB.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")));
     gamepadX.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")));
     gamepadB.onTrue(new InstantCommand(() -> toggleSlowIntake()).ignoringDisable(true));
+    gamepadBack.onTrue(new InstantCommand(() -> toggleCubedDrive()).ignoringDisable(true));
 
 
     // Trigger shooting = new Trigger(() -> shooter.isAtShootingRPM());
@@ -247,7 +253,7 @@ public class RobotContainer {
     Trigger canPass = new Trigger(() -> shooter.getShootingTrigger() && hood.isInPosition() && drivetrain.isPointingAtVector() && !drivetrain.isDrivetrainInAllianceZone() && DriverStation.isTeleop());
     Trigger canShoot = new Trigger(() -> shooter.getShootingTrigger() && hood.isInPosition() && drivetrain.isPointingAtVector() && drivetrain.isDrivetrainInAllianceZone() && drivetrain.getShift().isOurHubActive() &&  DriverStation.isTeleop());
 
-    Trigger firing = canShoot.or(canPass);
+    Trigger firing = canShoot.or(canPass).debounce(0.25, DebounceType.kFalling);
 
     // gamepadRT.whileTrue(DriveCommands.shootOnTheMove(() -> gamepad.getLeftY(), gamepadLeftX, drivetrain));
     // gamepadRT.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(true)), shooter));
@@ -262,7 +268,7 @@ public class RobotContainer {
     //   new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator)
     // );
 
-    right2.whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
+    // right2.whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
 
     // right1.whileTrue(
     //   new ParallelCommandGroup(
@@ -271,19 +277,24 @@ public class RobotContainer {
 
     Trigger shooting = gamepadRT.or(right1);
     Trigger intaking = gamepadLT.or(left1);
+    Trigger holdingIn = gamepadRB.or(right2);
+
+    holdingIn.whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
 
     shooting.whileTrue(DriveCommands.shootOnTheMove(driveX, driveY, drivetrain));
     shooting.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(true)), shooter));
     shooting.whileTrue(new RunCommand(() -> hood.setPosition(hood.getHoodToFirePosition(true)), hood));
     // shooting.and(firing).whileTrue(RobotCommands.feedShooter(indexer, kicker));
-    shooting.and(firing).onTrue(RobotCommands.feedShooter(indexer, kicker).until(shooting.negate()));
-    shooting.and(intaking.negate()).and(right2.negate()).whileTrue(new SequentialCommandGroup(
+    // shooting.and(firing).onTrue(RobotCommands.feedShooter(indexer, kicker).until(shooting.negate()));
+    shooting.and(firing).whileTrue(RobotCommands.feedShooter(indexer, kicker));
+    shooting.and(intaking.negate()).and(holdingIn.negate()).whileTrue(new SequentialCommandGroup(
       new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator).withTimeout(intakeInDelay),
       new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator)
     ));
 
-    intaking.whileTrue(RobotCommands.intake(intake, articulator));
-    intaking.and(() -> slowIntakeMode).whileTrue(DriveCommands.joyStickDrive(slowDriveX, slowDriveY, driveRotation, drivetrain));
+    // intaking.whileTrue(RobotCommands.intake(intake, articulator));
+    intaking.and(holdingIn.negate()).whileTrue(RobotCommands.intake(intake, articulator));
+    intaking.and(() -> slowIntakeMode).whileTrue(DriveCommands.joyStickDrive(slowDriveX, slowDriveY, driveRotation, () -> cubedDrive, drivetrain));
 
     // gamepadRT.and(canShoot).whileTrue(new ParallelCommandGroup(
     //   new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer),
@@ -317,6 +328,12 @@ public class RobotContainer {
   public void toggleSlowIntake() {
     slowIntakeMode = !slowIntakeMode;
     SmartDashboard.putBoolean("Intake/Slow Intake Mode", slowIntakeMode);
+  }
+
+  public void toggleCubedDrive() {
+    cubedDrive = !cubedDrive;
+    SmartDashboard.putBoolean("Drivetrain/Cubed Drive", cubedDrive);
+    SmartDashboard.putString("Drivetrain/Drive Curve", cubedDrive ? "Cubed" : "Squared");
   }
 
   public Drivetrain getDrivetrain() {
@@ -394,8 +411,8 @@ public class RobotContainer {
         driveX = () -> gamepad.getLeftY() + leftJoystick.getY();
         driveY = () -> gamepad.getLeftX() + leftJoystick.getX();
         driveRotation = () -> gamepad.getRightX() + rightJoystick.getX();
-        slowDriveX = () -> driveX.get() * Math.sqrt(slowIntakeMaxSpeed);
-        slowDriveY = () -> driveY.get() * Math.sqrt(slowIntakeMaxSpeed);
+        slowDriveX = () -> driveX.get() * Math.pow(slowIntakeMaxSpeed, cubedDrive ? 1.0 / 3.0 : 1.0 / 2.0);
+        slowDriveY = () -> driveY.get() * Math.pow(slowIntakeMaxSpeed, cubedDrive ? 1.0 / 3.0 : 1.0 / 2.0);
 
 
   }

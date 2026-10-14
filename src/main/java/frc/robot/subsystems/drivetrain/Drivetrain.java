@@ -75,14 +75,15 @@ public class Drivetrain extends SubsystemBase {
   // private ObjectDetectionCamera objCam;
   private Hood hood;
 
-  private static final double ROTATION_P = 1.0 / 45.0, DIRECTION_P = 1 / 1.25, I = 0.0, D = 0.0;
-  private final double THRESHOLD_DEGREES = 3.0;
+  private static final double ROTATION_P = 1.0 / 40.0, ROTATION_D = 0.0004, DIRECTION_P = 1 / 1.25, I = 0.0, D = 0.0;
+  private final double THRESHOLD_DEGREES = 5.0;
   private final double THRESHOLD_SPEED = 0.5;
   private Translation2d robotVelocityVector;
   private Translation2d targetHubVector;
   private Translation2d targetHubVelocityVector;
   private Translation2d compensatedShotVector;
   private Translation2d shotOffset = new Translation2d();
+  private Translation2d filteredVelocity = new Translation2d();
   private InterpolatingDoubleTreeMap timeOfFlightMap = new InterpolatingDoubleTreeMap();
   private Pose2d averageFuelPose;
 
@@ -141,7 +142,7 @@ public class Drivetrain extends SubsystemBase {
     // gyro.setPartyMode(1); //wooooo
     // gyro.setPartyMode(0);
 
-    rotationPIDController = new PIDController(ROTATION_P, I, D);
+    rotationPIDController = new PIDController(ROTATION_P, I, ROTATION_D);
     rotationPIDController.enableContinuousInput(-180, 180);
     rotationPIDController.setTolerance(1.0);
 
@@ -662,7 +663,9 @@ public class Drivetrain extends SubsystemBase {
     finalHeading = TargetUtils.getTargetHeadingToPoint(getPose(), target).getDegrees();
 
     double timeOfFlight = timeOfFlightMap.get(getPose().getTranslation().getDistance(target));
-    shotOffset = new Translation2d(getXSpeeds(), getYSpeeds()).rotateBy(getPose().getRotation()).times(timeOfFlight);
+    Translation2d velocity = new Translation2d(getXSpeeds(), getYSpeeds()).rotateBy(getPose().getRotation());
+    filteredVelocity = filteredVelocity.plus(velocity.minus(filteredVelocity).times(0.2));
+    shotOffset = filteredVelocity.times(timeOfFlight);
     compensatedShotVector = new Translation2d(1.0, TargetUtils.getTargetHeadingToPoint(getPose(), target.minus(shotOffset)));
 
     // robotVelocityVector = new Translation2d(getXSpeeds(), getYSpeeds());

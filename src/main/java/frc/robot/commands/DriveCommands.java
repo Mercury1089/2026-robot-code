@@ -50,6 +50,23 @@ public class DriveCommands {
               -MercMath.squareInput(MathUtil.applyDeadband(angularSpeedSupplier.get(), SWERVE.JOYSTICK_DEADBAND)))
           , drivetrain);
     }
+
+    /**
+    * @param : Suppliers (xSpeed, ySpeed, angularSpeed), Supplier (cubed input or squared input), Drivetrain
+    * @return : Drives based on the Joystick values given, as a Run Command
+    */
+    public static Command joyStickDrive(Supplier<Double> xSpeedSupplier, Supplier<Double> ySpeedSupplier, Supplier<Double> angularSpeedSupplier, Supplier<Boolean> cubedInputSupplier, Drivetrain drivetrain) {
+        return new RunCommand(
+            () -> drivetrain.drive(
+              -curveInput(MathUtil.applyDeadband(xSpeedSupplier.get(), SWERVE.JOYSTICK_DEADBAND), cubedInputSupplier.get()),
+              -curveInput(MathUtil.applyDeadband(ySpeedSupplier.get(), SWERVE.JOYSTICK_DEADBAND), cubedInputSupplier.get()),
+              -curveInput(MathUtil.applyDeadband(angularSpeedSupplier.get(), SWERVE.JOYSTICK_DEADBAND), cubedInputSupplier.get()))
+          , drivetrain);
+    }
+
+    public static double curveInput(double input, boolean cubedInput) {
+        return cubedInput ? Math.pow(input, 3) : MercMath.squareInput(input);
+    }
     /** 
     * @param : Suppliers (xSpeed, ySpeed, angularSpeed), Drivetrain, Boolean (Field Relative)
     * @return : RunCommand
