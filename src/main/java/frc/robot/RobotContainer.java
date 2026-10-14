@@ -80,7 +80,7 @@ public class RobotContainer {
   private Hood hood;
 
   private double manualThreshold = 0.2;
-  private double intakeInDelay = 2.0;
+  private double intakeInDelay = 0.75;
   private double slowIntakeMaxSpeed = 0.65;
   private boolean slowIntakeMode = false;
   private boolean cubedDrive = true;
@@ -175,15 +175,15 @@ public class RobotContainer {
     left2.onTrue(drivetrain.getDefaultCommand());
     gamepadStart.onTrue(new InstantCommand(() -> drivetrain.resetGyro(), drivetrain).ignoringDisable(true));
     
-    gamepadY.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
-    gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
-    gamepadPOVRight.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
+    // gamepadY.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
+    // gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
+    // gamepadPOVRight.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.OUT), articulator));
       
-    gamepadA.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")));
-    // gamepadB.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")));
-    gamepadX.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")));
-    gamepadB.onTrue(new InstantCommand(() -> toggleSlowIntake()).ignoringDisable(true));
-    gamepadBack.onTrue(new InstantCommand(() -> toggleCubedDrive()).ignoringDisable(true));
+    // gamepadA.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("R")));
+    // // gamepadB.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")));
+    // gamepadX.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")));
+    // gamepadB.onTrue(new InstantCommand(() -> toggleSlowIntake()).ignoringDisable(true));
+    // gamepadBack.onTrue(new InstantCommand(() -> toggleCubedDrive()).ignoringDisable(true));
 
 
     // Trigger shooting = new Trigger(() -> shooter.isAtShootingRPM());
