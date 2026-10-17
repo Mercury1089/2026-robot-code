@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DS_USB;
 import frc.robot.Constants.JOYSTICK_BUTTONS;
+import frc.robot.Constants.SWERVE;
 import frc.robot.commands.Autons;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.RobotCommands;
@@ -172,8 +173,8 @@ public class RobotContainer {
      */
     left10.onTrue(new InstantCommand(() -> drivetrain.resetGyro(), drivetrain).ignoringDisable(true));
     left11.onTrue(new InstantCommand(() -> drivetrain.recalibrateGyro(), drivetrain).ignoringDisable(true));
-    left2.onTrue(drivetrain.getDefaultCommand());
-    gamepadStart.onTrue(new InstantCommand(() -> drivetrain.resetGyro(), drivetrain).ignoringDisable(true));
+    // left2.onTrue(drivetrain.getDefaultCommand());
+    // gamepadStart.onTrue(new InstantCommand(() -> drivetrain.resetGyro(), drivetrain).ignoringDisable(true));
     
     // gamepadY.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
     // gamepadPOVUp.onTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
@@ -184,13 +185,15 @@ public class RobotContainer {
     // gamepadX.onTrue(new InstantCommand(() -> drivetrain.getShift().setManualAutonWinner("B")));
     // gamepadB.onTrue(new InstantCommand(() -> toggleSlowIntake()).ignoringDisable(true));
     // gamepadBack.onTrue(new InstantCommand(() -> toggleCubedDrive()).ignoringDisable(true));
+    right6.onTrue(new InstantCommand(() -> toggleCubedDrive()).ignoringDisable(true));
+    right7.onTrue(new InstantCommand(() -> toggleSlowIntake()).ignoringDisable(true));
 
 
     // Trigger shooting = new Trigger(() -> shooter.isAtShootingRPM());
     
 
-    right8.whileTrue(new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer));
-    right9.whileTrue(new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker));
+    // right8.whileTrue(new RunCommand(() -> indexer.setSpeed(IndexerSpeed.INDEX), indexer));
+    // right9.whileTrue(new RunCommand(() -> kicker.setSpeed(KickerSpeed.INDEX), kicker));
 
     // gamepadA.whileTrue(new RunCommand(() -> shooter.setSpeed(0.25), shooter));
     // gamepadB.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(720.0), shooter));
@@ -221,7 +224,7 @@ public class RobotContainer {
     /**
      * DRIVETRAIN AUTOMATION
      */
-    left3.whileTrue(DriveCommands.shootOnTheMove(leftJoystickY, leftJoystickX, drivetrain));
+    // left3.whileTrue(DriveCommands.shootOnTheMove(leftJoystickY, leftJoystickX, drivetrain));
     
     // left2.onTrue(DriveCommands.safelyDriveOverBump(leftJoystickY, leftJoystickX, drivetrain));
 
@@ -275,11 +278,19 @@ public class RobotContainer {
     //     RobotCommands.feedShooter(indexer, kicker)
     // ));
 
-    Trigger shooting = gamepadRT.or(right1);
-    Trigger intaking = gamepadLT.or(left1);
-    Trigger holdingIn = gamepadRB.or(right2);
+    // Trigger shooting = gamepadRT.or(right1);
+    // Trigger intaking = gamepadLT.or(left1);
+    // Trigger holdingIn = gamepadRB.or(right2);
+    Trigger shooting = right1;
+    Trigger intaking = left1;
+    Trigger holdingIn = right3;
+    Trigger holdingSafe = right2;
+    Trigger rotating = new Trigger(() -> Math.abs(driveRotation.get()) > SWERVE.JOYSTICK_DEADBAND);
 
     holdingIn.whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator));
+    holdingSafe.whileTrue(new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator));
+
+    left3.onTrue(DriveCommands.turnStraight(driveX, driveY, drivetrain).until(rotating.or(shooting).or(intaking)));
 
     shooting.whileTrue(DriveCommands.shootOnTheMove(driveX, driveY, drivetrain));
     shooting.whileTrue(new RunCommand(() -> shooter.setVelocityRPM(shooter.getStaticShootingRPM(true)), shooter));
@@ -287,13 +298,13 @@ public class RobotContainer {
     // shooting.and(firing).whileTrue(RobotCommands.feedShooter(indexer, kicker));
     // shooting.and(firing).onTrue(RobotCommands.feedShooter(indexer, kicker).until(shooting.negate()));
     shooting.and(firing).whileTrue(RobotCommands.feedShooter(indexer, kicker));
-    shooting.and(intaking.negate()).and(holdingIn.negate()).whileTrue(new SequentialCommandGroup(
+    shooting.and(intaking.negate()).and(holdingIn.negate()).and(holdingSafe.negate()).whileTrue(new SequentialCommandGroup(
       new RunCommand(() -> articulator.setPosition(ArticulatorPosition.SAFE), articulator).withTimeout(intakeInDelay),
       new RunCommand(() -> articulator.setPosition(ArticulatorPosition.IN), articulator)
     ));
 
     // intaking.whileTrue(RobotCommands.intake(intake, articulator));
-    intaking.and(holdingIn.negate()).whileTrue(RobotCommands.intake(intake, articulator));
+    intaking.and(holdingIn.negate()).and(holdingSafe.negate()).whileTrue(RobotCommands.intake(intake, articulator));
     intaking.and(() -> slowIntakeMode).whileTrue(DriveCommands.joyStickDrive(slowDriveX, slowDriveY, driveRotation, () -> cubedDrive, drivetrain));
 
     // gamepadRT.and(canShoot).whileTrue(new ParallelCommandGroup(
@@ -408,9 +419,12 @@ public class RobotContainer {
         rightJoystickX = () -> rightJoystick.getX();
         rightJoystickY = () -> rightJoystick.getY();
 
-        driveX = () -> gamepad.getLeftY() + leftJoystick.getY();
-        driveY = () -> gamepad.getLeftX() + leftJoystick.getX();
-        driveRotation = () -> gamepad.getRightX() + rightJoystick.getX();
+        // driveX = () -> gamepad.getLeftY() + leftJoystick.getY();
+        // driveY = () -> gamepad.getLeftX() + leftJoystick.getX();
+        // driveRotation = () -> gamepad.getRightX() + rightJoystick.getX();
+        driveX = () -> leftJoystick.getY();
+        driveY = () -> leftJoystick.getX();
+        driveRotation = () -> rightJoystick.getX();
         slowDriveX = () -> driveX.get() * Math.pow(slowIntakeMaxSpeed, cubedDrive ? 1.0 / 3.0 : 1.0 / 2.0);
         slowDriveY = () -> driveY.get() * Math.pow(slowIntakeMaxSpeed, cubedDrive ? 1.0 / 3.0 : 1.0 / 2.0);
 

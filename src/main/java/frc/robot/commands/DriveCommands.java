@@ -157,6 +157,12 @@ public class DriveCommands {
               , drivetrain);
     }
 
+    public static Command turnStraight(Supplier<Double> xSpeedSupplier, Supplier<Double> ySpeedSupplier, Drivetrain drivetrain) {
+        return targetDrive(xSpeedSupplier, ySpeedSupplier, () -> drivetrain.getStraightAngle(), drivetrain)
+            .until(() -> drivetrain.isPointingStraight())
+            .withTimeout(2.0);
+    }
+
     public static Command lockToHub(Supplier<Double> xSupplier, Supplier<Double> ySupplier, Drivetrain drivetrain) {
         Supplier<Double> headingSupplier = () -> TargetUtils.getTargetHeadingToPoint(drivetrain.getPose(), KnownLocations.getKnownLocations().HUB.getTranslation()).getDegrees();
         return targetDrive(xSupplier, ySupplier, headingSupplier, drivetrain);

@@ -38,6 +38,7 @@ public class Shooter extends SubsystemBase {
     private LaserCan lc;
     private Drivetrain drivetrain;
     private double THRESHOLD_RPM = 150.0; // TODO: tune this threshold
+    private double START_THRESHOLD_RPM = 50.0;
     private final double MAX_VOLTAGE = 12.0;
 
     private double setRPM = 0.0, desiredFireRPM = 0.0;
@@ -61,7 +62,8 @@ public class Shooter extends SubsystemBase {
 
         // Build the shooter SparkMaxConfig inline (previously in ShooterConfigs)
         SparkFlexConfig leader_config = new SparkFlexConfig();
-        leader_config.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
+        // leader_config.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
+        leader_config.idleMode(IdleMode.kCoast).smartCurrentLimit(60);
         // use RPM units for encoder velocity here (1.0 = pass-through)
         leader_config.encoder.velocityConversionFactor(1.0)
                     .quadratureAverageDepth(2)
@@ -84,14 +86,16 @@ public class Shooter extends SubsystemBase {
 
         // Build the shooter SparkMaxConfig inline (previously in ShooterConfigs)
         SparkFlexConfig follower_config_left = new SparkFlexConfig();
-        follower_config_left.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
+        // follower_config_left.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
+        follower_config_left.idleMode(IdleMode.kCoast).smartCurrentLimit(60);
             // .voltageCompensation(MAX_VOLTAGE);
         // use RPM units for encoder velocity here (1.0 = pass-through)
         follower_config_left.encoder.velocityConversionFactor(1.0);
         follower_config_left.follow(Constants.CAN.SHOOTER, true);//assumes invert of leader affects followers. which is true
 
         SparkFlexConfig follower_config_right = new SparkFlexConfig();
-        follower_config_right.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
+        // follower_config_right.idleMode(IdleMode.kCoast).smartCurrentLimit(40);
+        follower_config_right.idleMode(IdleMode.kCoast).smartCurrentLimit(60);
             // .voltageCompensation(MAX_VOLTAGE);
         follower_config_right.encoder.velocityConversionFactor(1.0);
         follower_config_right.follow(Constants.CAN.SHOOTER, false);
@@ -192,8 +196,16 @@ public class Shooter extends SubsystemBase {
         return Math.abs(getVelocityRPM()) > 2500;
     }
 
+    // public void isAtShootingRPM() {
+    //     isAtRPM = Math.abs(getSetRPM() - getVelocityRPM()) < THRESHOLD_RPM;
+    // }
+
     public void isAtShootingRPM() {
-        isAtRPM = Math.abs(getSetRPM() - getVelocityRPM()) < THRESHOLD_RPM;
+        if (Math.abs(getSetRPM() - getVelocityRPM()) < START_THRESHOLD_RPM) {
+            isAtRPM = true;
+        } else if (Math.abs(getSetRPM() - getVelocityRPM()) > THRESHOLD_RPM) {
+            isAtRPM = false;
+        }
     }
 
     // public void isAtShootingRPM() {

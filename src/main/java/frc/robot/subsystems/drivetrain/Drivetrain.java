@@ -475,6 +475,18 @@ public class Drivetrain extends SubsystemBase {
     return min;
   }
 
+  public double getStraightAngle() {
+    if (Math.abs(getPose().getRotation().getDegrees()) < 90.0) {
+      return 0.0;
+    } else {
+      return 180.0;
+    }
+  }
+
+  public boolean isPointingStraight() {
+    return Math.abs(getPose().getRotation().minus(Rotation2d.fromDegrees(getStraightAngle())).getDegrees()) < 3.0;
+  }
+
   public double getSafeBumpingAngle() {
     double currentHeading = getPose().getRotation().getDegrees();
     if (currentHeading >= 0.0 && currentHeading <= 90.0) {
